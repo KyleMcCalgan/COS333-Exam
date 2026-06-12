@@ -1,0 +1,642 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 5 — Names, Bindings &amp; Scopes</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+
+  <button class="menu-toggle" aria-label="Open menu">☰</button>
+  <div class="sidebar-overlay"></div>
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="course-label">COS 333 · Concepts of PL</span>
+      <h1>Programming Language Concepts</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Overview</span>
+      <a href="index.html"><span class="nav-chapter">00</span> Home &amp; Topics</a>
+
+      <span class="nav-section-label">Chapters</span>
+      <a href="chapter1.html"><span class="nav-chapter">01</span> Preliminaries</a>
+      <a href="chapter2.html"><span class="nav-chapter">02</span> Evolution of PLs</a>
+      <a href="chapter5.html" class="active"><span class="nav-chapter">05</span> Names, Bindings &amp; Scopes</a>
+      <a href="chapter6.html"><span class="nav-chapter">06</span> Data Types</a>
+      <a href="chapter7.html"><span class="nav-chapter">07</span> Expressions &amp; Assignments</a>
+      <a href="chapter8.html"><span class="nav-chapter">08</span> Control Structures</a>
+      <a href="chapter9.html"><span class="nav-chapter">09</span> Subprograms</a>
+      <a href="chapter12.html"><span class="nav-chapter">12</span> OOP Support</a>
+      <a href="chapter15.html"><span class="nav-chapter">15</span> Functional Programming</a>
+      <a href="chapter16.html"><span class="nav-chapter">16</span> Logic Programming</a>
+
+      <span class="nav-section-label">Practical</span>
+      <a href="prolog-practical.html"><span class="nav-chapter">P3</span> Prolog in Practice</a>
+      <a href="prolog-list-patterns.html"><span class="nav-chapter">P4</span> List Patterns</a>
+      <a href="scheme-practical.html"><span class="nav-chapter">P5</span> Scheme in Practice</a>
+
+      <span class="nav-section-label">Assessment</span>
+      <a href="past-papers.html"><span class="nav-chapter">PP</span> Past Papers</a>
+      <a href="mcq.html"><span class="nav-chapter">MC</span> MCQ Bank</a>
+    </nav>
+
+    <div class="sidebar-toc">
+      <span class="sidebar-toc-title">On this page</span>
+      <a href="#names">Names</a>
+      <a href="#variables">Variables</a>
+      <a href="#binding">Binding</a>
+      <a href="#type-binding">Type Binding</a>
+      <a href="#storage">Storage &amp; Lifetimes</a>
+      <a href="#scope">Scope</a>
+      <a href="#let-construct">let Construct</a>
+      <a href="#declaration-order">Declaration Order</a>
+      <a href="#dynamic-scope">Dynamic Scope</a>
+      <a href="#referencing-environment">Referencing Environment</a>
+      <a href="#named-constants">Named Constants</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle">
+        <span class="toggle-icon">☾</span>
+        <span class="toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <main class="main">
+    <div class="reading-progress"><div class="reading-progress-bar"></div></div>
+
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span>›</span> Chapter 5
+    </div>
+
+    <header class="page-header">
+      <span class="chapter-tag">Chapter 5</span>
+      <h1>Names, Bindings &amp; Scopes</h1>
+      <p class="subtitle">
+        Variables as abstractions of memory. How attributes are bound to entities,
+        when that binding happens, and how names are resolved in different languages.
+      </p>
+      <div class="topic-pills">
+        <span class="pill">Names</span>
+        <span class="pill">Variables</span>
+        <span class="pill">Binding Time</span>
+        <span class="pill">Static / Dynamic Type</span>
+        <span class="pill">Storage Lifetime</span>
+        <span class="pill">Static Scope</span>
+        <span class="pill">Dynamic Scope</span>
+      </div>
+    </header>
+
+    <article class="article">
+
+      <!-- ─── NAMES ─────────────────────────────────── -->
+      <h2 id="names">Names (Identifiers)</h2>
+      <p>
+        Imperative languages are abstractions of the von Neumann architecture (memory + processor).
+        <strong>Variables</strong> are abstractions of memory cells. The design of variables raises
+        issues around names, bindings, and scopes.
+      </p>
+
+      <h3>Form of a Name</h3>
+      <p>Names have three design dimensions: <strong>length</strong>, use of <strong>special characters</strong>, and <strong>case sensitivity</strong>.</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>Language</th><th>Name Length Rule</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Fortran I</td><td>Max 6 characters</td></tr>
+            <tr><td>Fortran 95</td><td>Max 31 characters</td></tr>
+            <tr><td>C99</td><td>No limit; only first 63 significant (external names: 31)</td></tr>
+            <tr><td>C++, C#, Ada, Java</td><td>No limit, all significant</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Special Character Conventions</h4>
+      <ul>
+        <li><strong>PHP</strong>: All variable names begin with <code>$</code></li>
+        <li><strong>Perl</strong>: Scalars use <code>$</code>, arrays use <code>@</code>, hashes use <code>%</code></li>
+        <li><strong>Ruby</strong>: Instance variables begin with <code>@</code>; class variables with <code>@@</code></li>
+      </ul>
+
+      <div class="callout note">
+        <div class="callout-label">📝 Case Sensitivity</div>
+        <p>
+          C-based languages are case-sensitive — <code>myname</code> ≠ <code>myName</code>.
+          This hurts <em>readability</em>. Mixed-case predefined names like <code>IndexOutOfBoundsException</code> also hurt <em>writability</em>.
+          Many non-C languages are not case-sensitive.
+        </p>
+      </div>
+
+      <h3>Reserved Words vs Keywords</h3>
+      <dl class="definition">
+        <dt>Reserved word</dt>
+        <dd>Cannot be used as a user-defined identifier. E.g., <code>int</code> in C always means integer type. Too many reserved words = name collision problems (COBOL has ~300).</dd>
+      </dl>
+      <dl class="definition">
+        <dt>Keyword</dt>
+        <dd>Only special in certain contexts. E.g., in Fortran, <code>Real</code> is a type name in <code>Real VarName</code> but can be a variable name in <code>Real = 3.4</code>.</dd>
+      </dl>
+
+      <!-- ─── VARIABLES ─────────────────────────────── -->
+      <h2 id="variables">Variables</h2>
+      <p>A variable is an abstraction of a memory cell, characterized by <strong>six attributes</strong>:</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>Attribute</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Name</td><td>The identifier (not all variables have one — anonymous heap vars)</td></tr>
+            <tr><td>Address</td><td>The memory address. Can change between executions. Two names for same address = <strong>aliases</strong>.</td></tr>
+            <tr><td>Value</td><td>Contents of the memory cell. One abstract cell even if many bytes (e.g., float = 4 bytes = 1 abstract cell).</td></tr>
+            <tr><td>Type</td><td>Defines the set of valid values, operations, and storage representation.</td></tr>
+            <tr><td>Lifetime</td><td>Time during which the variable is bound to a memory cell.</td></tr>
+            <tr><td>Scope</td><td>Range of statements over which the variable is visible.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Aliases</div>
+        <p>
+          <strong>Aliases</strong> — when two names refer to the same memory cell — are bad for readability
+          because changing one variable unexpectedly changes another. Created by pointers, references, and unions.
+        </p>
+      </div>
+
+      <!-- ─── BINDING ─────────────────────────────── -->
+      <h2 id="binding">The Concept of Binding</h2>
+
+      <dl class="definition">
+        <dt>Binding</dt>
+        <dd>An association between an attribute and an entity. E.g., variable ↔ type, variable ↔ value, operator ↔ symbol.</dd>
+      </dl>
+
+      <dl class="definition">
+        <dt>Binding time</dt>
+        <dd>The time at which the binding takes place.</dd>
+      </dl>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>Binding Time</th><th>Example</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Language design time</td><td>Binding <code>*</code> to multiplication</td></tr>
+            <tr><td>Language implementation time</td><td>Binding <code>float</code> to a 32-bit IEEE representation</td></tr>
+            <tr><td>Compile time</td><td>Binding a variable to a type in C or Java</td></tr>
+            <tr><td>Load time</td><td>Binding a C <code>static</code> local variable to a memory cell</td></tr>
+            <tr><td>Runtime</td><td>Binding a non-static local variable to a memory cell</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label advantage">✓ Static Binding</div>
+          <ul>
+            <li>Occurs before runtime</li>
+            <li>Remains unchanged throughout execution</li>
+            <li>Enables compile-time type checking</li>
+            <li>More efficient (no runtime overhead)</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label disadvantage">~ Dynamic Binding</div>
+          <ul>
+            <li>Occurs during execution</li>
+            <li>Can change during execution</li>
+            <li>More flexible / generic code</li>
+            <li>Higher cost; harder to detect errors</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ─── TYPE BINDING ─────────────────────────── -->
+      <h2 id="type-binding">Type Binding</h2>
+
+      <h3>Static Type Binding</h3>
+
+      <div class="collapsible open">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">METHOD 1</span><span class="ch-title">Explicit Declaration</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>A program statement used to declare types before use.</p>
+          <pre><code><span class="kw">int</span> myVar;       <span class="cm">// C++ explicit declaration</span>
+<span class="kw">double</span> salary;   <span class="cm">// type bound at compile time</span></code></pre>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">METHOD 2</span><span class="ch-title">Implicit Declaration</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>Type inferred from naming conventions or first appearance. Used in BASIC, Perl, Ruby, PHP.</p>
+          <div class="compare-grid">
+            <div class="compare-card">
+              <div class="cc-label advantage">✓ Advantage</div>
+              <ul><li>Minor writability convenience</li></ul>
+            </div>
+            <div class="compare-card">
+              <div class="cc-label disadvantage">✗ Disadvantage</div>
+              <ul><li>Typographic errors can't be caught by the compiler — a misspelled name creates a new variable silently.</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">METHOD 3</span><span class="ch-title">Type Inferencing</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>Type determined from context. Used in C#, Visual BASIC 9+, Haskell, ML, F#.</p>
+          <pre><code><span class="kw">var</span> value = 12;     <span class="cm">// C# — value is inferred as int</span>
+<span class="kw">var</span> name  = "hi";  <span class="cm">// inferred as string</span></code></pre>
+          <p>The type is still static — it's just not written explicitly. The binding still happens at compile time.</p>
+        </div>
+      </div>
+
+      <h3>Dynamic Type Binding</h3>
+      <p>Type is determined at runtime via assignment. Variables can hold different types at different times.</p>
+
+      <pre><code><span class="cm">// JavaScript — dynamic type binding</span>
+<span class="kw">let</span> list = [2, 4.33, 6, 8];  <span class="cm">// list is now an array</span>
+list = 17.3;                   <span class="cm">// list is now a float — no error!</span></code></pre>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label advantage">✓ Advantages</div>
+          <ul>
+            <li>Flexibility — variable can hold any type</li>
+            <li>Enables generic program units</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label disadvantage">✗ Disadvantages</div>
+          <ul>
+            <li>Runtime type checking overhead</li>
+            <li>Type errors are harder to detect</li>
+            <li>Less reliable programs</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ─── STORAGE LIFETIMES ────────────────────── -->
+      <h2 id="storage">Storage Bindings &amp; Lifetimes</h2>
+
+      <p>
+        <strong>Lifetime</strong> = the time during which a variable is bound to a memory cell.
+        <strong>Allocation</strong> = getting a cell from available memory.
+        <strong>Deallocation</strong> = returning it to the pool.
+      </p>
+
+      <div class="collapsible open">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">CATEGORY 1</span><span class="ch-title">Static Variables</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>Bound to memory before execution begins; remain bound throughout the entire program run.</p>
+          <pre><code><span class="kw">int</span> f() {
+    <span class="kw">static int</span> sVar = 10;   <span class="cm">// allocated once, persists</span>
+    <span class="kw">return</span> ++sVar;
+}</code></pre>
+          <div class="compare-grid">
+            <div class="compare-card">
+              <div class="cc-label advantage">✓ Advantages</div>
+              <ul><li>Efficient — direct addressing</li><li>History-sensitive subprograms</li></ul>
+            </div>
+            <div class="compare-card">
+              <div class="cc-label disadvantage">✗ Disadvantages</div>
+              <ul><li>No recursion support</li><li>Storage cannot be shared</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">CATEGORY 2</span><span class="ch-title">Stack-Dynamic Variables</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>Storage bound when declaration is elaborated; deallocated at end of scope. The normal case for local variables in C, Java, etc.</p>
+          <pre><code><span class="kw">void</span> f() {
+    <span class="kw">int</span> myVar;   <span class="cm">// allocated on call, freed on return</span>
+}</code></pre>
+          <div class="compare-grid">
+            <div class="compare-card">
+              <div class="cc-label advantage">✓ Advantages</div>
+              <ul><li>Allows recursion</li><li>Conserves storage — reused across calls</li></ul>
+            </div>
+            <div class="compare-card">
+              <div class="cc-label disadvantage">✗ Disadvantages</div>
+              <ul><li>Allocation/deallocation overhead</li><li>Not history-sensitive</li><li>Indirect addressing — less efficient</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">CATEGORY 3</span><span class="ch-title">Explicit Heap-Dynamic</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>Allocated and deallocated by <strong>explicit programmer directives</strong>. Accessed only via pointers/references. All Java objects; <code>new</code>/<code>delete</code> in C++.</p>
+          <pre><code><span class="cm">// C++ — programmer controls allocation</span>
+<span class="kw">int</span>* p = <span class="kw">new int</span>(12);
+<span class="kw">delete</span> p;</code></pre>
+          <div class="compare-grid">
+            <div class="compare-card">
+              <div class="cc-label advantage">✓ Advantages</div>
+              <ul><li>Custom dynamic storage management</li></ul>
+            </div>
+            <div class="compare-card">
+              <div class="cc-label disadvantage">✗ Disadvantages</div>
+              <ul><li>Unreliable — dangling pointers, memory leaks</li><li>Slow (heap management overhead)</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">CATEGORY 4</span><span class="ch-title">Implicit Heap-Dynamic</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>Allocation/deallocation caused by assignment statements. All variables in APL; strings and arrays in Perl, JavaScript, PHP.</p>
+          <pre><code><span class="cm">// JavaScript — implicit heap dynamic</span>
+<span class="kw">let</span> arr = [1, 2, 3];    <span class="cm">// allocated on assignment</span>
+arr = <span class="st">"now a string"</span>;   <span class="cm">// old array freed, new string allocated</span></code></pre>
+          <div class="compare-grid">
+            <div class="compare-card">
+              <div class="cc-label advantage">✓ Advantages</div>
+              <ul><li>Maximum flexibility</li></ul>
+            </div>
+            <div class="compare-card">
+              <div class="cc-label disadvantage">✗ Disadvantages</div>
+              <ul><li>Most attributes bound dynamically — very inefficient</li><li>Loss of compile-time error detection</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── SCOPE ─────────────────────────────────── -->
+      <h2 id="scope">Scope</h2>
+
+      <p>
+        The <strong>scope</strong> of a variable is the range of statements over which it is visible.
+        <strong>Local variables</strong> are declared in the unit; <strong>nonlocal variables</strong> are visible but declared elsewhere.
+      </p>
+
+      <h3>Static Scope</h3>
+      <p>
+        Based on <strong>program text</strong>. To find a name, search declarations starting in the local unit and expanding outward through enclosing scopes until found. Enclosing static scopes are called <strong>static ancestors</strong>; the nearest is the <strong>static parent</strong>.
+      </p>
+
+      <pre><code><span class="cm">// Static scope example — C</span>
+<span class="kw">void</span> f() {
+    <span class="kw">int</span> i = 10;        <span class="cm">// outer i</span>
+    <span class="kw">for</span> (...) {
+        <span class="kw">int</span> i = 20;    <span class="cm">// inner i — HIDES outer i</span>
+        <span class="cm">// outer i is inaccessible here in C/C++</span>
+    }
+    <span class="cm">// outer i is visible here again</span>
+}</code></pre>
+
+      <div class="callout note">
+        <div class="callout-label">📝 Variable Hiding Rules by Language</div>
+        <ul>
+          <li><strong>C, C++</strong>: Variable hiding in nested blocks is legal.</li>
+          <li><strong>Java, C#</strong>: Variable hiding in blocks is <em>not</em> allowed — considered error-prone.</li>
+        </ul>
+      </div>
+
+      <h4>Global Scope</h4>
+      <ul>
+        <li><strong>C, C++, PHP, Python</strong>: Global variables declared outside functions; scope covers all functions.</li>
+        <li><strong>PHP</strong>: Globals are accessible inside functions only via <code>$GLOBALS['x']</code> or a <code>global $x;</code> declaration.</li>
+        <li><strong>Python</strong>: A global can be <em>read</em> inside a function; to <em>assign</em> to it, you must declare <code>global x</code> inside the function.</li>
+      </ul>
+
+      <h3 id="let-construct">The <code>let</code> Construct</h3>
+      <p>
+        Functional languages often create local scope with a <code>let</code> construct instead of statement blocks.
+        The bindings behave like local named constants inside a limited expression scope.
+      </p>
+
+      <pre><code><span class="cm">// F#-style idea</span>
+let radius = 5
+let area = 3.14159 * radius * radius</code></pre>
+
+      <h3 id="declaration-order">Declaration Order</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Language</th><th>Rule</th></tr></thead>
+          <tbody>
+            <tr><td>C89</td><td>Declarations must appear at the beginning of a function/block</td></tr>
+            <tr><td>C99, C++, Java, JavaScript, C#</td><td>Declarations can appear anywhere a statement can</td></tr>
+            <tr><td>C++, Java, C#</td><td><code>for</code>-loop control variables are scoped to the loop body</td></tr>
+            <tr><td>JavaScript</td><td>Traditional function-scoped locals can be referenced before the declaration statement is reached</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-label">C# Scope Quirk</div>
+        <p>
+          In C#, a block variable's scope is considered the whole block even when the declaration appears later.
+          You still cannot use it before the declaration line, but its name is already reserved for that block.
+        </p>
+      </div>
+
+      <!-- ─── DYNAMIC SCOPE ─────────────────────────── -->
+      <h2 id="dynamic-scope">Dynamic Scope</h2>
+      <p>
+        Based on <strong>calling sequences</strong> at runtime. To find a variable, search back through the call chain. This is temporal, not spatial.
+      </p>
+
+      <pre><code>Big {
+    declare X
+    Sub1 {
+        declare X        <span class="cm">// local X in Sub1</span>
+        call Sub2
+    }
+    Sub2 {
+        refer to X       <span class="cm">// which X?</span>
+    }
+    call Sub1
+}
+
+<span class="cm">// Static  scope: X in Big  (search text structure)</span>
+<span class="cm">// Dynamic scope: X in Sub1 (search call chain)</span></code></pre>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label advantage">✓ Advantage</div>
+          <ul><li>Convenient — eliminates the need for explicit parameters in some cases</li></ul>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label disadvantage">✗ Disadvantages</div>
+          <ul>
+            <li>Executing subprogram's locals are visible to all called subprograms</li>
+            <li>Impossible to statically type-check</li>
+            <li>Hard to read — must trace call chain to understand variable reference</li>
+            <li>Slower access to non-local variables</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Scope vs Lifetime</h3>
+      <p>These are related but <strong>different</strong> concepts:</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>Variable</th><th>Scope</th><th>Lifetime</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Local var in Java method</td><td>Method body only</td><td>Same as scope</td></tr>
+            <tr><td>C <code>static</code> local var</td><td>Inside function only</td><td>Entire program execution</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        The C static example is the key one: <strong>narrow scope, wide lifetime</strong>. The variable is alive the whole program but only nameable within the function.
+      </p>
+
+      <h3 id="referencing-environment">Referencing Environment</h3>
+      <p>
+        The <strong>referencing environment</strong> of a statement is the full collection of names visible at that point.
+      </p>
+      <ul>
+        <li>In a <strong>static-scoped</strong> language: local names plus visible names from static ancestor scopes.</li>
+        <li>In a <strong>dynamic-scoped</strong> language: local names plus names from all currently active subprograms on the call stack.</li>
+      </ul>
+
+      <!-- ─── NAMED CONSTANTS ──────────────────────── -->
+      <h2 id="named-constants">Named Constants</h2>
+
+      <p>A <strong>named constant</strong> is a variable bound to a value only once. Improves readability and maintainability.</p>
+
+      <pre><code><span class="kw">const int</span> SIZE = 10;   <span class="cm">// C++</span>
+<span class="kw">int</span> arr[SIZE];
+<span class="kw">for</span> (<span class="kw">int</span> i = 0; i &lt; SIZE; i++) { ... }</code></pre>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>Language</th><th>Binding</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Fortran 95</td><td>Constant-valued expressions only</td></tr>
+            <tr><td>Ada, C++, Java</td><td>Expressions of any kind (can be dynamic)</td></tr>
+            <tr><td>C# <code>const</code></td><td>Compile-time bound (manifest constants)</td></tr>
+            <tr><td>C# <code>readonly</code></td><td>Dynamically bound (runtime)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ─── QUIZ ──────────────────────────────────── -->
+      <h2>Self-Check Quiz</h2>
+
+      <div class="quiz">
+        <div class="quiz-header">
+          <span>📝 Check your understanding</span>
+        </div>
+        <div class="quiz-body">
+          <p class="quiz-question">A C <code>static</code> local variable has narrow scope but a lifetime equal to the entire program. Which storage category does this fall into?</p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Stack-dynamic variables are deallocated when the function returns — their lifetime matches their scope.">
+              <span class="opt-key">A</span> Stack-dynamic
+            </li>
+            <li class="quiz-option" data-correct="true"
+                data-feedback="✓ Correct! Static variables are bound to memory before execution begins and remain bound throughout. Their scope can still be limited (e.g., inside a function), but their lifetime is the whole program.">
+              <span class="opt-key">B</span> Static
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Explicit heap-dynamic variables are manually allocated/deallocated with new/delete and accessed through pointers.">
+              <span class="opt-key">C</span> Explicit heap-dynamic
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Implicit heap-dynamic variables are allocated on assignment (like JS arrays). C static variables require explicit declaration.">
+              <span class="opt-key">D</span> Implicit heap-dynamic
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="quiz">
+        <div class="quiz-header">
+          <span>📝 Check your understanding</span>
+        </div>
+        <div class="quiz-body">
+          <p class="quiz-question">In the dynamic scoping example (Big → Sub1 → Sub2), when Sub2 refers to X, dynamic scoping resolves it to…</p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Static scoping would find X in Big (the textually enclosing scope). Dynamic scope works differently.">
+              <span class="opt-key">A</span> X declared in Big
+            </li>
+            <li class="quiz-option" data-correct="true"
+                data-feedback="✓ Correct! Dynamic scoping searches back through the call chain. Sub2 was called from Sub1, which has a local X — so that's the one found.">
+              <span class="opt-key">B</span> X declared in Sub1
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Sub2 has no local X of its own — that's why it needs to search.">
+              <span class="opt-key">C</span> X declared in Sub2
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Prolog uses unification, not dynamic scoping. This question is about imperative languages.">
+              <span class="opt-key">D</span> Unbound — produces an error
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">↺ Reset</button>
+        </div>
+      </div>
+
+      <!-- ─── SUMMARY ──────────────────────────────── -->
+      <div class="summary-box">
+        <h2>Chapter 5 Summary</h2>
+        <ul>
+          <li><strong>Binding time</strong>: Earlier = more efficient, less flexible. Later = more flexible, higher cost.</li>
+          <li><strong>Static type binding</strong>: Via explicit declaration, implicit declaration, or type inferencing. Type is bound at compile time.</li>
+          <li><strong>Dynamic type binding</strong>: Via assignment. Used in Python, JavaScript, Ruby. Flexible but error-prone.</li>
+          <li><strong>4 storage lifetime categories</strong>: static → stack-dynamic → explicit heap-dynamic → implicit heap-dynamic (ordered from most to least control).</li>
+          <li><strong>Static scoping</strong>: Based on text structure. More readable and reliable. Most modern languages use this.</li>
+          <li><strong>Dynamic scoping</strong>: Based on call chain. More convenient but harder to reason about. Used in some older/scripting languages.</li>
+          <li><strong>Scope ≠ Lifetime</strong>: A C static local is the canonical example of narrow scope + wide lifetime.</li>
+        </ul>
+      </div>
+
+    </article>
+  </main>
+</div>
+<script src="study-notes.js"></script>
+</body>
+</html>

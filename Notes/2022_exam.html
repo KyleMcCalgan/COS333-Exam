@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>COS 333 Examination 2022</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f6f7f9; color: #20242a; }
+    main { max-width: 940px; margin: 0 auto; padding: 28px 18px 48px; }
+    .back-link { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px; color: #243246; text-decoration: none; font-size: 14px; font-weight: 600; }
+    .back-link:hover { color: #0f172a; text-decoration: underline; }
+    h1 { font-size: 28px; margin: 0 0 4px; }
+    .meta { font-size: 14px; color: #5a6272; margin-bottom: 20px; }
+    .question { background: white; border: 1px solid #d9dde3; border-radius: 8px; padding: 20px; margin: 16px 0; }
+    .question h2 { font-size: 18px; margin: 0 0 12px; }
+    .points { font-size: 13px; color: #5f6f89; font-weight: normal; margin-left: 8px; }
+    .prompt { line-height: 1.6; margin-bottom: 14px; }
+    .prompt p { margin: 0 0 10px; }
+    .prompt pre { background: #f4f6f8; border: 1px solid #d8dde4; border-radius: 6px; overflow-x: auto; padding: 12px; white-space: pre-wrap; font-size: 13px; }
+    .options { display: grid; gap: 8px; }
+    button { font: inherit; }
+    button.option { text-align: left; border: 1px solid #c7cdd6; background: #fff; padding: 10px 12px; border-radius: 6px; cursor: pointer; font-size: 15px; }
+    button.option:hover { border-color: #62748e; background: #f8fafc; }
+    button.show-answer { border: 1px solid #5f6f89; background: #f8fafc; color: #243246; padding: 9px 12px; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+    button.show-answer:hover { background: #edf2f7; }
+    button.correct { border-color: #198754; background: #eaf7ef; }
+    button.wrong { border-color: #c73333; background: #fdecec; }
+    .feedback, .answer { display: none; margin-top: 12px; padding: 12px; border-radius: 6px; background: #eef3fb; line-height: 1.5; font-size: 14px; }
+    .feedback.show, .answer.show { display: block; }
+    .answer pre { background: #f4f6f8; border: 1px solid #d8dde4; border-radius: 6px; padding: 12px; white-space: pre-wrap; font-size: 13px; margin: 6px 0 0; }
+    .coding { border-left: 4px solid #667085; }
+    .multi-hint { font-size: 13px; color: #a0522d; font-style: italic; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+<main>
+  <a class="back-link" href="past-papers.html">&larr; Back to Past Papers</a>
+  <h1>COS 333 Examination <span class="points">15 November 2022</span></h1>
+  <div class="meta">Examiner: Mr W. S. van Heerden &nbsp;|&nbsp; Total: 40 marks &nbsp;|&nbsp; 29 Questions</div>
+  <div id="quiz"></div>
+</main>
+<script>
+const questions = [
+  {n:1, pts:1, multi:false, interactive:true,
+   prompt:"For programming languages designed for <strong>systems programming</strong> applications, the primary concern is efficiency. Select the one that most correctly identifies the <strong>second most important concern</strong>.",
+   opts:["Portability.","Generality.","Orthogonality.","Reliability."],
+   ans:[4], reason:"After efficiency, reliability is the second most important concern for systems-programming languages — they must behave predictably in OS and embedded contexts."},
+  {n:2, pts:1, multi:false, interactive:true,
+   prompt:"Pseudocode languages were interpreted rather than compiled. Select the option that most correctly identifies <strong>why these languages were interpreted</strong>.",
+   opts:["Interpretation offers the advantage of cross-platform compatibility.","Interpretation is more reliable in terms of error detection than compilation.","Certain operations were not supported in hardware at the time, meaning execution was slow regardless of whether interpretation was used.","Interpretation requires less computing resources than compilation does, meaning it worked better on the limited hardware of the time."],
+   ans:[3], reason:"Early hardware lacked floating-point and other operations, so programs had to be 'expanded' (interpreted) regardless — making compilation no faster."},
+  {n:3, pts:1, multi:false, interactive:true,
+   prompt:"Select the option that most correctly describes <strong>Objective-C</strong>.",
+   opts:["Object-oriented programming in Objective-C is based on C.","Object-oriented programming in Objective-C is based on C++.","Object-oriented programming in Objective-C is based on Smalltalk.","Objective-C does not support object-oriented programming."],
+   ans:[3], reason:"Objective-C adds Smalltalk-style message passing to C; its OOP model is derived from Smalltalk."},
+  {n:4, pts:5, multi:false, interactive:false, coding:true,
+   prompt:"Write a Scheme function named <code>getPositiveOddValues</code>, which receives one parameter: a simple list of numeric atoms. The function should yield (not print) a list containing only the <strong>positive (non-zero) odd values</strong> in the parameter list.<br><br>Examples:<pre>(getPositiveOddValues '())       ; =&gt; ()\n(getPositiveOddValues '(1 2 7 -3 4)) ; =&gt; (1 7)</pre>Submit file <code>s99999999.scm</code> to slot <em>\"Exam: Scheme Function\"</em>.",
+   shortAnswer:"(define (getPositiveOddValues lst)\n  (cond\n    ((null? lst) '())\n    ((and (> (car lst) 0) (odd? (car lst)))\n     (cons (car lst) (getPositiveOddValues (cdr lst))))\n    (else (getPositiveOddValues (cdr lst)))))"},
+  {n:5, pts:5, multi:false, interactive:false, coding:true,
+   prompt:"Write a Prolog proposition called <code>stripOccurrences(X, L1, L2)</code>, which succeeds if L2 contains all elements in L1, in order, with <strong>all occurrences of X removed</strong>.<br><br>Examples:<pre>?- stripOccurrences(a, [b, c, d], X).   % X = [b, c, d]\n?- stripOccurrences(a, [a, b, a, c, a], X). % X = [b, c]</pre>Submit <code>s99999999.pl</code> to slot <em>\"Exam: Prolog Proposition\"</em>.",
+   shortAnswer:"stripOccurrences(_, [], []).\nstripOccurrences(X, [X|T], R) :- stripOccurrences(X, T, R).\nstripOccurrences(X, [H|T], [H|R]) :- not(X = H), stripOccurrences(X, T, R)."},
+  {n:6, pts:1, multi:false, interactive:true,
+   prompt:"Consider the <strong>scope and lifetime of static variables</strong>, and select the statement that is most correct.",
+   opts:["The scope is from the variable declaration to the end of its block; the lifetime is from the start of program execution to the end of program execution.","The scope is from start to end of program execution; the lifetime is from the variable declaration to the end of its block.","The scope and lifetime are both from the variable declaration to the end of its block.","The scope and lifetime are both from start to end of program execution."],
+   ans:[1], reason:"Static variable scope is local (declaration to block end), but its storage persists for the entire program execution — so scope ≠ lifetime."},
+  {n:7, pts:1, multi:false, interactive:true,
+   prompt:"Consider the following possible <strong>disadvantages of implicitly dereferenced pointers</strong>, and select the one that is most correct.",
+   opts:["Void pointers cannot be used.","Pointer arithmetic is disallowed.","Pointers cannot be used for indirect addressing.","Pointers cannot be used for dynamic memory management."],
+   ans:[2], reason:"When pointers are always implicitly dereferenced, explicit pointer arithmetic (e.g. ptr+1) becomes impossible or meaningless."},
+  {n:8, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>operator precedence and associativity in APL</strong>, and select the one that is most correct.",
+   opts:["Precedence rules in APL are more orthogonal than in other languages, but associativity rules are less orthogonal.","Associativity rules in APL are more orthogonal than in other languages, but precedence rules are less orthogonal.","Precedence and associativity rules in APL are both more orthogonal than in other programming languages.","Precedence and associativity rules in APL are both less orthogonal than in other programming languages."],
+   ans:[3], reason:"APL has a single rule: all operators have the same precedence and associate right-to-left — one uniform rule for both, making it highly orthogonal."},
+  {n:9, pts:1, multi:false, interactive:true,
+   prompt:"In Scheme, operator overloading isn't supported due to Scheme's reliance on dynamic typing. Select the reason that most correctly explains why <strong>dynamic typing results in a lack of operator overloading in Scheme</strong>.",
+   opts:["Dynamic typing means Scheme operators can receive operands of any type.","Dynamic typing means overloaded operators would be very unreliable.","Dynamic typing means overloaded versions of operators are automatically generated.","Dynamic typing means operator support doesn't make sense in Scheme."],
+   ans:[1], reason:"Because dynamic typing allows any type at runtime, a single '+' function works on all numeric types — overloading different versions is unnecessary."},
+  {n:10, pts:1, multi:false, interactive:true,
+   prompt:"Ada supports <strong>no assignment coercions</strong>. Select the statement that most correctly describes a result of this.",
+   opts:["Ada is more writable.","Ada is more orthogonal.","Ada is more reliable.","Ada has lower cost."],
+   ans:[3], reason:"Without implicit coercions, type mismatches are caught explicitly — reducing unintended conversions and improving reliability."},
+  {n:11, pts:1, multi:false, interactive:true,
+   prompt:"Perl supports <strong>multiple assignments</strong>. Select the statement that most correctly describes an advantage of this.",
+   opts:["Perl is more writable.","Perl is more orthogonal.","Perl has reduced cost.","Perl is more reliable."],
+   ans:[1], reason:"Multiple assignment (e.g. swapping variables in one line) directly improves writability by reducing the code needed."},
+  {n:12, pts:1, multi:false, interactive:true,
+   prompt:"Consider this loop condition: <code>while ((myArr[index] == threshold) or (++index &lt; length))</code>. Select the option that most correctly describes a <strong>problem</strong> with this code.",
+   opts:["If the <code>or</code> operator is short-circuit evaluated, a side effect will not occur, which causes a problem.","If the <code>or</code> operator is short-circuit evaluated, a side effect occurs, which causes a problem.","If the <code>or</code> operator is not short-circuit evaluated, a side effect will not occur, which causes a problem.","If the <code>or</code> operator is not short-circuit evaluated, a side effect occurs, which causes a problem."],
+   ans:[1], reason:"When short-circuit evaluation skips the right side (because left is true), ++index is NOT evaluated — index doesn't advance, potentially causing an infinite loop."},
+  {n:13, pts:2, multi:true, interactive:true,
+   prompt:"Fortran I had a <strong>three-way selection statement</strong> (branch on <0, =0, >0). Select <strong>only</strong> the statements that are properties of this statement. <em>(Incorrectly selected options will be penalised.)</em>",
+   opts:["The three-way statement allows flow control that cannot be written using two-way selection and pretest loops.","The three-way selection statement is very efficient.","The three-way selection statement is an example of programmer time being considered more important than execution time.","The three-way selection statement is too closely based on the IBM 704 hardware."],
+   ans:[2,4], reason:"It jumps directly to one of three labels (efficient), and its design mirrors the IBM 704's conditional branch instruction (too hardware-specific)."},
+  {n:14, pts:1, multi:false, interactive:true,
+   prompt:"Counter-controlled loops are supported in <strong>C and Ada</strong>. Select the most correct statement.",
+   opts:["Counter-controlled loops in C are less writable than counter-controlled loops in Ada.","Counter-controlled loops in C are more costly than counter-controlled loops in Ada.","Counter-controlled loops in C are less reliable than counter-controlled loops in Ada.","Counter-controlled loops in C are more orthogonal than counter-controlled loops in Ada."],
+   ans:[3], reason:"Ada's for loop has a read-only loop variable and restricted range expressions, preventing many C-style loop errors (index modification, etc.) — making Ada more reliable."},
+  {n:15, pts:1, multi:false, interactive:true,
+   prompt:"Consider the drawback that applies to situations in which <strong>a conditional is part of a break</strong> used in a loop.",
+   opts:["Writability is reduced.","Readability is reduced.","Orthogonality is reduced.","Cost is reduced."],
+   ans:[2], reason:"When a conditional is embedded inside a break, it obscures the exit logic — the reader must inspect the loop body to understand the termination condition."},
+  {n:16, pts:1, multi:false, interactive:false,
+   prompt:"Consider this guarded-commands program:<pre>var a = 11\nif (a &lt; 0)       -&gt; print(\"Negative\")\n[] (a mod 2 == 0) -&gt; print(\"Even\")\nfi</pre>Provide the <strong>output</strong>. Write <code>Nothing</code>, <code>Compilation error</code>, or <code>Runtime error</code> as appropriate.",
+   shortAnswer:"Runtime error\n\n(a = 11: neither guard (a < 0) nor (a mod 2 == 0) is true. In Dijkstra's guarded IF, no true guard is a runtime error.)"},
+  {n:17, pts:1, multi:false, interactive:true,
+   prompt:"In Python, subprogram definitions are executable. Select the statement about the <strong>implications of executable subprogram definitions</strong> that is most correct.",
+   opts:["Writability is reduced.","Readability is reduced.","Cost is reduced.","There is no effect on the programming language, because all languages that support subprograms have executable subprogram definitions."],
+   ans:[2], reason:"Executable definitions allow functions to be defined inside conditionals or loops, which can make code harder to follow and reduces readability for unfamiliar readers."},
+  {n:18, pts:1, multi:false, interactive:true,
+   prompt:"In C++, default parameters must appear last. Select the solution for <strong>allowing default parameters to appear anywhere</strong> in the parameter list.",
+   opts:["Use a variable number of parameters, if the language supports them.","Use positional parameters, if the language supports them.","Use keyword parameters, if the language supports them.","It is not possible to allow default parameters to appear anywhere."],
+   ans:[3], reason:"Keyword parameters let the caller name each argument, so defaults can be omitted in any position regardless of order."},
+  {n:19, pts:1, multi:false, interactive:true,
+   prompt:"Procedures are a specific kind of subprogram. Select the statement that is most correct.",
+   opts:["Procedures are guaranteed to never have side effects.","Procedures are guaranteed to always have side effects.","Procedures have a high probability of having side effects, unless they are written carefully.","Procedures generate side effects unpredictably."],
+   ans:[3], reason:"Procedures typically modify shared state (parameters by reference, global vars, I/O) — they can have side effects unless explicitly written to avoid them."},
+  {n:20, pts:1, multi:false, interactive:false,
+   prompt:"Consider this code (static scoping, ad-hoc binding):<pre>A = 4\nsubprogram f(sub) { A = 9;  call sub() }\nsubprogram g()    { print A }\nsubprogram main() { A = 2;  call f(g) }</pre>Provide the <strong>output</strong> with <strong>static scoping and ad-hoc binding</strong>.",
+   shortAnswer:"9\n\n(main sets global A = 2, then calls f(g). Inside f, A is set to 9. g is then called via the parameter. Under static scoping and ad-hoc binding, g's A refers to the global A, which is now 9.)"},
+  {n:21, pts:1, multi:false, interactive:false,
+   prompt:"Consider this coroutine program:<pre>subprogram main() { resume g() }\ncoroutine f()     { print \"A \"; resume g(); print \"B \" }\ncoroutine g()     { print \"C \"; resume f(); print \"D \" }</pre>Provide the <strong>output</strong>.",
+   shortAnswer:"C A D B\n\nTrace:\n1. main → resume g\n2. g starts: print C, resume f\n3. f starts: print A, resume g\n4. g resumes: print D, g ends\n5. f resumes: print B, f ends"},
+  {n:22, pts:1, multi:false, interactive:true,
+   prompt:"Java supports a mechanism for ensuring clients can't depend on the implementation of ADTs. Select the language feature that <strong>ensures a lack of client dependence on implementation</strong>.",
+   opts:["Header files and implementation files.","Base classes and derived classes.","Classes implementing interfaces.","Javadoc and bytecode."],
+   ans:[4], reason:"Javadoc exposes the public interface; the implementation is compiled to bytecode (.class files) which clients receive — they see the interface but not the source implementation."},
+  {n:23, pts:1, multi:false, interactive:true,
+   prompt:"Classes are dynamic in Ruby. Select the statement about the <strong>implications of dynamic classes in Ruby</strong> that is most correct.",
+   opts:["Dynamic classes increase writability.","Dynamic classes increase readability.","Dynamic classes decrease cost.","Dynamic classes increase reliability."],
+   ans:[1], reason:"Dynamic classes allow classes to be reopened and extended at runtime (monkey patching), which greatly increases writability and expressiveness."},
+  {n:24, pts:3, multi:false, interactive:false,
+   prompt:"Briefly outline how the <strong>compiler handles parameterised classes in Java 5.0</strong>.",
+   shortAnswer:"Java 5.0 uses type erasure: the compiler checks type correctness at compile time using the generic type parameters, then replaces all type parameters with Object (or their declared bounds). A single version of the compiled bytecode is produced — no new classes are generated per type argument. At runtime, casts are inserted by the compiler where needed."},
+  {n:25, pts:1, multi:false, interactive:true,
+   prompt:"Consider Smalltalk's support for object-oriented programming, and select the statement that is most correct.",
+   opts:["Smalltalk's support for OOP is very writable.","Smalltalk's support for OOP is quite efficient.","Smalltalk's support for OOP is highly orthogonal.","Smalltalk is essentially equivalent to C++ and Java in terms of evaluation criteria."],
+   ans:[3], reason:"In Smalltalk, every operation (including arithmetic) is a message send on an object — one uniform paradigm throughout, making it highly orthogonal."},
+  {n:26, pts:1, multi:false, interactive:true,
+   prompt:"Four classes: A (base), B and C both inherit from A, D inherits from both B and C. Select the statement that causes an <strong>implicit problem</strong> with this hierarchy.",
+   opts:["If any class member is defined in class A.","If any class member is defined in class B.","If any class member is defined in class C.","If any class member with the same name is defined in classes B and C."],
+   ans:[1], reason:"If A defines a member and neither B nor C override it, D implicitly inherits two copies of A's member (one via B, one via C) — an implicit collision without explicit redefinition."},
+  {n:27, pts:1, multi:false, interactive:true,
+   prompt:"C++ provides support for <strong>private derivation</strong>. Select the statement describing a <strong>valid use for private derivation</strong>.",
+   opts:["When a derived class wishes to only add to the public interface of its base class.","When a derived class wishes to modify one part of the public interface of its base class.","When a derived class wishes to only make part of its base class interface publicly visible.","When a derived class wishes to ensure it is a subtype of its base class."],
+   ans:[3], reason:"Private derivation makes the base's public members private in the derived class. The derived class can then selectively expose only the members it chooses, hiding the rest."},
+  {n:28, pts:1, multi:false, interactive:true,
+   prompt:"C++ and Java both support <strong>object-oriented message binding</strong>. Select the statement that is most correct.",
+   opts:["C++ support for message binding is more writable than Java's support.","C++ support for message binding is more readable than Java's support.","C++ support for message binding is less efficient than Java's support.","C++ support for message binding is more reliable than Java's support."],
+   ans:[1], reason:"C++ allows the programmer to choose between static binding (default, efficient) and dynamic binding (virtual keyword) — this flexibility makes it more writable for performance-sensitive code."},
+  {n:29, pts:1, multi:false, interactive:true,
+   prompt:"Consider the following statements about <strong>classes and structs in C#</strong>, and select the one that is most correct.",
+   opts:["C# only supports classes, not structs.","Classes are more writable than structs in C#.","Structs are more writable than classes in C#.","Classes and structs are equally writable in C#."],
+   ans:[2], reason:"C# classes support inheritance, constructors, destructors, and all OOP features. Structs are value types with significant restrictions (no inheritance, no default parameterless constructor defined explicitly), making classes generally more writable."}
+];
+
+const quiz = document.getElementById('quiz');
+
+for (const q of questions) {
+  const sec = document.createElement('section');
+  sec.className = 'question' + (q.coding ? ' coding' : '');
+
+  let promptHtml = `<div class="prompt">${q.prompt}</div>`;
+  let bodyHtml = '';
+
+  if (q.interactive) {
+    if (q.multi) bodyHtml += `<p class="multi-hint">Select ALL correct options. (Incorrectly selected options are penalised.)</p>`;
+    bodyHtml += `<div class="options">`;
+    q.opts.forEach((o, i) => {
+      bodyHtml += `<button class="option" data-idx="${i+1}">${i+1}. ${o}</button>`;
+    });
+    bodyHtml += `</div><div class="feedback"></div>`;
+  } else {
+    bodyHtml += `<button class="show-answer">Show model answer</button>`;
+    bodyHtml += `<div class="answer"><strong>Model Answer:</strong><pre>${escHtml(q.shortAnswer)}</pre></div>`;
+  }
+
+  sec.innerHTML = `<h2>Question ${q.n} <span class="points">(${q.pts} pt${q.pts>1?'s':''})</span></h2>${promptHtml}${bodyHtml}`;
+  quiz.appendChild(sec);
+
+  if (q.interactive) {
+    const selected = new Set();
+    const btns = sec.querySelectorAll('button.option');
+    const fb = sec.querySelector('.feedback');
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = +btn.dataset.idx;
+        if (!q.multi) {
+          btns.forEach(b => { b.classList.remove('correct','wrong'); });
+          selected.clear();
+        }
+        selected.has(idx) ? selected.delete(idx) : selected.add(idx);
+        if (!q.multi) {
+          const correct = q.ans.includes(idx);
+          btn.classList.add(correct ? 'correct' : 'wrong');
+          if (!correct) q.ans.forEach(a => btns[a-1].classList.add('correct'));
+          fb.textContent = correct ? '✓ Correct. ' + q.reason : '✗ Incorrect. ' + q.reason;
+          fb.className = 'feedback show';
+        } else {
+          btns.forEach(b => b.classList.remove('correct','wrong'));
+          selected.forEach(s => btns[s-1].classList.add(q.ans.includes(s) ? 'correct' : 'wrong'));
+          q.ans.forEach(a => btns[a-1].classList.add('correct'));
+          fb.textContent = q.reason;
+          fb.className = 'feedback show';
+        }
+      });
+    });
+  } else {
+    const btn = sec.querySelector('.show-answer');
+    const ans = sec.querySelector('.answer');
+    if (btn) btn.addEventListener('click', () => { ans.classList.toggle('show'); btn.textContent = ans.classList.contains('show') ? 'Hide answer' : 'Show model answer'; });
+  }
+}
+
+function escHtml(s) {
+  return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+</script>
+</body>
+</html>

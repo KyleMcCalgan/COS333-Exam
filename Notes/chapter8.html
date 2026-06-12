@@ -1,0 +1,385 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 8 — Statement-Level Control Structures</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+
+  <button class="menu-toggle" aria-label="Open menu">☰</button>
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="course-label">COS 333 · Concepts of PL</span>
+      <h1>Programming Language Concepts</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Overview</span>
+      <a href="index.html"><span class="nav-chapter">00</span> Home &amp; Topics</a>
+
+      <span class="nav-section-label">Chapters</span>
+      <a href="chapter1.html"><span class="nav-chapter">01</span> Preliminaries</a>
+      <a href="chapter2.html"><span class="nav-chapter">02</span> Evolution of PLs</a>
+      <a href="chapter5.html"><span class="nav-chapter">05</span> Names, Bindings &amp; Scopes</a>
+      <a href="chapter6.html"><span class="nav-chapter">06</span> Data Types</a>
+      <a href="chapter7.html"><span class="nav-chapter">07</span> Expressions &amp; Assignments</a>
+      <a href="chapter8.html" class="active"><span class="nav-chapter">08</span> Control Structures</a>
+      <a href="chapter9.html"><span class="nav-chapter">09</span> Subprograms</a>
+      <a href="chapter12.html"><span class="nav-chapter">12</span> OOP Support</a>
+      <a href="chapter15.html"><span class="nav-chapter">15</span> Functional Programming</a>
+      <a href="chapter16.html"><span class="nav-chapter">16</span> Logic Programming</a>
+
+      <span class="nav-section-label">Practical</span>
+      <a href="prolog-practical.html"><span class="nav-chapter">P3</span> Prolog in Practice</a>
+      <a href="prolog-list-patterns.html"><span class="nav-chapter">P4</span> List Patterns</a>
+      <a href="scheme-practical.html"><span class="nav-chapter">P5</span> Scheme in Practice</a>
+
+      <span class="nav-section-label">Assessment</span>
+      <a href="past-papers.html"><span class="nav-chapter">PP</span> Past Papers</a>
+      <a href="mcq.html"><span class="nav-chapter">MC</span> MCQ Bank</a>
+    </nav>
+
+    <div class="sidebar-toc">
+      <span class="sidebar-toc-title">On this page</span>
+      <a href="#selection">Selection Statements</a>
+      <a href="#twoway">Two-Way Selection</a>
+      <a href="#multiway">Multiple Selection</a>
+      <a href="#iterative">Iterative Statements</a>
+      <a href="#counter">Counter-Controlled Loops</a>
+      <a href="#logical">Logically-Controlled Loops</a>
+      <a href="#iterator">Iterator-Based</a>
+      <a href="#ruby-blocks">Ruby Blocks</a>
+      <a href="#guarded">Guarded Commands</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle">
+        <span class="toggle-icon">☾</span>
+        <span class="toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="reading-progress"><div class="reading-progress-bar"></div></div>
+
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span>›</span> Chapter 8
+    </div>
+
+    <header class="page-header">
+      <span class="chapter-tag">Chapter 8</span>
+      <h1>Statement-Level Control Structures</h1>
+      <p class="subtitle">
+        Selecting which statements execute, and how many times. From simple if-else to Dijkstra's
+        non-deterministic guarded commands — control flow design has profound implications for correctness.
+      </p>
+      <div class="topic-pills">
+        <span class="pill">Selection</span>
+        <span class="pill">Iteration</span>
+        <span class="pill">for-each</span>
+        <span class="pill">Ruby Blocks</span>
+        <span class="pill">Guarded Commands</span>
+        <span class="pill">Non-determinism</span>
+      </div>
+    </header>
+
+    <article class="article">
+
+      <h2 id="selection">Selection Statements</h2>
+      <p>A <strong>selection statement</strong> (also called conditional statement) selects between two or more execution paths based on a Boolean condition or expression value.</p>
+
+      <h2 id="twoway">Two-Way Selection: if-then-else</h2>
+      <p>The most fundamental control structure. Design issues include:</p>
+      <ul>
+        <li>What can appear in the condition? (Boolean only, or any type?)</li>
+        <li>What is the clause syntax? (single statement, block, or any?)</li>
+        <li>How is the "dangling else" problem resolved?</li>
+      </ul>
+
+      <h3>The Dangling else Problem</h3>
+      <pre><code>/* C — which 'if' does the 'else' belong to? */
+if (x &gt; 0)
+    if (y &gt; 0)
+        z = 1;
+else       /* Belongs to inner 'if', not outer! */
+    z = -1;</code></pre>
+
+      <p>Most languages (C, Java, C++) resolve this by the <strong>nearest unmatched if</strong> rule: an <code>else</code> matches the nearest preceding <code>if</code> that has no <code>else</code>. This is often a surprise to programmers. Solutions:</p>
+      <ul>
+        <li><strong>Explicit delimiters</strong>: Pascal uses <code>begin...end</code>; Scheme and LISP use parentheses.</li>
+        <li><strong>Required else</strong>: never have dangling ifs.</li>
+        <li><strong>Mandatory blocks</strong>: Python and Ruby require indentation/keyword delimiters, so the structure is unambiguous.</li>
+        <li><strong>Special keyword</strong>: Ada uses <code>end if</code> to close every <code>if</code>.</li>
+      </ul>
+
+      <h3>Selector Expressions (Conditional Expressions)</h3>
+      <p>In some languages, selection is an expression that returns a value:</p>
+      <pre><code>/* C/C++/Java — ternary operator */
+int max = (a &gt; b) ? a : b;
+
+/* Python — conditional expression */
+max_val = a if a &gt; b else b</code></pre>
+
+      <h2 id="multiway">Multiple Selection: case / switch</h2>
+      <p>Selects one of several paths based on the value of an expression (the <em>selector</em>).</p>
+
+      <h3>C-style switch</h3>
+      <pre><code>/* C — fall-through semantics by default */
+switch (grade) {
+    case 'A':
+        printf("Excellent\n");
+        break;       /* break required to prevent fall-through */
+    case 'B':
+    case 'C':
+        printf("Passing\n");
+        break;
+    default:
+        printf("Failing\n");
+}</code></pre>
+
+      <p>The <strong>fall-through</strong> default of C's <code>switch</code> is a common source of bugs — forgetting a <code>break</code> causes execution to continue into the next case. Languages differ in how they handle this:</p>
+      <ul>
+        <li><strong>Java</strong>: same fall-through as C, but also has the new <code>switch</code> expression (Java 14+) which does not fall through.</li>
+        <li><strong>Ada</strong>: no fall-through; all choices are exclusive and the compiler warns if a value is not covered.</li>
+        <li><strong>Ruby</strong>: uses <code>case...when</code> with no fall-through; can match on ranges and patterns.</li>
+        <li><strong>Python</strong>: the structural pattern matching (<code>match...case</code>, Python 3.10+) has no fall-through.</li>
+      </ul>
+
+      <h3>Design issue: what can be the selector?</h3>
+      <p>C's <code>switch</code> requires an integer-compatible type. C++ allows enumerations. Java 7+ allows strings. Ada allows any discrete type. Ruby allows any object with an equality test.</p>
+
+      <h2 id="iterative">Iterative Statements</h2>
+      <p>An iterative statement (loop) causes one or more statements to execute zero or more times.</p>
+
+      <h2 id="counter">Counter-Controlled Loops</h2>
+      <p>A loop that executes a fixed number of times, controlled by a counter variable.</p>
+
+      <h3>FORTRAN-style do loop</h3>
+      <p>The earliest DO loops had a fixed loop variable, initial value, final value, and step. Modifying the loop variable inside the loop was undefined or forbidden in some languages.</p>
+
+      <h3>C-style for loop</h3>
+      <pre><code>/* C — flexible: initialisation, condition, update are arbitrary expressions */
+for (int i = 0; i &lt; 10; i++) { ... }
+
+/* Can use any expressions — not just counter control */
+for (p = head; p != NULL; p = p-&gt;next) { ... }  /* linked list traversal */</code></pre>
+
+      <p>The C <code>for</code> is extremely flexible but is fundamentally a "while loop with initialiser and update" — not specifically a counter-controlled loop. This flexibility is expressive but can be misused.</p>
+
+      <h3>Python range-based for</h3>
+      <pre><code class="language-python"># Python — counter-controlled using range()
+for i in range(10):
+    print(i)
+
+for i in range(0, 10, 2):  # range(start, stop, step)
+    print(i)  # 0, 2, 4, 6, 8</code></pre>
+
+      <h2 id="logical">Logically-Controlled Loops</h2>
+      <p>Loops that continue executing while (or until) a condition is true. Not counter-controlled — the number of iterations depends on program state.</p>
+
+      <h3>Pre-test loop (while)</h3>
+      <pre><code>/* Condition checked BEFORE each iteration — may execute zero times */
+while (condition) {
+    body;
+}</code></pre>
+
+      <h3>Post-test loop (do-while / repeat-until)</h3>
+      <pre><code>/* Condition checked AFTER each iteration — executes at least once */
+do {
+    body;
+} while (condition);  /* C/Java */
+
+repeat
+    body
+until condition;      /* Pascal/Ada */</code></pre>
+
+      <p>Note: C's <code>do-while</code> continues while the condition is <em>true</em>. Pascal's <code>repeat-until</code> continues until the condition is <em>true</em> (i.e., exits when condition becomes true). The semantics are inverted — a common source of confusion.</p>
+
+      <h3>Mid-test loops</h3>
+      <p>Ada and some other languages allow an <code>exit when</code> inside a loop, which effectively tests the condition in the middle of the loop body. This avoids the "loop-and-a-half" problem of duplicating code for the first check before the loop.</p>
+
+      <h2 id="iterator">Iterator-Based Loops (for-each)</h2>
+      <p>Iterates over every element in a collection without the programmer managing indices or pointers.</p>
+
+      <pre><code class="language-java">// Java — enhanced for (for-each)
+for (String name : nameList) {
+    System.out.println(name);
+}</code></pre>
+
+      <pre><code class="language-python"># Python — all for loops are iterator-based
+for element in my_list:
+    print(element)
+
+for key, value in my_dict.items():
+    print(key, value)</code></pre>
+
+      <pre><code class="language-ruby"># Ruby — multiple iterator methods
+[1, 2, 3].each { |x| puts x }
+(1..5).each { |n| puts n }</code></pre>
+
+      <p>Iterator-based loops improve readability and reliability: no off-by-one errors, no accidental index mutation, works naturally with any collection type that supports iteration.</p>
+
+      <h2 id="ruby-blocks">Ruby Blocks</h2>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Exam Focus — Section 8.3.4</div>
+        <p>Ruby blocks are specifically highlighted in the scope. Understand the syntax, how blocks are passed to methods, and how they differ from a language that separates iteration from the iteration logic.</p>
+      </div>
+
+      <p>In Ruby, a <strong>block</strong> is an anonymous chunk of code that can be passed to a method and invoked by that method. Blocks are closures — they capture the surrounding scope.</p>
+
+      <h3>Block syntax</h3>
+      <pre><code class="language-ruby"># Brace syntax (single-line, conventional)
+[1, 2, 3].each { |x| puts x }
+
+# do...end syntax (multi-line, conventional)
+[1, 2, 3].each do |x|
+  puts x * 2
+end
+
+# Block with the times method
+5.times { |i| puts i }    # 0 1 2 3 4
+
+# Block with upto
+1.upto(5) { |n| puts n }  # 1 2 3 4 5
+
+# collect/map — returns new array
+doubled = [1, 2, 3].collect { |x| x * 2 }  # [2, 4, 6]
+
+# select — returns elements for which block is true
+evens = [1, 2, 3, 4, 5].select { |x| x.even? }  # [2, 4]
+
+# inject/reduce — accumulator
+sum = [1, 2, 3, 4].inject(0) { |acc, x| acc + x }  # 10</code></pre>
+
+      <h3>Why Ruby blocks matter conceptually</h3>
+      <p>Ruby's design turns control structures (iteration, resource management, error handling) into <em>method calls that accept blocks</em>. This is more flexible than built-in syntax because:</p>
+      <ul>
+        <li>Any object can define its own iteration behaviour (by implementing <code>each</code>).</li>
+        <li>The programmer does not need to learn a new syntax for each kind of iteration.</li>
+        <li>Blocks are first-class closures — they capture local variables from the enclosing scope.</li>
+      </ul>
+
+      <pre><code class="language-ruby"># Resource management with blocks (ensures file is closed)
+File.open("data.txt") do |file|
+  file.each_line { |line| puts line }
+end  # file is automatically closed when the block exits</code></pre>
+
+      <h2 id="guarded">Guarded Commands (Dijkstra, 1975)</h2>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Exam Focus — Section 8.5</div>
+        <p>Guarded commands are a theoretical concept with practical implications for program correctness. Understand the syntax, the non-determinism, and the rationale for their design. They appear regularly in exams.</p>
+      </div>
+
+      <p>Edsger Dijkstra proposed guarded commands as a foundation for <strong>program verification</strong> (proving programs correct). The key insight is that <em>if there is no reason to prefer one execution path over another, the language should not force one</em>. This is called <strong>non-determinism</strong>.</p>
+
+      <h3>Guarded Selection Command</h3>
+      <p>Syntax (pseudo-code):</p>
+      <pre><code>if &lt;guard1&gt; → &lt;statement_list1&gt;
+[] &lt;guard2&gt; → &lt;statement_list2&gt;
+...
+[] &lt;guardn&gt; → &lt;statement_listn&gt;
+fi</code></pre>
+
+      <p>Semantics:</p>
+      <ul>
+        <li>Each guard is a Boolean expression.</li>
+        <li>All guards are evaluated.</li>
+        <li>If <strong>none</strong> of the guards are true → <strong>error</strong> (program terminates with an error — it is the programmer's responsibility to ensure at least one guard is true).</li>
+        <li>If <strong>one or more</strong> guards are true → <strong>one is selected non-deterministically</strong> and its statement list is executed.</li>
+      </ul>
+
+      <h4>Example: maximum of two values</h4>
+      <pre><code>if x &gt;= y → max := x
+[] y &gt;= x → max := y
+fi</code></pre>
+      <p>When <code>x == y</code>, <em>both</em> guards are true. Either branch gives the correct result. The language need not choose a particular one — and this non-determinism explicitly documents that both answers are equivalent.</p>
+
+      <h4>Contrast with if-else</h4>
+      <p>In a traditional <code>if-else</code>, even when both branches are semantically equivalent (as in the example above), the programmer must arbitrarily pick one ordering. The guarded command expresses the symmetry explicitly.</p>
+
+      <h3>Guarded Loop Command</h3>
+      <pre><code>do &lt;guard1&gt; → &lt;statement_list1&gt;
+[] &lt;guard2&gt; → &lt;statement_list2&gt;
+...
+[] &lt;guardn&gt; → &lt;statement_listn&gt;
+od</code></pre>
+
+      <p>Semantics:</p>
+      <ul>
+        <li>As long as <em>at least one</em> guard is true, evaluate all guards and <strong>non-deterministically execute one</strong> of the true guards' statement lists.</li>
+        <li>When <strong>all guards are false</strong>, the loop terminates.</li>
+      </ul>
+
+      <h4>Example: sort two variables</h4>
+      <pre><code>do x &gt; y → temp := x; x := y; y := temp
+od</code></pre>
+      <p>This loop continues swapping x and y as long as x > y. When x ≤ y, the loop terminates with x holding the smaller value.</p>
+
+      <h4>Example: non-deterministic sort with two variables</h4>
+      <pre><code>do x &gt; y → x := x - y
+[] y &gt; x → y := y - x
+od
+/* when x == y, both guards false, loop ends — this computes GCD! */</code></pre>
+
+      <h3>Significance of guarded commands</h3>
+      <ul>
+        <li><strong>Program verification</strong>: the explicit guards make pre- and post-conditions for each branch very clear, supporting formal proof of correctness.</li>
+        <li><strong>Non-determinism</strong>: allows expressing algorithms where the order of operations genuinely does not matter, making the algorithm more abstract and general.</li>
+        <li><strong>Influence</strong>: guarded commands influenced Ada's <code>select</code> statement for concurrent programming, and various verification languages (TLA+, B, Z). They do not appear in mainstream imperative languages but are important theoretically.</li>
+      </ul>
+
+      <div class="quiz">
+        <div class="quiz-header"><span>Quick Check</span></div>
+        <div class="quiz-body">
+          <p class="quiz-question">In Dijkstra's guarded selection command, what happens if more than one guard evaluates to true?</p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="true"
+                data-feedback="One of the true guards is selected non-deterministically — the language (or implementation) may choose any one. This is the key feature of guarded commands: they explicitly permit non-determinism when multiple paths are valid.">
+              <span class="opt-key">A</span> One of the true guards is selected non-deterministically
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="No error occurs when multiple guards are true. The error occurs when NO guard is true.">
+              <span class="opt-key">B</span> A runtime error is raised
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="All true guards' statement lists are not executed simultaneously — only one is selected.">
+              <span class="opt-key">C</span> All true guards' statement lists are executed in order
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="The first true guard is NOT necessarily selected. The choice is non-deterministic — that is the point.">
+              <span class="opt-key">D</span> The first true guard in the list is selected
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">Try again</button>
+        </div>
+      </div>
+
+      <div class="summary-box">
+        <h2>Chapter 8 Summary</h2>
+        <ul>
+          <li><strong>Dangling else</strong>: resolved by nearest-unmatched-if rule in most languages. Use explicit delimiters to prevent ambiguity.</li>
+          <li><strong>switch/case</strong>: C has fall-through (requires break); Ada does not. Selector types vary by language.</li>
+          <li><strong>Counter loops</strong>: C's for is very flexible; Ada/Pascal's for is restricted to integer ranges.</li>
+          <li><strong>while (pre-test)</strong>: may execute zero times. <strong>do-while (post-test)</strong>: always executes at least once.</li>
+          <li><strong>for-each / iterator</strong>: safer, more readable iteration over collections. Avoids index errors.</li>
+          <li><strong>Ruby blocks</strong>: closures passed to methods; used for iteration, resource management. All iteration in Ruby is via blocks and methods.</li>
+          <li><strong>Guarded commands</strong>: guards evaluated, one true guard selected non-deterministically. Error if no guard is true. Error does NOT occur if multiple guards are true. Supports program verification and non-determinism.</li>
+        </ul>
+      </div>
+
+    </article>
+  </main>
+</div>
+<script src="study-notes.js"></script>
+</body>
+</html>

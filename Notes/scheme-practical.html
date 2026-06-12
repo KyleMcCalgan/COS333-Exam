@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scheme in Practice — COS 333</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Scheme code anatomy ───────────────────────────────── */
+    .anatomy {
+      background: var(--bg-sidebar);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-6);
+      margin: var(--sp-5) 0;
+      max-width: var(--content-max);
+      font-family: var(--font-mono);
+      font-size: 1.05rem;
+      color: #d4cec4;
+      line-height: 2.4;
+      overflow-x: auto;
+    }
+    .anatomy .s-paren  { color: #5a5048; }
+    .anatomy .s-kw     { color: #e8a070; }
+    .anatomy .s-fn     { color: #88c870; }
+    .anatomy .s-var    { color: #7ab8e8; }
+    .anatomy .s-pred   { color: #d49ee0; }
+    .anatomy .s-val    { color: #e8c870; }
+    .anatomy .s-label  {
+      font-family: var(--font-body);
+      font-size: var(--fs-xs);
+      color: var(--text-muted);
+      font-style: italic;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+
+    /* ── Worked example box ────────────────────────────────── */
+    .worked {
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin: var(--sp-6) 0;
+      max-width: var(--content-max);
+    }
+    .worked-header {
+      background: var(--bg-table-head);
+      padding: var(--sp-3) var(--sp-6);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+    }
+    .worked-header .wh-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .worked-header .wh-title {
+      font-family: var(--font-display);
+      font-size: var(--fs-base);
+      color: #f5efe6;
+      font-weight: 600;
+    }
+    .worked-header .wh-year {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: var(--fs-xs);
+      color: #a09888;
+    }
+    .worked-body {
+      padding: var(--sp-6);
+      background: var(--bg-content);
+    }
+    .worked-body h4 { margin-top: var(--sp-5); }
+    .worked-body h4:first-child { margin-top: 0; }
+
+    /* ── Evaluation trace ──────────────────────────────────── */
+    .trace-block {
+      background: var(--bg-sidebar);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-5) var(--sp-6);
+      margin: var(--sp-4) 0;
+      font-family: var(--font-mono);
+      font-size: var(--fs-sm);
+      line-height: 2;
+      overflow-x: auto;
+    }
+    .trace-block .t-call   { color: #7ab8e8; }
+    .trace-block .t-val    { color: #88c870; }
+    .trace-block .t-step   { color: #5a5048; }
+    .trace-block .t-result { color: #e8c870; font-weight: 600; }
+    .trace-block .t-cm     { color: #5a5048; font-style: italic; }
+
+    /* ── Archetype grid ────────────────────────────────────── */
+    .archetype-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: var(--sp-4);
+      margin: var(--sp-5) 0;
+    }
+    .archetype-card {
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .archetype-header {
+      padding: var(--sp-3) var(--sp-4);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 700;
+    }
+    .archetype-header.filter-keep { background: #1a2e1a; color: #88c870; }
+    .archetype-header.filter-drop { background: #2e1a1a; color: #e87870; }
+    .archetype-header.transform   { background: #1a1e2e; color: #7ab8e8; }
+    .archetype-header.combined    { background: #2e2a1a; color: #e8c870; }
+    .archetype-body {
+      padding: var(--sp-4);
+      background: var(--bg-hover);
+    }
+    .archetype-body pre {
+      margin: 0;
+      background: transparent;
+      border: none;
+      padding: 0;
+      font-size: var(--fs-sm);
+    }
+
+    /* ── Decision flow ─────────────────────────────────────── */
+    .decision-step {
+      display: flex;
+      gap: var(--sp-4);
+      align-items: flex-start;
+      margin: var(--sp-3) 0;
+    }
+    .decision-num {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      font-size: var(--fs-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+    .decision-content { flex: 1; }
+    .decision-content strong { display: block; margin-bottom: 2px; }
+
+    /* ── Predicate quick-ref table ─────────────────────────── */
+    .pred-table {
+      width: 100%;
+      max-width: var(--content-max);
+      border-collapse: collapse;
+      margin: var(--sp-4) 0;
+      font-size: var(--fs-sm);
+    }
+    .pred-table th {
+      text-align: left;
+      padding: var(--sp-2) var(--sp-4);
+      background: var(--bg-table-head);
+      color: #f5efe6;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .pred-table td {
+      padding: var(--sp-2) var(--sp-4);
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .pred-table tr:last-child td { border-bottom: none; }
+    .pred-table .pt-code {
+      font-family: var(--font-mono);
+      font-size: var(--fs-sm);
+      color: #88c870;
+      white-space: nowrap;
+    }
+    .pred-table .pt-result {
+      font-family: var(--font-mono);
+      font-size: var(--fs-sm);
+      color: #e8c870;
+    }
+
+    /* Mobile */
+    @media (max-width: 900px) {
+      .article { padding-top: calc(var(--sp-12) + var(--sp-8)); }
+    }
+    @media (max-width: 600px) {
+      .archetype-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="reading-progress"><div class="reading-progress-bar"></div></div>
+<div class="layout">
+
+  <button class="menu-toggle" aria-label="Open menu">☰</button>
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="course-label">COS 333 · Concepts of PL</span>
+      <h1>Programming Language Concepts</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Overview</span>
+      <a href="index.html"><span class="nav-chapter">00</span> Home &amp; Topics</a>
+
+      <span class="nav-section-label">Chapters</span>
+      <a href="chapter1.html"><span class="nav-chapter">01</span> Preliminaries</a>
+      <a href="chapter2.html"><span class="nav-chapter">02</span> Evolution of PLs</a>
+      <a href="chapter5.html"><span class="nav-chapter">05</span> Names, Bindings &amp; Scopes</a>
+      <a href="chapter6.html"><span class="nav-chapter">06</span> Data Types</a>
+      <a href="chapter7.html"><span class="nav-chapter">07</span> Expressions &amp; Assignments</a>
+      <a href="chapter8.html"><span class="nav-chapter">08</span> Control Structures</a>
+      <a href="chapter9.html"><span class="nav-chapter">09</span> Subprograms</a>
+      <a href="chapter12.html"><span class="nav-chapter">12</span> OOP Support</a>
+      <a href="chapter15.html"><span class="nav-chapter">15</span> Functional Programming</a>
+      <a href="chapter16.html"><span class="nav-chapter">16</span> Logic Programming</a>
+
+      <span class="nav-section-label">Practical</span>
+      <a href="prolog-practical.html"><span class="nav-chapter">P3</span> Prolog in Practice</a>
+      <a href="prolog-list-patterns.html"><span class="nav-chapter">P4</span> List Patterns</a>
+      <a href="scheme-practical.html" class="active"><span class="nav-chapter">P5</span> Scheme in Practice</a>
+
+      <span class="nav-section-label">Assessment</span>
+      <a href="past-papers.html"><span class="nav-chapter">PP</span> Past Papers</a>
+      <a href="mcq.html"><span class="nav-chapter">MC</span> MCQ Bank</a>
+    </nav>
+
+    <div class="sidebar-toc">
+      <span class="sidebar-toc-title">On this page</span>
+      <a href="#mental-model">Mental Model</a>
+      <a href="#core-vocab">Core Vocabulary</a>
+      <a href="#list-anatomy">List Anatomy</a>
+      <a href="#cond-template">The cond Template</a>
+      <a href="#exam-formula">The Exam Formula</a>
+      <a href="#archetypes">Four Archetypes</a>
+      <a href="#decision">Decision Process</a>
+      <a href="#past-exams">Past Exam Walkthrough</a>
+      <a href="#quickref">Quick Reference</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle">
+        <span class="toggle-icon">☾</span>
+        <span class="toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span>›</span> Practical
+      <span>›</span> Scheme in Practice
+    </div>
+
+    <header class="page-header">
+      <span class="chapter-tag">Practical 5 · Exam Prep</span>
+      <h1>Scheme in Practice</h1>
+      <p class="subtitle">
+        Every exam since 2022 has included a 5-mark Scheme coding question. They all follow a single formula: write a recursive function that processes a list of integers using <code>cond</code>. This page reverse-engineers that formula from every past paper.
+      </p>
+      <div class="topic-pills">
+        <span class="pill">cond template</span>
+        <span class="pill">car / cdr / cons</span>
+        <span class="pill">4 archetypes</span>
+        <span class="pill">2022–2025 exams</span>
+        <span class="pill">Decision process</span>
+      </div>
+    </header>
+
+    <article class="article">
+
+      <div class="callout warning">
+        <div class="callout-label">Exam Pattern (5 marks)</div>
+        <p>
+          The Scheme question on the exam is always 5 marks and always asks you to write a recursive function over a list of integers. The question will specify behaviour per element — what to <em>keep</em>, what to <em>discard</em>, what to <em>transform</em>. It is always solvable with the same 3-clause <code>cond</code> skeleton. Master that skeleton and the variants, and this question is free marks.
+        </p>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════
+           MENTAL MODEL
+      ═══════════════════════════════════════════════════════ -->
+      <h2 id="mental-model">Mental Model</h2>
+
+      <p>Scheme is a dialect of Lisp. Everything in Scheme is either an <strong>atom</strong> (a number, symbol, boolean) or a <strong>list</strong> (a pair of elements enclosed in parentheses). All code is data and all data looks like code — this is what S-expression syntax means.</p>
+
+      <div class="callout note">
+        <div class="callout-label">Key shift</div>
+        <p>In Scheme, <code>f(x, y)</code> is written <code>(f x y)</code>. The function comes <em>first</em>, inside the parentheses. There are no infix operators — <code>2 + 3</code> is <code>(+ 2 3)</code>. Once you internalise this, reading Scheme becomes mechanical.</p>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Familiar syntax</th><th>Scheme equivalent</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td><code>f(x)</code></td><td><code>(f x)</code></td><td>Call function f with argument x</td></tr>
+            <tr><td><code>x + y</code></td><td><code>(+ x y)</code></td><td>Addition</td></tr>
+            <tr><td><code>x * 2</code></td><td><code>(* x 2)</code></td><td>Multiplication</td></tr>
+            <tr><td><code>x &gt; 0</code></td><td><code>(&gt; x 0)</code></td><td>Returns #t or #f</td></tr>
+            <tr><td><code>if (c) a else b</code></td><td><code>(if c a b)</code></td><td>Conditional expression</td></tr>
+            <tr><td><code>a &amp;&amp; b</code></td><td><code>(and a b)</code></td><td>Logical and</td></tr>
+            <tr><td><code>a || b</code></td><td><code>(or a b)</code></td><td>Logical or</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════
+           CORE VOCABULARY
+      ═══════════════════════════════════════════════════════ -->
+      <h2 id="core-vocab">Core Vocabulary — the 10 things you need</h2>
+
+      <p>You do not need all of Scheme for the exam. These are the only constructs that appear in exam questions:</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Form</th><th>Syntax</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>define</strong></td>
+              <td><code>(define (name param) body)</code></td>
+              <td>Define a named function</td>
+            </tr>
+            <tr>
+              <td><strong>cond</strong></td>
+              <td><code>(cond (test expr) … (else expr))</code></td>
+              <td>Multi-way conditional — like a chain of if/else if</td>
+            </tr>
+            <tr>
+              <td><strong>null?</strong></td>
+              <td><code>(null? lst)</code></td>
+              <td>True if lst is the empty list <code>'()</code></td>
+            </tr>
+            <tr>
+              <td><strong>car</strong></td>
+              <td><code>(car lst)</code></td>
+              <td>Returns the <em>first element</em> (the head)</td>
+            </tr>
+            <tr>
+              <td><strong>cdr</strong></td>
+              <td><code>(cdr lst)</code></td>
+              <td>Returns the <em>rest of the list</em> (everything after the head)</td>
+            </tr>
+            <tr>
+              <td><strong>cons</strong></td>
+              <td><code>(cons x lst)</code></td>
+              <td>Prepends x to lst — builds a new list</td>
+            </tr>
+            <tr>
+              <td><strong>and</strong></td>
+              <td><code>(and p q)</code></td>
+              <td>True only if both p and q are true</td>
+            </tr>
+            <tr>
+              <td><strong>zero? / odd? / even?</strong></td>
+              <td><code>(zero? x)</code> etc.</td>
+              <td>Built-in numeric predicates</td>
+            </tr>
+            <tr>
+              <td><strong>&gt; &lt; = &gt;= &lt;=</strong></td>
+              <td><code>(&gt; x 0)</code></td>
+              <td>Numeric comparisons</td>
+            </tr>
+            <tr>
+              <td><strong>* - +</strong></td>
+              <td><code>(* x 2)</code></td>
+              <td>Arithmetic — almost always multiplication for doubling</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════
+           LIST ANATOMY
+      ═══════════════════════════════════════════════════════ -->
+      <h2 id="list-anatomy">List Anatomy</h2>
+
+      <p>A Scheme list is a chain of <strong>cons pairs</strong>. Each pair holds one element (the car) and a pointer to the rest (the cdr). The last cdr is the empty list <code>'()</code>.</p>
+
+      <div class="anatomy">
+<span class="s-val">'(3 -1 5 0)</span>   <span class="s-label">← this list looks like this internally:</span>
+
+<span class="s-paren">(</span><span class="s-kw">cons</span> <span class="s-val">3</span>  <span class="s-paren">(</span><span class="s-kw">cons</span> <span class="s-val">-1</span>  <span class="s-paren">(</span><span class="s-kw">cons</span> <span class="s-val">5</span>  <span class="s-paren">(</span><span class="s-kw">cons</span> <span class="s-val">0</span>  <span class="s-val">'()</span><span class="s-paren">))))</span>
+
+<span class="s-paren">(</span><span class="s-fn">car</span> <span class="s-val">'(3 -1 5 0)</span><span class="s-paren">)</span>  <span class="s-label">→</span>  <span class="s-val">3</span>          <span class="s-label">← the first element</span>
+<span class="s-paren">(</span><span class="s-fn">cdr</span> <span class="s-val">'(3 -1 5 0)</span><span class="s-paren">)</span>  <span class="s-label">→</span>  <span class="s-val">'(-1 5 0)</span>  <span class="s-label">← everything else</span>
+<span class="s-paren">(</span><span class="s-fn">cons</span> <span class="s-val">3</span> <span class="s-val">'(-1 5)</span><span class="s-paren">)</span>  <span class="s-label">→</span>  <span class="s-val">'(3 -1 5)</span>  <span class="s-label">← prepend 3</span>
+      </div>
+
+      <div class="callout key">
+        <div class="callout-label">The recursion mental model</div>
+        <p>Every exam question asks you to process a list element by element. The strategy is always the same: <strong>handle the head</strong> (<code>car</code>), then <strong>recurse on the tail</strong> (<code>cdr</code>). You never need a loop — the recursion handles iteration.</p>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════
+           COND TEMPLATE
+      ═══════════════════════════════════════════════════════ -->
+      <h2 id="cond-template">The <code>cond</code> Template</h2>
+
+      <p>Every exam Scheme answer uses <code>cond</code> with exactly <strong>two or three clauses</strong>. Here is the skeleton — memorise this:</p>
+
+      <div class="anatomy">
+<span class="s-paren">(</span><span class="s-kw">define</span> <span class="s-paren">(</span><span class="s-fn">functionName</span> <span class="s-var">lst</span><span class="s-paren">)</span>
+  <span class="s-paren">(</span><span class="s-kw">cond</span>
+    <span class="s-paren">((</span><span class="s-pred">null?</span> <span class="s-var">lst</span><span class="s-paren">)</span>  <span class="s-val">'()</span><span class="s-paren">)</span>                               <span class="s-label">← base case: empty list → empty list</span>
+
+    <span class="s-paren">((</span><span class="s-pred">condition</span> <span class="s-paren">(</span><span class="s-fn">car</span> <span class="s-var">lst</span><span class="s-paren">))</span>                            <span class="s-label">← does the head satisfy the condition?</span>
+     <span class="s-paren">(</span><span class="s-kw">cons</span> <span class="s-pred">???</span> <span class="s-paren">(</span><span class="s-fn">functionName</span> <span class="s-paren">(</span><span class="s-fn">cdr</span> <span class="s-var">lst</span><span class="s-paren">))))</span>             <span class="s-label">← yes: include something + recurse</span>
+
+    <span class="s-paren">(</span><span class="s-kw">else</span>                                                <span class="s-label">← head does NOT satisfy condition</span>
+     <span class="s-paren">(</span><span class="s-kw">cons</span> <span class="s-pred">???</span> <span class="s-paren">(</span><span class="s-fn">functionName</span> <span class="s-paren">(</span><span class="s-fn">cdr</span> <span class="s-var">lst</span><span class="s-paren">))))</span><span class="s-paren">)</span>             <span class="s-label">← no: include something different + recurse</span>
+<span class="s-paren">)</span>
+      </div>
+
+      <p>The two decisions you make are:</p>
+      <ol>
+        <li><strong>What is the condition on <code>(car lst)</code>?</strong> — Positive? Odd? Zero? A combination?</li>
+        <li><strong>What do you put in each <code>cons</code>?</strong> — The head unchanged? The head transformed? Nothing (skip it)?</li>
+      </ol>
+
+      <p>When you <em>skip</em> an element (don't include it in the result), you drop the <code>cons</code> and just return the recursive call directly:</p>
+
+      <div class="anatomy">
+<span class="s-label">Including the head:</span>   <span class="s-paren">(</span><span class="s-kw">cons</span> <span class="s-paren">(</span><span class="s-fn">car</span> <span class="s-var">lst</span><span class="s-paren">)</span> <span class="s-paren">(</span><span class="s-fn">fn</span> <span class="s-paren">(</span><span class="s-fn">cdr</span> <span class="s-var">lst</span><span class="s-paren">)))</span>
+<span class="s-label">Transforming the head:</span>  <span class="s-paren">(</span><span class="s-kw">cons</span> <span class="s-paren">(</span><span class="s-pred">*</span> <span class="s-paren">(</span><span class="s-fn">car</span> <span class="s-var">lst</span><span class="s-paren">)</span> <span class="s-val">2</span><span class="s-paren">)</span> <span class="s-paren">(</span><span class="s-fn">fn</span> <span class="s-paren">(</span><span class="s-fn">cdr</span> <span class="s-var">lst</span><span class="s-paren">)))</span>  <span class="s-label">← double it</span>
+<span class="s-label">Skipping the head:</span>      <span class="s-paren">(</span><span class="s-fn">fn</span> <span class="s-paren">(</span><span class="s-fn">cdr</span> <span class="s-var">lst</span><span class="s-paren">))</span>                          <span class="s-label">← no cons, just recurse</span>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════
+           THE EXAM FORMULA
+      ═══════════════════════════════════════════════════════ -->
+      <h2 id="exam-formula">The Exam Formula — What Changes Each Year</h2>
+
+      <p>Looking at every exam from 2022–2025, the question always specifies behaviour for elements in a list. The formula has exactly three moving parts:</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Function name</th>
+              <th>Condition</th>
+              <th>When true: do this</th>
+              <th>When false: do this</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2022</td>
+              <td><code>getPositiveOddValues</code></td>
+              <td><code>(&gt; x 0)</code> AND <code>(odd? x)</code></td>
+              <td>Keep (cons it)</td>
+              <td>Skip (drop it)</td>
+            </tr>
+            <tr>
+              <td>2023</td>
+              <td><code>doublePositives</code></td>
+              <td><code>(&gt; x 0)</code></td>
+              <td>Double it — <code>(* x 2)</code></td>
+              <td>Keep unchanged</td>
+            </tr>
+            <tr>
+              <td>2024</td>
+              <td><code>removePositiveOddValues</code></td>
+              <td><code>(&gt; x 0)</code> AND <code>(odd? x)</code></td>
+              <td>Skip (drop it)</td>
+              <td>Keep (cons it)</td>
+            </tr>
+            <tr>
+              <td>2025</td>
+              <td><code>getZerosDoublePositives</code></td>
+              <td>Three-way: zero / positive / negative</td>
+              <td>Keep zero; double positive</td>
+              <td>Skip negatives</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Notice: 2022 and 2024 are the <em>same condition</em> but with <em>swapped actions</em> — one keeps matching elements, one discards them. 2025 adds a three-way split (zero / positive / negative). These are your four exam archetypes.</p>
+
+      <!-- ══════════════════════════════════════════════════════
+           FOUR ARCHETYPES
+      ═══════════════════════════════════════════════════════ -->
+      <h2 id="archetypes">The Four Archetypes</h2>
+
+      <p>Every possible exam question is a combination of these patterns. Know all four cold.</p>
+
+      <div class="archetype-grid">
+
+        <div class="archetype-card">
+          <div class="archetype-header filter-keep">Archetype 1 · Filter-Keep</div>
+          <div class="archetype-body">
+            <p style="font-size:var(--fs-sm);margin-bottom:var(--sp-3)">Return only elements that <em>match</em> the condition. Drop everything else.</p>
+            <pre><code>(define (fn lst)
+  (cond
+    ((null? lst) '())
+    ((condition (car lst))
+     (cons (car lst)
+           (fn (cdr lst))))
+    (else
+     (fn (cdr lst)))))</code></pre>
+          </div>
+        </div>
+
+        <div class="archetype-card">
+          <div class="archetype-header filter-drop">Archetype 2 · Filter-Drop</div>
+          <div class="archetype-body">
+            <p style="font-size:var(--fs-sm);margin-bottom:var(--sp-3)">Return only elements that <em>do NOT match</em>. Drop matching ones.</p>
+            <pre><code>(define (fn lst)
+  (cond
+    ((null? lst) '())
+    ((condition (car lst))
+     (fn (cdr lst)))
+    (else
+     (cons (car lst)
+           (fn (cdr lst))))))</code></pre>
+          </div>
+        </div>
+
+        <div class="archetype-card">
+          <div class="archetype-header transform">Archetype 3 · Transform-or-Keep</div>
+          <div class="archetype-body">
+            <p style="font-size:var(--fs-sm);margin-bottom:var(--sp-3)">Transform matching elements; keep others unchanged. Nothing is dropped.</p>
+            <pre><code>(define (fn lst)
+  (cond
+    ((null? lst) '())
+    ((condition (car lst))
+     (cons (transform (car lst))
+           (fn (cdr lst))))
+    (else
+     (cons (car lst)
+           (fn (cdr lst))))))</code></pre>
+          </div>
+        </div>
+
+        <div class="archetype-card">
+          <div class="archetype-header combined">Archetype 4 · Three-Way Split</div>
+          <div class="archetype-body">
+            <p style="font-size:var(--fs-sm);margin-bottom:var(--sp-3)">Three distinct cases (zero / positive / negative). Needs three <code>cond</code> clauses plus base.</p>
+            <pre><code>(define (fn lst)
+  (cond
+    ((null? lst) '())
+    ((zero? (car lst))
+     (cons 0 (fn (cdr lst))))
+    ((> (car lst) 0)
+     (cons (transform (car lst))
+           (fn (cdr lst))))
+    (else
+     (fn (cdr lst)))))</code></pre>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════
+           DECISION PROCESS
+      ═══════════════════════════════════════════════════════ -->
+      <h2 id="decision">Decision Process — Reading an Exam Question</h2>
+
+      <p>When you see the Scheme question, work through this checklist:</p>
+
+      <div class="decision-step">
+        <div class="decision-num">1</div>
+        <div class="decision-content">
+          <strong>Write the skeleton immediately.</strong>
+          Start with <code>(define (name lst) (cond ((null? lst) '()) … ))</code>. Don't stare at a blank screen.
+        </div>
+      </div>
+
+      <div class="decision-step">
+        <div class="decision-num">2</div>
+        <div class="decision-content">
+          <strong>Identify how many distinct cases the question describes.</strong>
+          Two cases → two <code>cond</code> branches. Three cases (e.g. zero / positive / negative) → three branches.
+        </div>
+      </div>
+
+      <div class="decision-step">
+        <div class="decision-num">3</div>
+        <div class="decision-content">
+          <strong>For each case, decide: keep, transform, or drop?</strong>
+          <ul>
+            <li><em>Keep unchanged</em> → <code>(cons (car lst) (fn (cdr lst)))</code></li>
+            <li><em>Transform</em> → <code>(cons (f (car lst)) (fn (cdr lst)))</code></li>
+            <li><em>Drop/skip</em> → <code>(fn (cdr lst))</code> — no cons</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="decision-step">
+        <div class="decision-num">4</div>
+        <div class="decision-content">
+          <strong>Write the condition for each branch using <code>(car lst)</code>.</strong>
+          Positive: <code>(&gt; (car lst) 0)</code>. Negative: <code>(&lt; (car lst) 0)</code>. Both positive and odd: <code>(and (&gt; (car lst) 0) (odd? (car lst)))</code>.
+        </div>
+      </div>
+
+      <div class="decision-step">
+        <div class="decision-num">5</div>
+        <div class="decision-content">
+          <strong>Make the last condition <code>else</code>, never a specific check.</strong>
+          The <code>else</code> catches everything not matched by previous branches. Never repeat a positive check in the else — if you've already handled positive, else covers zero and negative automatically.
+        </div>
+      </div>
+
+      <div class="decision-step">
+        <div class="decision-num">6</div>
+        <div class="decision-content">
+          <strong>Trace through a tiny example mentally.</strong>
+          Try <code>'(2 -1 3)</code> or <code>'(0 3 -2)</code> — two elements you expect to appear in the output and one you expect to be dropped or transformed. Check your output matches the question description.
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════
+           PAST EXAM WALKTHROUGH
+      ═══════════════════════════════════════════════════════ -->
+      <h2 id="past-exams">Past Exam Walkthroughs</h2>
+
+      <!-- 2022 -->
+      <div class="worked">
+        <div class="worked-header">
+          <span class="wh-tag">Filter-Keep</span>
+          <span class="wh-title">getPositiveOddValues(lst)</span>
+          <span class="wh-year">2022 Exam · Q4 · 5 marks</span>
+        </div>
+        <div class="worked-body">
+          <h4>Question</h4>
+          <p>Write a Scheme function <code>getPositiveOddValues</code> that accepts a list of integers and returns a new list containing only those elements that are both <strong>positive</strong> and <strong>odd</strong>.</p>
+          <p>Example: <code>(getPositiveOddValues '(3 -1 4 7 -2 5))</code> → <code>'(3 7 5)</code></p>
+
+          <h4>Analysis</h4>
+          <p><strong>Archetype: Filter-Keep.</strong> Two cases. Condition: <code>(&gt; x 0)</code> AND <code>(odd? x)</code>. If true → keep. If false → skip. There are no transforms.</p>
+
+          <h4>Solution</h4>
+          <pre><code>(define (getPositiveOddValues lst)
+  (cond
+    ((null? lst) '())
+    ((and (> (car lst) 0) (odd? (car lst)))
+     (cons (car lst) (getPositiveOddValues (cdr lst))))
+    (else
+     (getPositiveOddValues (cdr lst)))))</code></pre>
+
+          <h4>Trace — <code>(getPositiveOddValues '(3 -1 4))</code></h4>
+          <div class="trace-block">
+<span class="t-call">call</span>  getPositiveOddValues <span class="t-val">'(3 -1 4)</span>
+  <span class="t-step">→</span> (car lst) = 3  ; (> 3 0) = #t, (odd? 3) = #t  → keep
+  <span class="t-call">call</span>  getPositiveOddValues <span class="t-val">'(-1 4)</span>
+    <span class="t-step">→</span> (car lst) = -1 ; (> -1 0) = #f              → skip (else)
+    <span class="t-call">call</span>  getPositiveOddValues <span class="t-val">'(4)</span>
+      <span class="t-step">→</span> (car lst) = 4  ; (odd? 4) = #f              → skip (else)
+      <span class="t-call">call</span>  getPositiveOddValues <span class="t-val">'()</span>
+      <span class="t-val">return</span> <span class="t-result">'()</span>
+    <span class="t-val">return</span> <span class="t-result">'()</span>         <span class="t-cm">; skip 4, return unchanged recursive result</span>
+  <span class="t-val">return</span> <span class="t-result">'()</span>           <span class="t-cm">; skip -1</span>
+<span class="t-val">return</span> <span class="t-result">'(3)</span>             <span class="t-cm">; cons 3 onto '() → '(3)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2023 -->
+      <div class="worked">
+        <div class="worked-header">
+          <span class="wh-tag">Transform-or-Keep</span>
+          <span class="wh-title">doublePositives(lst)</span>
+          <span class="wh-year">2023 Exam · Q4 · 5 marks</span>
+        </div>
+        <div class="worked-body">
+          <h4>Question</h4>
+          <p>Write a Scheme function <code>doublePositives</code> that accepts a list of integers and returns a new list where each <strong>positive</strong> element is doubled and all other elements are <strong>kept unchanged</strong>.</p>
+          <p>Example: <code>(doublePositives '(3 -1 0 4))</code> → <code>'(6 -1 0 8)</code></p>
+
+          <h4>Analysis</h4>
+          <p><strong>Archetype: Transform-or-Keep.</strong> Two cases. Condition: <code>(&gt; x 0)</code>. If true → double (<code>(* x 2)</code>). If false → keep unchanged. Nothing is dropped.</p>
+
+          <h4>Solution</h4>
+          <pre><code>(define (doublePositives lst)
+  (cond
+    ((null? lst) '())
+    ((> (car lst) 0)
+     (cons (* (car lst) 2) (doublePositives (cdr lst))))
+    (else
+     (cons (car lst) (doublePositives (cdr lst))))))</code></pre>
+
+          <h4>Key difference from 2022</h4>
+          <p>The <code>else</code> branch now has a <code>cons</code> — because non-positive elements are <em>kept</em>, not dropped. In 2022, the <code>else</code> was just the bare recursive call with no <code>cons</code> because non-matching elements were dropped.</p>
+        </div>
+      </div>
+
+      <!-- 2024 -->
+      <div class="worked">
+        <div class="worked-header">
+          <span class="wh-tag">Filter-Drop</span>
+          <span class="wh-title">removePositiveOddValues(lst)</span>
+          <span class="wh-year">2024 Exam · Q4 · 5 marks</span>
+        </div>
+        <div class="worked-body">
+          <h4>Question</h4>
+          <p>Write a Scheme function <code>removePositiveOddValues</code> that accepts a list of integers and returns a new list with all elements that are both <strong>positive</strong> and <strong>odd</strong> removed.</p>
+          <p>Example: <code>(removePositiveOddValues '(3 -1 4 7 -2 5))</code> → <code>'(-1 4 -2)</code></p>
+
+          <h4>Analysis</h4>
+          <p><strong>Archetype: Filter-Drop.</strong> The condition is identical to 2022, but the actions are swapped — matching elements are now <em>dropped</em>, non-matching elements are <em>kept</em>. This is the classic "get vs remove" variant.</p>
+
+          <h4>Solution</h4>
+          <pre><code>(define (removePositiveOddValues lst)
+  (cond
+    ((null? lst) '())
+    ((and (> (car lst) 0) (odd? (car lst)))
+     (removePositiveOddValues (cdr lst)))
+    (else
+     (cons (car lst) (removePositiveOddValues (cdr lst))))))</code></pre>
+
+          <h4>The swap pattern</h4>
+          <p>Compare with 2022: the two body expressions are exactly swapped. In 2022, the matching branch has <code>cons</code> and the else is bare. Here, the matching branch is bare and <code>else</code> has <code>cons</code>. If you see "remove" or "without" in the question, swap the branches.</p>
+        </div>
+      </div>
+
+      <!-- 2025 -->
+      <div class="worked">
+        <div class="worked-header">
+          <span class="wh-tag">Three-Way Split</span>
+          <span class="wh-title">getZerosDoublePositives(lst)</span>
+          <span class="wh-year">2025 Exam · Q4 · 5 marks</span>
+        </div>
+        <div class="worked-body">
+          <h4>Question</h4>
+          <p>Write a Scheme function <code>getZerosDoublePositives</code> that accepts a list of integers and returns a new list where: <strong>zeros</strong> are kept, <strong>positives</strong> are doubled, and <strong>negatives</strong> are removed.</p>
+          <p>Example: <code>(getZerosDoublePositives '(3 0 -2 1 -5 0))</code> → <code>'(6 0 2 0)</code></p>
+
+          <h4>Analysis</h4>
+          <p><strong>Archetype: Three-Way Split.</strong> Three distinct behaviours require three <code>cond</code> clauses (plus the base). The trick is ordering: check <code>zero?</code> first, then <code>&gt; 0</code>, then <code>else</code> catches negatives.</p>
+
+          <h4>Solution</h4>
+          <pre><code>(define (getZerosDoublePositives lst)
+  (cond
+    ((null? lst) '())
+    ((zero? (car lst))
+     (cons 0 (getZerosDoublePositives (cdr lst))))
+    ((> (car lst) 0)
+     (cons (* (car lst) 2) (getZerosDoublePositives (cdr lst))))
+    (else
+     (getZerosDoublePositives (cdr lst)))))</code></pre>
+
+          <h4>Why check zero first?</h4>
+          <p>If you checked <code>(&gt; x 0)</code> first, zeros fall through to <code>else</code> and get dropped — wrong. The more specific case (<code>zero?</code>) must precede the more general case (<code>&gt; 0</code>). Order your <code>cond</code> branches from most specific to least specific.</p>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════
+           QUICK REFERENCE
+      ═══════════════════════════════════════════════════════ -->
+      <h2 id="quickref">Quick Reference</h2>
+
+      <h3>Predicates on a single integer</h3>
+      <table class="pred-table">
+        <thead>
+          <tr><th>Scheme form</th><th>Meaning</th><th>Example</th><th>Result</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="pt-code">(null? lst)</td><td>Is lst the empty list?</td><td class="pt-code">(null? '())</td><td class="pt-result">#t</td></tr>
+          <tr><td class="pt-code">(> x 0)</td><td>x is positive</td><td class="pt-code">(> 3 0)</td><td class="pt-result">#t</td></tr>
+          <tr><td class="pt-code">(< x 0)</td><td>x is negative</td><td class="pt-code">(< -1 0)</td><td class="pt-result">#t</td></tr>
+          <tr><td class="pt-code">(zero? x)</td><td>x equals zero</td><td class="pt-code">(zero? 0)</td><td class="pt-result">#t</td></tr>
+          <tr><td class="pt-code">(odd? x)</td><td>x is odd</td><td class="pt-code">(odd? 3)</td><td class="pt-result">#t</td></tr>
+          <tr><td class="pt-code">(even? x)</td><td>x is even</td><td class="pt-code">(even? 4)</td><td class="pt-result">#t</td></tr>
+          <tr><td class="pt-code">(and p q)</td><td>Both p and q true</td><td class="pt-code">(and (> x 0) (odd? x))</td><td class="pt-result">#t if both</td></tr>
+          <tr><td class="pt-code">(not p)</td><td>Negate predicate</td><td class="pt-code">(not (zero? x))</td><td class="pt-result">#t if non-zero</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Common transformations on a single integer</h3>
+      <table class="pred-table">
+        <thead>
+          <tr><th>What the question says</th><th>Scheme form</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>"double it"</td><td class="pt-code">(* (car lst) 2)</td></tr>
+          <tr><td>"negate it" / "make it negative"</td><td class="pt-code">(- (car lst))</td></tr>
+          <tr><td>"halve it"</td><td class="pt-code">(/ (car lst) 2)</td></tr>
+          <tr><td>"add N to it"</td><td class="pt-code">(+ (car lst) N)</td></tr>
+          <tr><td>"keep it unchanged"</td><td class="pt-code">(car lst)</td></tr>
+          <tr><td>"replace it with 0"</td><td class="pt-code">0</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Common mistakes</h3>
+
+      <div class="callout warning">
+        <div class="callout-label">Mistake 1 — Forgetting the base case</div>
+        <p>Every recursive function needs <code>((null? lst) '())</code> as the first clause. Without it, the function will throw an error when it reaches the end of the list because it tries to call <code>(car '())</code>.</p>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-label">Mistake 2 — Using the wrong argument for recursion</div>
+        <p>The recursive call is always on <code>(cdr lst)</code>, never on <code>lst</code> (that causes infinite recursion) and never on <code>(car lst)</code> (that's an atom, not a list). Every branch ends with <code>(functionName (cdr lst))</code>.</p>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-label">Mistake 3 — Wrapping the condition in an extra list</div>
+        <p>The condition in a <code>cond</code> clause is just an expression: <code>((> (car lst) 0) …)</code>. Do not write <code>((list (> (car lst) 0)) …)</code> or any variant. The condition is tested directly as a boolean.</p>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-label">Mistake 4 — Putting <code>cons</code> where you mean to skip</div>
+        <p>When you want to drop an element, the branch body is just <code>(fn (cdr lst))</code> — the recursive call alone. If you accidentally write <code>(cons (car lst) (fn (cdr lst)))</code>, the element is kept instead of dropped. Double-check which branches have <code>cons</code> and which don't.</p>
+      </div>
+
+      <div class="callout key">
+        <div class="callout-label">DrRacket note</div>
+        <p>The exam environment is DrRacket with <code>#lang racket</code>. All the forms above work identically in that environment. The 2023 exam explicitly required the <code>#lang racket</code> directive on the first line — write it by default. You can use <code>define</code>, <code>cond</code>, <code>car</code>, <code>cdr</code>, <code>cons</code>, <code>null?</code>, <code>odd?</code>, <code>even?</code>, <code>zero?</code>, and all arithmetic without any imports.</p>
+      </div>
+
+    </article>
+  </main>
+</div>
+
+<script src="study-notes.js"></script>
+</body>
+</html>

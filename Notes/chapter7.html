@@ -1,0 +1,402 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 7 — Expressions &amp; Assignment Statements</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+
+  <button class="menu-toggle" aria-label="Open menu">☰</button>
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="course-label">COS 333 · Concepts of PL</span>
+      <h1>Programming Language Concepts</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Overview</span>
+      <a href="index.html"><span class="nav-chapter">00</span> Home &amp; Topics</a>
+
+      <span class="nav-section-label">Chapters</span>
+      <a href="chapter1.html"><span class="nav-chapter">01</span> Preliminaries</a>
+      <a href="chapter2.html"><span class="nav-chapter">02</span> Evolution of PLs</a>
+      <a href="chapter5.html"><span class="nav-chapter">05</span> Names, Bindings &amp; Scopes</a>
+      <a href="chapter6.html"><span class="nav-chapter">06</span> Data Types</a>
+      <a href="chapter7.html" class="active"><span class="nav-chapter">07</span> Expressions &amp; Assignments</a>
+      <a href="chapter8.html"><span class="nav-chapter">08</span> Control Structures</a>
+      <a href="chapter9.html"><span class="nav-chapter">09</span> Subprograms</a>
+      <a href="chapter12.html"><span class="nav-chapter">12</span> OOP Support</a>
+      <a href="chapter15.html"><span class="nav-chapter">15</span> Functional Programming</a>
+      <a href="chapter16.html"><span class="nav-chapter">16</span> Logic Programming</a>
+
+      <span class="nav-section-label">Practical</span>
+      <a href="prolog-practical.html"><span class="nav-chapter">P3</span> Prolog in Practice</a>
+      <a href="prolog-list-patterns.html"><span class="nav-chapter">P4</span> List Patterns</a>
+      <a href="scheme-practical.html"><span class="nav-chapter">P5</span> Scheme in Practice</a>
+
+      <span class="nav-section-label">Assessment</span>
+      <a href="past-papers.html"><span class="nav-chapter">PP</span> Past Papers</a>
+      <a href="mcq.html"><span class="nav-chapter">MC</span> MCQ Bank</a>
+    </nav>
+
+    <div class="sidebar-toc">
+      <span class="sidebar-toc-title">On this page</span>
+      <a href="#arithmetic">Arithmetic Expressions</a>
+      <a href="#precedence">Precedence &amp; Associativity</a>
+      <a href="#operand-order">Operand Evaluation Order</a>
+      <a href="#overloaded">Overloaded Operators</a>
+      <a href="#type-conversion">Type Conversions</a>
+      <a href="#relational">Relational &amp; Boolean</a>
+      <a href="#short-circuit">Short-Circuit Evaluation</a>
+      <a href="#side-effects">Side Effects</a>
+      <a href="#referential">Referential Transparency</a>
+      <a href="#assignment">Assignment Statements</a>
+      <a href="#mixed-mode">Mixed-Mode Assignment</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle">
+        <span class="toggle-icon">☾</span>
+        <span class="toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="reading-progress"><div class="reading-progress-bar"></div></div>
+
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span>›</span> Chapter 7
+    </div>
+
+    <header class="page-header">
+      <span class="chapter-tag">Chapter 7</span>
+      <h1>Expressions &amp; Assignment Statements</h1>
+      <p class="subtitle">
+        Expressions compute values. Assignment stores them. But the design decisions around evaluation order,
+        type conversion, operator overloading, side effects, and referential transparency have far-reaching consequences.
+      </p>
+      <div class="topic-pills">
+        <span class="pill">Arithmetic Expressions</span>
+        <span class="pill">Precedence</span>
+        <span class="pill">Coercion</span>
+        <span class="pill">Short-Circuit</span>
+        <span class="pill">Side Effects</span>
+        <span class="pill">Referential Transparency</span>
+        <span class="pill">Assignment</span>
+      </div>
+    </header>
+
+    <article class="article">
+
+      <h2 id="arithmetic">Arithmetic Expressions</h2>
+      <p>An arithmetic expression consists of <strong>operators</strong>, <strong>operands</strong>, <strong>parentheses</strong>, and <strong>function calls</strong>. The design decisions are about how to evaluate them.</p>
+
+      <p>Operators can be classified by their position relative to their operands:</p>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Notation</th><th>Position</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td>Prefix</td><td>Operator before operands</td><td><code>+ a b</code> (LISP: <code>(+ a b)</code>)</td></tr>
+            <tr><td>Infix</td><td>Operator between operands</td><td><code>a + b</code> (most languages)</td></tr>
+            <tr><td>Postfix</td><td>Operator after operands</td><td><code>a b +</code> (Forth, RPN calculators)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="precedence">Operator Precedence and Associativity</h2>
+
+      <p>When an expression contains more than one operator, rules determine which operations are performed first.</p>
+
+      <div class="definition">
+        <dt>Operator Precedence</dt>
+        <dd>The hierarchy of operators that determines the order in which operators of <em>different precedence levels</em> are evaluated. Higher-precedence operators bind more tightly to their operands. Example: <code>a + b * c</code> evaluates as <code>a + (b * c)</code> because multiplication has higher precedence than addition.</dd>
+      </div>
+
+      <div class="definition">
+        <dt>Operator Associativity</dt>
+        <dd>When two operators of the <em>same precedence level</em> appear in sequence, associativity determines evaluation order. Left-associative: <code>a - b - c</code> = <code>(a - b) - c</code>. Right-associative: <code>a ** b ** c</code> = <code>a ** (b ** c)</code> (exponentiation is typically right-associative).</dd>
+      </div>
+
+      <div class="callout note">
+        <div class="callout-label">Ruby &amp; APL exceptions</div>
+        <p>In Ruby, all operators have equal precedence (all are actually method calls). APL evaluates all operators right to left, regardless of precedence. These are intentional design choices with significant implications for readability.</p>
+      </div>
+
+      <h3>Unary Operators</h3>
+      <p>Unary minus (<code>-x</code>) can be ambiguous in expressions like <code>-a ** 2</code>. Should this be <code>(-a) ** 2</code> or <code>-(a ** 2)</code>? Most languages make unary minus lower precedence than exponentiation, giving <code>-(a ** 2)</code>.</p>
+
+      <h2 id="operand-order">Operand Evaluation Order</h2>
+
+      <p>When evaluating an expression like <code>f(a) + g(b)</code>, should <code>f(a)</code> or <code>g(b)</code> be evaluated first? Most languages do not specify operand evaluation order, leaving it to the compiler. This is fine <em>unless operand evaluation has side effects</em>.</p>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Side Effects and Operand Order</div>
+        <p>If <code>f(a)</code> modifies a variable that <code>g(b)</code> uses, the result of the expression depends on evaluation order — and that order is <em>compiler-defined</em>, not language-defined in most languages. This is a source of subtle, non-portable bugs in C and C++.</p>
+        <pre><code>/* C: undefined order of evaluation */
+int a = 5;
+int result = (a = a + 1) + (a * 2);  /* Undefined! */</code></pre>
+      </div>
+
+      <h2 id="overloaded">Overloaded Operators</h2>
+
+      <div class="definition">
+        <dt>Operator Overloading</dt>
+        <dd>Using a single operator symbol for more than one purpose, with the meaning determined by the types of the operands. Example: <code>+</code> means integer addition for <code>int</code> operands, floating-point addition for <code>float</code> operands, and concatenation for strings in some languages.</dd>
+      </div>
+
+      <p>Most languages have some built-in operator overloading. The design question is whether <em>user-defined</em> overloading is allowed:</p>
+      <ul>
+        <li><strong>C++, Python, Ruby</strong>: allow user-defined operator overloading — programmers can define <code>+</code> for custom types.</li>
+        <li><strong>Java</strong>: does NOT allow user-defined operator overloading (but uses it internally for <code>+</code> on strings). Rationale: user overloading reduces readability when operators behave unexpectedly.</li>
+        <li><strong>Ada</strong>: allows overloading of predefined operators for user-defined types.</li>
+      </ul>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label advantage">Advantage of operator overloading</div>
+          <ul>
+            <li>Natural, readable notation for custom types (e.g., matrix arithmetic)</li>
+            <li>Allows user types to behave like built-in types</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label disadvantage">Disadvantage of operator overloading</div>
+          <ul>
+            <li>Reduces readability if operator meaning is not obvious from context</li>
+            <li>Can obscure performance differences (a <code>+</code> that does O(n) work)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2 id="type-conversion">Type Conversions</h2>
+
+      <p>When values of different types appear in expressions, the language must decide how to handle the type mismatch.</p>
+
+      <div class="definition">
+        <dt>Narrowing Conversion</dt>
+        <dd>Converting a value to a type that <em>cannot store all values</em> of the original type. Example: <code>float</code> to <code>int</code> loses the fractional part; <code>int</code> to <code>short</code> may lose magnitude. <strong>Potentially unsafe</strong> — should always require an explicit cast.</dd>
+      </div>
+
+      <div class="definition">
+        <dt>Widening Conversion</dt>
+        <dd>Converting a value to a type that <em>can store all values</em> of the original type. Example: <code>int</code> to <code>float</code>, <code>int</code> to <code>double</code>. <strong>Safe</strong> — no information is lost (though precision may be affected for very large integers). Can be done implicitly.</dd>
+      </div>
+
+      <div class="definition">
+        <dt>Coercion (implicit conversion)</dt>
+        <dd>An <em>implicit</em> type conversion performed automatically by the language. Example: in <code>3 + 4.0</code>, the <code>3</code> is coerced (implicitly converted) to <code>3.0</code> so that floating-point addition can be performed. Coercion is widening in this case, which is safe. Languages vary greatly in how much coercion they allow — more coercion means more writability but potentially less reliability (type errors may go undetected).</dd>
+      </div>
+
+      <div class="definition">
+        <dt>Explicit Type Casting</dt>
+        <dd>A programmer-specified type conversion. In C: <code>(int) 3.7</code> → <code>3</code>. In Java: <code>(int) 3.7</code>. Explicit casts are required for narrowing conversions and signal to the reader that a deliberate type change is happening.</dd>
+      </div>
+
+      <h2 id="relational">Relational and Boolean Expressions</h2>
+
+      <h3>Relational Expressions</h3>
+      <p>A relational expression has two operands and a relational operator (<code>&lt;</code>, <code>&gt;</code>, <code>==</code>, <code>!=</code>, etc.) that evaluates to a Boolean result. Design issue: in C, there is no Boolean type — relational expressions return <code>0</code> or <code>1</code> (integers). This allows nonsense like <code>a &lt; b &lt; c</code> which compiles but does not test whether <code>b</code> is between <code>a</code> and <code>c</code>.</p>
+
+      <h3>Boolean Expressions</h3>
+      <p>Combine relational or Boolean values with <code>AND</code>, <code>OR</code>, <code>NOT</code>. In C, any non-zero integer is true; in Java/Python, Booleans are a distinct type.</p>
+
+      <h2 id="short-circuit">Short-Circuit Evaluation</h2>
+
+      <div class="definition">
+        <dt>Short-Circuit Evaluation</dt>
+        <dd>The result of a Boolean expression is determined <em>without evaluating all operands</em> if the result can be established from the operands evaluated so far. <code>A AND B</code>: if A is false, B is not evaluated. <code>A OR B</code>: if A is true, B is not evaluated.</dd>
+      </div>
+
+      <h3>Why it matters</h3>
+      <p>Short-circuit evaluation enables safe idioms:</p>
+      <pre><code class="language-c">/* C — short-circuit prevents null pointer dereference */
+if (ptr != NULL &amp;&amp; ptr-&gt;value &gt; 0) { ... }
+/* if ptr is NULL, ptr->value is never evaluated */</code></pre>
+
+      <pre><code class="language-python"># Python — same pattern
+if lst and lst[0] == target:  ...</code></pre>
+
+      <p>Without short-circuit evaluation, the second operand would always be evaluated, causing a runtime error if the pointer is null or the list is empty.</p>
+
+      <p>Ada uses <code>and then</code> / <code>or else</code> for short-circuit; plain <code>and</code> / <code>or</code> are not short-circuit. This makes the intent explicit.</p>
+
+      <h2 id="side-effects">Side Effects</h2>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Exam Focus — also appears in Chapter 15</div>
+        <p>Side effects and referential transparency are important topics that connect imperative and functional programming paradigms. Make sure you understand both concepts and can apply them.</p>
+      </div>
+
+      <div class="definition">
+        <dt>Side Effect</dt>
+        <dd>A side effect occurs when the evaluation of an expression (or function call) <em>modifies some state</em> outside its local scope — e.g., changes a global variable, modifies a parameter, performs I/O, writes to a file. The function does something beyond just returning a value.</dd>
+      </div>
+
+      <h3>Examples of side effects</h3>
+      <pre><code>/* C — function with a side effect: modifies global variable */
+int count = 0;
+int increment() {
+    return ++count;  /* side effect: modifies global 'count' */
+}
+
+int result = increment() + increment();
+/* Result depends on whether left or right operand is evaluated first!
+   If count starts at 0:
+   - Left first:  (1) + (2) = 3, count = 2
+   - Right first: (2) + (1) = 3, count = 2
+   Result is same here, but this is coincidental.
+
+   With: increment() + count  →  either 1+1=2 or 1+2=3 depending on order */</code></pre>
+
+      <p>Side effects make programs harder to reason about, test, and parallelise. The result of an expression may depend on <em>when</em> it is evaluated, not just <em>what</em> its arguments are.</p>
+
+      <h2 id="referential">Referential Transparency</h2>
+
+      <div class="definition">
+        <dt>Referential Transparency</dt>
+        <dd>A property of an expression: it is <strong>referentially transparent</strong> if it can be replaced with its value without changing the behaviour of the program. Equivalently: a function is referentially transparent (also called a <em>pure function</em>) if its return value depends <em>only</em> on its input arguments and it has <em>no side effects</em>.</dd>
+      </div>
+
+      <h3>Example — referentially transparent</h3>
+      <pre><code>/* Pure function — no side effects, result depends only on input */
+int square(int x) { return x * x; }
+
+square(5) + square(5)  /* can be replaced by 25 + 25 */</code></pre>
+
+      <h3>Example — NOT referentially transparent</h3>
+      <pre><code>/* Function with a side effect */
+int counter = 0;
+int nextVal() { return ++counter; }
+
+nextVal() + nextVal()  /* NOT replaceable — each call returns a different value */</code></pre>
+
+      <h3>Why referential transparency matters</h3>
+      <ul>
+        <li><strong>Reasoning</strong>: you can substitute equals for equals, as in mathematics.</li>
+        <li><strong>Testing</strong>: a pure function is fully determined by its inputs — easy to unit test.</li>
+        <li><strong>Parallelism</strong>: pure functions can be evaluated in any order or in parallel without affecting correctness.</li>
+        <li><strong>Functional languages</strong>: Haskell enforces referential transparency entirely. Scheme encourages it. Purely functional programs have no side effects — all computation is through function evaluation.</li>
+      </ul>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label advantage">Referentially transparent (pure)</div>
+          <ul>
+            <li>Predictable, easy to reason about</li>
+            <li>Order of evaluation does not matter</li>
+            <li>Trivially safe to parallelise</li>
+            <li>Easy to cache/memoize results</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label disadvantage">With side effects (impure)</div>
+          <ul>
+            <li>Result depends on program state and evaluation order</li>
+            <li>Hard to parallelise safely</li>
+            <li>Interaction with I/O is inherently a side effect</li>
+            <li>Necessary for practical imperative programs</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2 id="assignment">Assignment Statements</h2>
+
+      <h3>Simple Assignment</h3>
+      <p>In most imperative languages: <code>variable = expression</code>. The expression on the right is evaluated and the result is stored in the variable on the left (the l-value).</p>
+
+      <div class="definition">
+        <dt>l-value vs r-value</dt>
+        <dd>An <strong>l-value</strong> is a value that can appear on the left side of an assignment — it refers to a <em>memory location</em>. An <strong>r-value</strong> is a value that can appear on the right side — it is the <em>value</em> stored at a location (or a literal). Variables are both l-values and r-values; constants and expressions are only r-values.</dd>
+      </div>
+
+      <h3>Compound Assignment Operators</h3>
+      <p>Shorthand forms that combine an arithmetic operation with assignment: <code>a += b</code> (same as <code>a = a + b</code>). C, C++, Java, Python all support these. They reduce redundancy and improve writability, but add to the number of constructs a reader must know.</p>
+
+      <h3>Unary Assignment Operators</h3>
+      <p>C-style <code>++</code> and <code>--</code>: increment/decrement by 1. The pre- (<code>++a</code>) vs post-increment (<code>a++</code>) distinction affects the value of the expression itself:</p>
+      <pre><code>int a = 5;
+int b = ++a;  /* b = 6, a = 6 (pre-increment: increment first) */
+int c = a++;  /* c = 6, a = 7 (post-increment: use then increment) */</code></pre>
+
+      <h3>Multiple Assignment</h3>
+      <p>Some languages allow assigning the same value to multiple variables:</p>
+      <pre><code>/* Python — tuple unpacking (multiple assignment) */
+a, b = 5, 10
+a, b = b, a  /* swap without temporary variable */</code></pre>
+      <pre><code>/* C/Java — cascaded assignment (right-associative) */
+a = b = c = 0;  /* same as a = (b = (c = 0)) */</code></pre>
+
+      <h3>Assignment as an Expression</h3>
+      <p>In C, C++, and Python (walrus operator <code>:=</code>), assignment is an expression with a value. This enables:</p>
+      <pre><code>/* C — assignment in loop condition */
+while ((ch = getchar()) != EOF) { process(ch); }</code></pre>
+      <p>This is expressive but a reliability concern: <code>if (a = 5)</code> in C is a legal assignment, not comparison. A common bug. Java and C# prevent this by requiring the condition of an <code>if</code> to be a Boolean type.</p>
+
+      <h2 id="mixed-mode">Mixed-Mode Assignment</h2>
+      <p>When the type of the expression does not match the type of the target variable, an implicit conversion (coercion) may occur:</p>
+      <pre><code>/* Java — widening is allowed implicitly */
+int i = 5;
+double d = i;  /* int → double, safe widening coercion */
+
+/* Java — narrowing requires explicit cast */
+double d = 3.7;
+int i = (int) d;  /* Explicit cast required; result is 3 (truncation) */</code></pre>
+
+      <p>More permissive languages (like early C) allowed almost any assignment with implicit coercion, reducing reliability. Stricter languages (Ada, Haskell) require explicit conversions for virtually all type changes.</p>
+
+      <div class="quiz">
+        <div class="quiz-header"><span>Quick Check</span></div>
+        <div class="quiz-body">
+          <p class="quiz-question">A function <code>f(x)</code> always returns the same value for the same input and modifies no external state. This function is best described as:</p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="true"
+                data-feedback="A function whose result depends only on its arguments and produces no side effects is called referentially transparent (or a pure function). It can be replaced by its value without changing program behaviour.">
+              <span class="opt-key">A</span> Referentially transparent (pure)
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Polymorphic means a function works for multiple types — unrelated to side effects or referential transparency.">
+              <span class="opt-key">B</span> Polymorphic
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Generic means the function works with multiple types via a type parameter. It does not describe the presence or absence of side effects.">
+              <span class="opt-key">C</span> Generic
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Idempotent means calling f multiple times has the same effect as calling it once — a related but different property. Referential transparency is the correct term here.">
+              <span class="opt-key">D</span> Idempotent
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">Try again</button>
+        </div>
+      </div>
+
+      <div class="summary-box">
+        <h2>Chapter 7 Summary</h2>
+        <ul>
+          <li><strong>Operator precedence</strong>: determines evaluation order for different-precedence operators.</li>
+          <li><strong>Associativity</strong>: determines evaluation order for same-precedence operators (usually left-to-right).</li>
+          <li><strong>Operand evaluation order</strong>: usually unspecified; dangerous when operands have side effects.</li>
+          <li><strong>Overloading</strong>: same operator symbol, different meanings depending on operand types. User-defined overloading: C++/Python yes; Java no.</li>
+          <li><strong>Widening</strong>: safe implicit conversion (int → float). <strong>Narrowing</strong>: potentially unsafe, should require explicit cast.</li>
+          <li><strong>Coercion</strong>: implicit type conversion. More coercion = more writability but less reliability.</li>
+          <li><strong>Short-circuit</strong>: Boolean operator stops evaluating when result is determined. Critical for null-safety idioms.</li>
+          <li><strong>Side effect</strong>: expression evaluation changes state beyond returning a value. Makes programs order-dependent and harder to reason about.</li>
+          <li><strong>Referential transparency</strong>: expression can be replaced by its value. Requires no side effects. Foundation of functional programming.</li>
+          <li><strong>Assignment</strong>: l-value (memory location) gets r-value (computed value). Multiple assignment and assignment-as-expression are language-specific features.</li>
+        </ul>
+      </div>
+
+    </article>
+  </main>
+</div>
+<script src="study-notes.js"></script>
+</body>
+</html>

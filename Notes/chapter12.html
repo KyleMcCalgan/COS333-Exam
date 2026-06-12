@@ -1,0 +1,541 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 12 — Support for Object-Oriented Programming</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+
+  <button class="menu-toggle" aria-label="Open menu">☰</button>
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="course-label">COS 333 · Concepts of PL</span>
+      <h1>Programming Language Concepts</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Overview</span>
+      <a href="index.html"><span class="nav-chapter">00</span> Home &amp; Topics</a>
+
+      <span class="nav-section-label">Chapters</span>
+      <a href="chapter1.html"><span class="nav-chapter">01</span> Preliminaries</a>
+      <a href="chapter2.html"><span class="nav-chapter">02</span> Evolution of PLs</a>
+      <a href="chapter5.html"><span class="nav-chapter">05</span> Names, Bindings &amp; Scopes</a>
+      <a href="chapter6.html"><span class="nav-chapter">06</span> Data Types</a>
+      <a href="chapter7.html"><span class="nav-chapter">07</span> Expressions &amp; Assignments</a>
+      <a href="chapter8.html"><span class="nav-chapter">08</span> Control Structures</a>
+      <a href="chapter9.html"><span class="nav-chapter">09</span> Subprograms</a>
+      <a href="chapter12.html" class="active"><span class="nav-chapter">12</span> OOP Support</a>
+      <a href="chapter15.html"><span class="nav-chapter">15</span> Functional Programming</a>
+      <a href="chapter16.html"><span class="nav-chapter">16</span> Logic Programming</a>
+
+      <span class="nav-section-label">Practical</span>
+      <a href="prolog-practical.html"><span class="nav-chapter">P3</span> Prolog in Practice</a>
+      <a href="prolog-list-patterns.html"><span class="nav-chapter">P4</span> List Patterns</a>
+      <a href="scheme-practical.html"><span class="nav-chapter">P5</span> Scheme in Practice</a>
+
+      <span class="nav-section-label">Assessment</span>
+      <a href="past-papers.html"><span class="nav-chapter">PP</span> Past Papers</a>
+      <a href="mcq.html"><span class="nav-chapter">MC</span> MCQ Bank</a>
+    </nav>
+
+    <div class="sidebar-toc">
+      <span class="sidebar-toc-title">On this page</span>
+      <a href="#introduction">OOP Introduction</a>
+      <a href="#concepts">Core Concepts</a>
+      <a href="#encapsulation">Encapsulation</a>
+      <a href="#inheritance">Inheritance</a>
+      <a href="#polymorphism">Polymorphism</a>
+      <a href="#dynamic-binding">Dynamic Binding</a>
+      <a href="#abstract">Abstract Classes</a>
+      <a href="#design-issues">Design Issues</a>
+      <a href="#exclusivity">Exclusivity of Objects</a>
+      <a href="#subtype">Subtype Problem</a>
+      <a href="#single-multi">Single vs Multiple Inheritance</a>
+      <a href="#allocation">Allocation of Objects</a>
+      <a href="#nested">Nested Classes</a>
+      <a href="#smalltalk">Smalltalk</a>
+      <a href="#csharp">C#</a>
+      <a href="#ruby-oop">Ruby</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle">
+        <span class="toggle-icon">☾</span>
+        <span class="toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="reading-progress"><div class="reading-progress-bar"></div></div>
+
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span>›</span> Chapter 12
+    </div>
+
+    <header class="page-header">
+      <span class="chapter-tag">Chapter 12</span>
+      <h1>Support for Object-Oriented Programming</h1>
+      <p class="subtitle">
+        Object-oriented programming organises code around objects that bundle state and behaviour.
+        How different languages support — or constrain — OOP reveals fundamental design trade-offs
+        between purity, flexibility, performance, and safety.
+      </p>
+      <div class="topic-pills">
+        <span class="pill">Encapsulation</span>
+        <span class="pill">Inheritance</span>
+        <span class="pill">Polymorphism</span>
+        <span class="pill">Dynamic Binding</span>
+        <span class="pill">Abstract Classes</span>
+        <span class="pill">Subtype Problem</span>
+        <span class="pill">Smalltalk</span>
+        <span class="pill">C#</span>
+        <span class="pill">Ruby</span>
+      </div>
+    </header>
+
+    <article class="article">
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Scope Note</div>
+        <p>Sections 12.5 (C++) and 12.6 (Java) are <strong>not examinable</strong>. Focus on the general OOP design issues (12.3), Smalltalk (12.4), C# (12.7), Ada 95 (12.8), and Ruby (12.9), and the conceptual material in 12.1–12.3.</p>
+      </div>
+
+      <h2 id="introduction">Introduction to OOP</h2>
+
+      <p>Object-oriented programming is built around three core ideas that, together, provide a powerful approach to managing software complexity:</p>
+      <ol>
+        <li><strong>Encapsulation</strong> — bundling data and operations that manipulate that data into a single entity, and restricting access to internal details.</li>
+        <li><strong>Inheritance</strong> — defining new classes in terms of existing ones, inheriting their data and methods.</li>
+        <li><strong>Polymorphism (dynamic dispatch)</strong> — a reference to a parent class can refer to objects of any subclass, and the correct method is selected at runtime.</li>
+      </ol>
+
+      <p>The combination of these three mechanisms is what makes OOP powerful for large-scale software development.</p>
+
+      <h2 id="concepts">Core OOP Concepts</h2>
+
+      <h2 id="encapsulation">Encapsulation and Data Hiding</h2>
+
+      <div class="definition">
+        <dt>Encapsulation</dt>
+        <dd>Grouping related data (attributes/fields) and operations (methods) into a single unit (class/object), with a public interface that hides implementation details. The internal state is protected from direct external access.</dd>
+      </div>
+
+      <p>Encapsulation provides two benefits:</p>
+      <ul>
+        <li><strong>Information hiding</strong>: implementation details can change without affecting code that uses the class (as long as the interface stays the same).</li>
+        <li><strong>Integrity</strong>: the class controls all access to its data, which allows it to enforce invariants (e.g., a non-negative balance).</li>
+      </ul>
+
+      <h3>Access Modifiers</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Modifier</th><th>C++/Java/C#</th><th>Accessible from</th></tr></thead>
+          <tbody>
+            <tr><td><code>public</code></td><td>All three</td><td>Anywhere</td></tr>
+            <tr><td><code>private</code></td><td>All three</td><td>Within the class only</td></tr>
+            <tr><td><code>protected</code></td><td>All three</td><td>Class and its subclasses</td></tr>
+            <tr><td><code>package</code>/<code>internal</code></td><td>Java/C#</td><td>Within the package/assembly</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="inheritance">Inheritance</h2>
+
+      <div class="definition">
+        <dt>Inheritance</dt>
+        <dd>A mechanism by which a new class (subclass, derived class, child class) can be defined as an extension of an existing class (superclass, base class, parent class). The subclass inherits all public and protected members of the superclass, and can add new members or override (redefine) inherited methods.</dd>
+      </div>
+
+      <pre><code class="language-java">// Java — inheritance
+class Animal {
+    String name;
+    void speak() { System.out.println("..."); }  // can be overridden
+}
+
+class Dog extends Animal {
+    void speak() {                    // overrides Animal.speak()
+        System.out.println("Woof!");
+    }
+    void fetch() { ... }              // new method
+}</code></pre>
+
+      <h3>Method Overriding</h3>
+      <p>A subclass provides its own implementation of a method defined in the superclass. The override replaces the inherited implementation for objects of the subclass type.</p>
+      <p><strong>Not the same as overloading</strong>: overloading uses the same name with different parameter types (resolved at compile time); overriding uses the same name AND same parameter types (resolved at runtime via dynamic dispatch).</p>
+
+      <h2 id="polymorphism">Polymorphism</h2>
+
+      <div class="definition">
+        <dt>Polymorphism</dt>
+        <dd>The ability to use a reference of a parent (superclass) type to refer to objects of different subclass types. A single variable name can refer to objects of many different (sub)types, and the appropriate behaviour is determined at runtime.</dd>
+      </div>
+
+      <pre><code class="language-java">// Java — polymorphism
+Animal a;           // reference of type Animal
+
+a = new Dog();
+a.speak();          // calls Dog.speak() → "Woof!"
+
+a = new Cat();      // Cat extends Animal, overrides speak()
+a.speak();          // calls Cat.speak() → "Meow!"</code></pre>
+
+      <p>This is only possible because of <strong>dynamic binding</strong> — the method to call is not determined by the declared type of the variable, but by the actual type of the object at runtime.</p>
+
+      <h2 id="dynamic-binding">Dynamic Binding (Late Binding)</h2>
+
+      <div class="definition">
+        <dt>Dynamic Binding (Late Binding)</dt>
+        <dd>The binding of a method call to the method definition is determined at <strong>runtime</strong>, based on the actual type of the object receiving the call, rather than the declared type of the variable. Required for polymorphism.</dd>
+      </div>
+
+      <div class="definition">
+        <dt>Static Binding (Early Binding)</dt>
+        <dd>The binding of a method call to its definition is determined at <strong>compile time</strong>, based on the declared type of the variable. Non-virtual methods in C++, and all method calls in non-OOP languages, use static binding.</dd>
+      </div>
+
+      <h3>C++ virtual keyword</h3>
+      <pre><code class="language-cpp">// C++ — dynamic binding requires 'virtual'
+class Animal {
+public:
+    virtual void speak() { cout &lt;&lt; "..."; }   // dynamic binding
+    void breathe()       { cout &lt;&lt; "hh..."; } // static binding (no virtual)
+};
+
+class Dog : public Animal {
+public:
+    void speak() override { cout &lt;&lt; "Woof!"; }
+};
+
+Animal* a = new Dog();
+a-&gt;speak();    // "Woof!" — dynamic binding
+a-&gt;breathe();  // Animal::breathe() — static binding</code></pre>
+
+      <p>In Java and C#, <strong>all instance methods are virtual by default</strong> (dynamic binding unless the method is declared <code>final</code>/<code>sealed</code>). C++ requires explicit <code>virtual</code>; non-virtual methods in C++ use static binding for performance.</p>
+
+      <h3>Implementation — vtable</h3>
+      <p>Dynamic binding is typically implemented using a <strong>virtual function table (vtable)</strong>: each class has a table of pointers to its virtual method implementations. An object contains a pointer to its class's vtable. Dispatching a virtual call looks up the correct method pointer at runtime. This adds a small, constant overhead compared to a direct call.</p>
+
+      <h2 id="abstract">Abstract Classes and Interfaces</h2>
+
+      <div class="definition">
+        <dt>Abstract Class</dt>
+        <dd>A class that cannot be instantiated — it exists only to be subclassed. It may declare <strong>abstract methods</strong>: methods with no implementation that subclasses must provide. An abstract class can also have concrete (implemented) methods.</dd>
+      </div>
+
+      <pre><code class="language-java">// Java abstract class
+abstract class Shape {
+    abstract double area();          // must be overridden by subclass
+    void describe() {
+        System.out.println("Area: " + area());  // concrete method
+    }
+}
+
+class Circle extends Shape {
+    double radius;
+    Circle(double r) { radius = r; }
+    double area() { return Math.PI * radius * radius; }
+}
+
+// Shape s = new Shape();    // ERROR — cannot instantiate abstract class
+Shape s = new Circle(5.0);   // OK — polymorphism
+s.describe();                // calls Circle.area() via dynamic binding</code></pre>
+
+      <div class="definition">
+        <dt>Interface</dt>
+        <dd>A completely abstract type that specifies a set of method signatures that implementing classes must provide. Unlike abstract classes, a class can implement multiple interfaces, allowing a form of multiple inheritance of types without multiple inheritance of implementation.</dd>
+      </div>
+
+      <pre><code class="language-java">// Java interface
+interface Drawable {
+    void draw();           // abstract method (implicit)
+    default void hide() {  // default method (Java 8+)
+        System.out.println("Hidden");
+    }
+}
+
+class Circle extends Shape implements Drawable, Serializable {
+    public void draw() { System.out.println("Drawing circle"); }
+    // ...
+}</code></pre>
+
+      <h2 id="design-issues">Design Issues for OOP Languages</h2>
+
+      <h2 id="exclusivity">Exclusivity of Objects</h2>
+
+      <p>How completely does the language commit to "everything is an object"?</p>
+
+      <ul>
+        <li><strong>Pure OOP</strong> (Smalltalk, Ruby): <em>everything</em> is an object, including integers, characters, classes, and even <code>nil</code>. Operations on all values use the same message-passing syntax.</li>
+        <li><strong>Hybrid OOP</strong> (Java, C#): most things are objects, but <em>primitive types</em> (<code>int</code>, <code>double</code>, <code>boolean</code> in Java) are not objects. They get special treatment: no methods, no inheritance, stored by value. This improves performance but creates inconsistency.</li>
+        <li><strong>OOP added to existing language</strong> (C++): objects and non-objects coexist completely. Entire programs can be written without any objects at all.</li>
+      </ul>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label advantage">Pure OOP (Smalltalk/Ruby)</div>
+          <ul>
+            <li>Conceptually clean — uniform treatment of all values</li>
+            <li>No special cases or exceptions to the object model</li>
+            <li>Maximally orthogonal</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label disadvantage">Hybrid OOP (Java primitives)</div>
+          <ul>
+            <li>Primitives are more efficient (no heap allocation, no vtable)</li>
+            <li>Inconsistency: primitives cannot be used in generics directly</li>
+            <li>Autoboxing adds complexity and hidden overhead</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2 id="subtype">Are Subclasses Also Subtypes? The Subtype Problem</h2>
+
+      <div class="definition">
+        <dt>Subtype</dt>
+        <dd>If type S is a subtype of type T, then any value of type S can be used wherever a value of type T is expected (Liskov Substitution Principle). The subtype can do everything the supertype does, and possibly more.</dd>
+      </div>
+
+      <p>Are subclasses always subtypes? Ideally yes — a <code>Dog</code> should be usable anywhere an <code>Animal</code> is expected. But inheritance allows subclasses to <em>weaken</em> guarantees of the superclass:</p>
+
+      <p>Classic example: if <code>Square extends Rectangle</code>, and <code>Rectangle</code> has a <code>setWidth()</code> method, then calling <code>setWidth()</code> on a <code>Square</code> is problematic (a square must keep width == height). The <code>Square</code> is a subclass but not a proper subtype. This is the <strong>circle-ellipse problem</strong> or <strong>rectangle-square problem</strong>.</p>
+
+      <p>Languages address this with: abstract classes, interfaces (which define a true type contract), and final/sealed classes that cannot be subclassed.</p>
+
+      <h2 id="single-multi">Single vs Multiple Inheritance</h2>
+
+      <div class="definition">
+        <dt>Single Inheritance</dt>
+        <dd>Each class has at most one parent class. Simpler to implement; no ambiguity. Java (classes), C# (classes), Smalltalk.</dd>
+      </div>
+
+      <div class="definition">
+        <dt>Multiple Inheritance</dt>
+        <dd>A class can inherit from more than one parent class. More powerful (models real-world "is-a" in multiple dimensions) but introduces complications.</dd>
+      </div>
+
+      <h3>Diamond Problem</h3>
+      <p>When class D inherits from both B and C, and both B and C inherit from A, which version of A's method does D use?</p>
+      <pre><code>       A
+      / \
+     B   C
+      \ /
+       D   ← inherits A through both B and C — which A method wins?</code></pre>
+
+      <p>Solutions:</p>
+      <ul>
+        <li><strong>C++</strong>: virtual base classes resolve diamond ambiguity; programmer must specify explicitly.</li>
+        <li><strong>Java/C#</strong>: no multiple inheritance of classes (avoids diamond). Multiple <em>interface</em> implementation is allowed.</li>
+        <li><strong>Python</strong>: MRO (Method Resolution Order) using C3 linearisation determines which parent's method is used.</li>
+        <li><strong>Ruby</strong>: uses mixins (modules) instead of multiple class inheritance — a module can add methods to a class without the diamond problem.</li>
+      </ul>
+
+      <h2 id="allocation">Allocation and Deallocation of Objects</h2>
+
+      <p>How are objects created and destroyed?</p>
+      <ul>
+        <li><strong>Heap allocation</strong> (Java, C#, Python, Ruby): objects are created on the heap with <code>new</code> or equivalent; garbage collection handles deallocation automatically. No dangling pointers, but unpredictable GC pauses.</li>
+        <li><strong>Stack or heap</strong> (C++): objects can be created on the stack (automatic lifetime tied to scope) or the heap (manual <code>new</code>/<code>delete</code>). Programmer controls lifetime; risk of memory leaks and dangling pointers.</li>
+        <li><strong>Constructors</strong>: special methods called when an object is created; initialise the object's state.</li>
+        <li><strong>Destructors/Finalisers</strong>: called when an object is destroyed. C++ destructors are called deterministically; Java finalisers are called by the GC (non-deterministic). C# adds <code>IDisposable</code>/<code>using</code> for deterministic cleanup.</li>
+      </ul>
+
+      <h2 id="nested">Nested Classes</h2>
+      <p>Classes defined inside other classes. Reasons for nesting:</p>
+      <ul>
+        <li>Logical grouping — the inner class only makes sense in the context of the outer class.</li>
+        <li>Encapsulation — the inner class can access private members of the outer class.</li>
+        <li>Reduced package namespace pollution.</li>
+      </ul>
+      <p>Java distinguishes: static nested classes (no access to outer instance), inner classes (have access to outer instance), anonymous classes (one-off implementations), and local classes. C# nested classes are similar to Java's static nested classes.</p>
+
+      <h2 id="smalltalk">Support for OOP in Smalltalk</h2>
+
+      <p>Smalltalk is the canonical pure OOP language — everything is an object, computation happens through message passing.</p>
+
+      <h3>Key characteristics</h3>
+      <ul>
+        <li><strong>Everything is an object</strong>: integers (<code>5</code>), characters, classes, booleans, <code>nil</code>, and even blocks of code.</li>
+        <li><strong>Message passing</strong>: methods are invoked by sending a message to an object. Syntax: <code>receiver message</code> or <code>receiver message: argument</code>.</li>
+        <li><strong>Dynamic typing</strong>: no type declarations; any object can receive any message (if it doesn't understand, it raises a <code>doesNotUnderstand</code> error at runtime).</li>
+        <li><strong>Single inheritance</strong>: each class has exactly one parent class. The root of the hierarchy is <code>Object</code>.</li>
+        <li><strong>Classes are objects</strong>: classes are instances of <em>metaclasses</em>. This allows class-side methods (equivalent to static methods).</li>
+      </ul>
+
+      <pre><code class="language-smalltalk">| x |
+x := 5.                     "x = 5 (send := message)"
+x printNl.                  "print x — sends printNl to integer object 5"
+x class printNl.             "prints 'SmallInt' — class is an object too"
+(x + 3) printNl.            "sends + message to 5 with arg 3 → 8"
+(x &gt; 3) ifTrue: ['yes'] ifFalse: ['no'].  "boolean is an object"</code></pre>
+
+      <h2 id="csharp">Support for OOP in C#</h2>
+
+      <p>C# combines Java-like OOP (single class inheritance, multiple interface implementation) with important additions:</p>
+
+      <h3>Properties</h3>
+      <pre><code class="language-csharp">class BankAccount {
+    private decimal balance;
+
+    public decimal Balance {     // property with getter and setter
+        get { return balance; }
+        set {
+            if (value &lt; 0) throw new ArgumentException("Negative balance");
+            balance = value;
+        }
+    }
+}
+
+BankAccount account = new BankAccount();
+account.Balance = 100.0m;          // uses setter
+decimal b = account.Balance;       // uses getter</code></pre>
+
+      <h3>Sealed classes</h3>
+      <p><code>sealed</code> prevents a class from being subclassed (like Java's <code>final</code>). Sealed classes enable certain compiler optimisations since dynamic dispatch is not needed.</p>
+
+      <h3>Abstract classes</h3>
+      <pre><code class="language-csharp">abstract class Shape {
+    public abstract double Area();          // must be overridden
+    public virtual string Describe() {      // may be overridden
+        return $"Shape with area {Area()}";
+    }
+}
+
+class Rectangle : Shape {
+    double width, height;
+    public Rectangle(double w, double h) { width = w; height = h; }
+    public override double Area() { return width * height; }
+}</code></pre>
+
+      <h3>Interfaces</h3>
+      <pre><code class="language-csharp">interface IDrawable {
+    void Draw();
+    void Resize(double factor);
+}
+
+class Circle : Shape, IDrawable {
+    public void Draw() { /* ... */ }
+    public void Resize(double f) { /* ... */ }
+    public override double Area() { return Math.PI * radius * radius; }
+}</code></pre>
+
+      <h2 id="ruby-oop">Support for OOP in Ruby</h2>
+
+      <p>Ruby is a pure OOP language (like Smalltalk), but with a more conventional syntax (closer to Python/Perl).</p>
+
+      <h3>Everything is an object</h3>
+      <pre><code class="language-ruby">5.class          # => Integer
+5.respond_to?(:+)  # => true
+nil.class        # => NilClass
+true.class       # => TrueClass</code></pre>
+
+      <h3>Classes and inheritance</h3>
+      <pre><code class="language-ruby">class Animal
+  def initialize(name)    # constructor
+    @name = name          # instance variable (@ prefix)
+  end
+
+  def speak
+    "..."
+  end
+end
+
+class Dog &lt; Animal        # single inheritance (&lt; is "extends")
+  def speak
+    "Woof!"               # overrides Animal#speak
+  end
+end
+
+d = Dog.new("Rex")
+puts d.speak              # "Woof!" — dynamic dispatch</code></pre>
+
+      <h3>Mixins (Ruby's approach to multiple inheritance)</h3>
+      <pre><code class="language-ruby">module Swimmable
+  def swim
+    puts "#{@name} is swimming"
+  end
+end
+
+module Flyable
+  def fly
+    puts "#{@name} is flying"
+  end
+end
+
+class Duck &lt; Animal
+  include Swimmable     # mixin
+  include Flyable       # mixin — multiple capability without diamond problem
+end
+
+d = Duck.new("Donald")
+d.swim   # from Swimmable module
+d.fly    # from Flyable module
+d.speak  # from Animal (or overridden)</code></pre>
+
+      <p>Mixins allow Ruby to gain the benefits of multiple inheritance (reusing code from multiple sources) without the complications of the diamond problem. A module included in a class is inserted into the class's method lookup chain.</p>
+
+      <h3>Access control in Ruby</h3>
+      <ul>
+        <li><code>public</code>: accessible from anywhere (default)</li>
+        <li><code>private</code>: only accessible within the class; cannot be called with an explicit receiver</li>
+        <li><code>protected</code>: accessible from the class and its subclasses</li>
+      </ul>
+
+      <div class="quiz">
+        <div class="quiz-header"><span>Quick Check</span></div>
+        <div class="quiz-body">
+          <p class="quiz-question">A superclass <code>Animal</code> has a <code>speak()</code> method. A variable of type <code>Animal</code> is assigned a <code>Dog</code> object. When <code>speak()</code> is called on this variable, which version executes?</p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="true"
+                data-feedback="Dynamic binding selects the method based on the actual runtime type of the object (Dog), not the declared type of the variable (Animal). This is the essence of polymorphism via dynamic dispatch.">
+              <span class="opt-key">A</span> Dog's <code>speak()</code> — dynamic binding uses the actual object type
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Static binding would use the declared type (Animal), but OOP languages use dynamic binding for overridden virtual methods.">
+              <span class="opt-key">B</span> Animal's <code>speak()</code> — static binding uses the variable's declared type
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Both versions are not called — only one is selected based on dynamic binding.">
+              <span class="opt-key">C</span> Both versions are called in sequence
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="No compile error — this is legal and expected OOP usage (polymorphism).">
+              <span class="opt-key">D</span> Compile error — cannot assign Dog to Animal variable
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">Try again</button>
+        </div>
+      </div>
+
+      <div class="summary-box">
+        <h2>Chapter 12 Summary</h2>
+        <ul>
+          <li><strong>Encapsulation</strong>: data + operations in one unit, public interface hides implementation. Access modifiers control visibility.</li>
+          <li><strong>Inheritance</strong>: subclass inherits from superclass; can override methods. Enables code reuse.</li>
+          <li><strong>Polymorphism</strong>: superclass reference can hold subclass object; correct method called at runtime.</li>
+          <li><strong>Dynamic binding</strong>: method dispatched based on runtime type. C++ requires <code>virtual</code>; Java/C# use it by default.</li>
+          <li><strong>Abstract classes</strong>: cannot be instantiated; declare abstract methods that subclasses must implement.</li>
+          <li><strong>Interfaces</strong>: fully abstract types; a class can implement multiple interfaces (solving multiple-inheritance-of-type cleanly).</li>
+          <li><strong>Exclusivity</strong>: Smalltalk/Ruby — pure OOP (everything is object). Java/C# — hybrid (primitives are not objects).</li>
+          <li><strong>Diamond problem</strong>: multiple inheritance ambiguity. C++ uses virtual base classes; Java/C# prohibit multiple class inheritance; Ruby uses mixins.</li>
+          <li><strong>Smalltalk</strong>: pure OOP, message passing, dynamic typing, classes are objects.</li>
+          <li><strong>C#</strong>: Java-like OOP with properties, sealed classes, rich interface support, reified generics.</li>
+          <li><strong>Ruby</strong>: pure OOP, mixins for multi-inheritance, everything is an object including primitives.</li>
+        </ul>
+      </div>
+
+    </article>
+  </main>
+</div>
+<script src="study-notes.js"></script>
+</body>
+</html>

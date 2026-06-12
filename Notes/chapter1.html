@@ -1,0 +1,481 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 1 — Preliminaries</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+
+  <button class="menu-toggle" aria-label="Open menu">☰</button>
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="course-label">COS 333 · Concepts of PL</span>
+      <h1>Programming Language Concepts</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Overview</span>
+      <a href="index.html"><span class="nav-chapter">00</span> Home &amp; Topics</a>
+
+      <span class="nav-section-label">Chapters</span>
+      <a href="chapter1.html" class="active"><span class="nav-chapter">01</span> Preliminaries</a>
+      <a href="chapter2.html"><span class="nav-chapter">02</span> Evolution of PLs</a>
+      <a href="chapter5.html"><span class="nav-chapter">05</span> Names, Bindings &amp; Scopes</a>
+      <a href="chapter6.html"><span class="nav-chapter">06</span> Data Types</a>
+      <a href="chapter7.html"><span class="nav-chapter">07</span> Expressions &amp; Assignments</a>
+      <a href="chapter8.html"><span class="nav-chapter">08</span> Control Structures</a>
+      <a href="chapter9.html"><span class="nav-chapter">09</span> Subprograms</a>
+      <a href="chapter12.html"><span class="nav-chapter">12</span> OOP Support</a>
+      <a href="chapter15.html"><span class="nav-chapter">15</span> Functional Programming</a>
+      <a href="chapter16.html"><span class="nav-chapter">16</span> Logic Programming</a>
+
+      <span class="nav-section-label">Practical</span>
+      <a href="prolog-practical.html"><span class="nav-chapter">P3</span> Prolog in Practice</a>
+      <a href="prolog-list-patterns.html"><span class="nav-chapter">P4</span> List Patterns</a>
+      <a href="scheme-practical.html"><span class="nav-chapter">P5</span> Scheme in Practice</a>
+
+      <span class="nav-section-label">Assessment</span>
+      <a href="past-papers.html"><span class="nav-chapter">PP</span> Past Papers</a>
+      <a href="mcq.html"><span class="nav-chapter">MC</span> MCQ Bank</a>
+    </nav>
+
+    <div class="sidebar-toc">
+      <span class="sidebar-toc-title">On this page</span>
+      <a href="#reasons">Reasons for Studying</a>
+      <a href="#domains">Programming Domains</a>
+      <a href="#criteria">Evaluation Criteria</a>
+      <a href="#readability">Readability</a>
+      <a href="#writability">Writability</a>
+      <a href="#reliability">Reliability</a>
+      <a href="#cost">Cost</a>
+      <a href="#influences">Design Influences</a>
+      <a href="#categories">Language Categories</a>
+      <a href="#tradeoffs">Design Trade-offs</a>
+      <a href="#implementation">Implementation Methods</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle">
+        <span class="toggle-icon">☾</span>
+        <span class="toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="reading-progress"><div class="reading-progress-bar"></div></div>
+
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span>›</span> Chapter 1
+    </div>
+
+    <header class="page-header">
+      <span class="chapter-tag">Chapter 1</span>
+      <h1>Preliminaries</h1>
+      <p class="subtitle">
+        Why study programming languages? How do we evaluate and compare them?
+        This chapter builds the conceptual vocabulary used throughout the entire course.
+      </p>
+      <div class="topic-pills">
+        <span class="pill">Evaluation Criteria</span>
+        <span class="pill">Orthogonality</span>
+        <span class="pill">Readability</span>
+        <span class="pill">Writability</span>
+        <span class="pill">Reliability</span>
+        <span class="pill">Trade-offs</span>
+        <span class="pill">Implementation</span>
+        <span class="pill">Language Categories</span>
+      </div>
+    </header>
+
+    <article class="article">
+
+      <h2 id="reasons">Reasons for Studying Programming Languages</h2>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Exam Pattern</div>
+        <p>
+          The exam will give you a <strong>specific scenario</strong> (e.g., a junior programmer, a manager, a language designer) and ask for one or more reasons <em>relevant to that person</em>. You cannot simply list any reason — your answer must logically connect to the given scenario. Study each reason with its real-world application in mind.
+        </p>
+      </div>
+
+      <p>Understanding programming language concepts benefits anyone who works with software. Six key reasons, each with a distinct audience:</p>
+
+      <div class="definition">
+        <dt>1. Better use of available languages</dt>
+        <dd>Knowing language features deeply allows you to write better programs using features you may have overlooked or misused. A programmer who understands closures will write cleaner code in JavaScript; one who understands type systems will avoid unsafe casts in Java.</dd>
+      </div>
+
+      <div class="definition">
+        <dt>2. Better ability to learn new languages</dt>
+        <dd>Languages share concepts (scoping rules, type systems, parameter passing). Once you understand these at a conceptual level, picking up a new language is much faster. The mechanism differs, but the idea is familiar.</dd>
+      </div>
+
+      <div class="definition">
+        <dt>3. Better understanding of the significance of implementation</dt>
+        <dd>Understanding how language features are implemented (e.g., dynamic dispatch, garbage collection, closures) helps you reason about performance, memory use, and correctness. A manager can make informed decisions about language choice for a project.</dd>
+      </div>
+
+      <div class="definition">
+        <dt>4. Better ability to design new languages</dt>
+        <dd>Studying existing languages — their successes and failures — is essential for anyone designing a DSL or a new general-purpose language. You avoid repeating historical mistakes.</dd>
+      </div>
+
+      <div class="definition">
+        <dt>5. Better understanding of the importance of implementation</dt>
+        <dd>Language features have costs. Understanding these helps explain why some features (e.g., dynamic typing, exceptions) are avoided in embedded or real-time systems.</dd>
+      </div>
+
+      <div class="definition">
+        <dt>6. Overall advancement of computing</dt>
+        <dd>A broader understanding of programming paradigms enables innovation. New paradigms (functional, logic, concurrent) expand what is computable or expressible.</dd>
+      </div>
+
+      <h2 id="domains">Programming Domains</h2>
+      <p>Different application areas place different demands on a language, which shapes design priorities:</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>Domain</th><th>Key Priority</th><th>Example Languages</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Scientific computing</td><td>Floating-point performance, arrays</td><td>FORTRAN, C</td></tr>
+            <tr><td>Business applications</td><td>Decimal arithmetic, report generation</td><td>COBOL, RPG</td></tr>
+            <tr><td>Artificial intelligence</td><td>Symbol manipulation, flexibility</td><td>LISP, Prolog</td></tr>
+            <tr><td>Systems programming</td><td>Low-level access, efficiency</td><td>C, C++, Rust</td></tr>
+            <tr><td>Web scripting</td><td>Rapid development, string handling</td><td>JavaScript, PHP, Python</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="criteria">Language Evaluation Criteria</h2>
+
+      <p>Four primary criteria are used to evaluate and compare programming languages. Note that these criteria often conflict — improving one can harm another.</p>
+
+      <div class="callout key">
+        <div class="callout-label">Central Framework</div>
+        <p>These four criteria — <strong>readability, writability, reliability, cost</strong> — are the lens through which every language feature in this course is evaluated. Be able to apply them to features in both real and hypothetical languages.</p>
+      </div>
+
+      <h2 id="readability">Readability</h2>
+      <p>How easily can a program be read and understood? This is arguably the most important criterion since programs are read far more often than they are written.</p>
+
+      <h3>Overall Simplicity</h3>
+      <p>A language with a small number of basic constructs is easier to learn and read. Complications arise from:</p>
+      <ul>
+        <li><strong>Feature multiplicity</strong> — multiple ways to do the same thing (e.g., <code>i = i + 1</code>, <code>i += 1</code>, <code>i++</code> in C). The reader must understand all forms.</li>
+        <li><strong>Operator overloading</strong> — the same symbol means different things in different contexts, which can confuse readers if used inconsistently.</li>
+      </ul>
+
+      <h3>Orthogonality</h3>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ High-Frequency Exam Topic</div>
+        <p>Orthogonality is guaranteed to appear on the exam. Understand the definition, the examples, and how it creates a trade-off between readability and writability.</p>
+      </div>
+
+      <div class="definition">
+        <dt>Orthogonality</dt>
+        <dd>A <strong>small set of primitive constructs</strong> can be combined in a <strong>relatively unrestricted way</strong>, and every combination is legal and meaningful. The meaning of a combination is <em>independent</em> of the context in which it is used.</dd>
+      </div>
+
+      <p>The term comes from mathematics: orthogonal vectors are independent — they do not affect each other. In a language, orthogonal features do not interact in special, context-dependent ways.</p>
+
+      <h4>Example — IBM mainframe architecture</h4>
+      <p>IBM mainframe assembly had two types of operands (registers vs memory) and three instruction types (register-register, register-memory, memory-memory). A fully orthogonal design would allow all 6 combinations. IBM's design only supported some, so programmers had to remember which combinations were forbidden — <em>low orthogonality</em>.</p>
+
+      <h4>Example — VAX architecture vs IBM</h4>
+      <p>The VAX was highly orthogonal: any operand mode (register, literal, indexed, indirect, etc.) could be used with any instruction. This makes a small set of rules describe a large language.</p>
+
+      <h4>Orthogonality in high-level languages</h4>
+      <ul>
+        <li><strong>ALGOL 68</strong>: extremely orthogonal. Any expression can appear anywhere an expression is expected. Very consistent but complex to implement and sometimes difficult to read.</li>
+        <li><strong>C</strong>: moderately orthogonal but has exceptions (e.g., <code>void</code> functions, struct assignments were historically inconsistent).</li>
+        <li><strong>Java</strong>: less orthogonal — primitive types are not objects, so they cannot be used wherever objects are expected. You cannot put an <code>int</code> in a generic collection directly.</li>
+      </ul>
+
+      <h4>Too much orthogonality is also a problem</h4>
+      <p>High orthogonality means many combinations are legal — some of which are nonsensical or produce subtle errors. The compiler catches fewer mistakes because almost anything is valid. <em>Readability suffers</em> when legal expressions have surprising semantics.</p>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label advantage">Advantages of high orthogonality</div>
+          <ul>
+            <li>Few special cases or exceptions to remember</li>
+            <li>Greater expressive power from small feature set</li>
+            <li>More predictable, consistent behavior</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label disadvantage">Disadvantages of high orthogonality</div>
+          <ul>
+            <li>Many legal but meaningless combinations possible</li>
+            <li>Fewer compile-time error checks</li>
+            <li>Can reduce readability (too many valid ways to express an idea)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Data Types</h3>
+      <p>Adequate data types improve readability. A language with a Boolean type lets you write <code>flag = true</code> instead of <code>flag = 1</code>, which is self-documenting.</p>
+
+      <h3>Syntax Design</h3>
+      <ul>
+        <li><strong>Identifier forms</strong>: meaningful, multi-word identifiers (e.g., <code>totalBalance</code>) improve readability.</li>
+        <li><strong>Special words</strong>: reserved words like <code>if</code>, <code>while</code>, <code>for</code> with consistent syntax aid understanding.</li>
+        <li><strong>Form and meaning</strong>: syntax should reflect semantics. Inconsistency (e.g., same keyword used for different meanings in different contexts) harms readability.</li>
+      </ul>
+
+      <h2 id="writability">Writability</h2>
+      <p>How easily can a language be used to create programs for a given domain?</p>
+
+      <h3>Simplicity and Orthogonality</h3>
+      <p>A smaller, orthogonal set of features is easier to learn and combine. However, having too few features forces verbose workarounds. There is an optimal range.</p>
+
+      <h3>Support for Abstraction</h3>
+      <p>Abstraction means defining and using structures that allow programmers to ignore detail. Two types:</p>
+      <ul>
+        <li><strong>Process abstraction</strong> — subprograms/functions. Instead of copying logic, you name it and call it.</li>
+        <li><strong>Data abstraction</strong> — abstract data types (classes). Bundle data with its operations and hide the implementation.</li>
+      </ul>
+
+      <h3>Expressivity</h3>
+      <p>Powerful, concise operations improve writability. Example: the <code>for</code> loop over a collection in Python is more expressive than manual index management in C. The increment operator <code>++</code> in C is more expressive but also adds to the special-case knowledge needed.</p>
+
+      <h2 id="reliability">Reliability</h2>
+      <p>A program is <strong>reliable</strong> if it performs its specified behaviour under all conditions.</p>
+
+      <h3>Type Checking</h3>
+      <p>Detecting type errors. The earlier errors are caught, the better. Static type checking (at compile time) is more reliable than dynamic (at runtime), which can allow programs to run with undetected type errors.</p>
+
+      <h3>Exception Handling</h3>
+      <p>The ability to intercept unexpected conditions at runtime and recover gracefully. Languages with good exception handling (Java, Ada) are more reliable than those without (early C).</p>
+
+      <h3>Aliasing</h3>
+      <p>Having two or more distinct names for the same memory location. This reduces reliability because modifying one alias unexpectedly changes the other. Pointer-heavy languages (C) are less reliable partly because of aliasing.</p>
+
+      <h3>Readability and Writability</h3>
+      <p>Both indirectly affect reliability: readable programs are easier to verify and maintain; writable programs with complex constructs may be harder to write correctly.</p>
+
+      <h2 id="cost">Cost</h2>
+      <p>The total cost of a language includes many factors beyond just execution speed:</p>
+
+      <ul>
+        <li><strong>Training cost</strong> — how long it takes to train programmers to use the language.</li>
+        <li><strong>Cost of writing programs</strong> — development time, writability.</li>
+        <li><strong>Cost of compiling programs</strong> — compile time, tool requirements.</li>
+        <li><strong>Cost of executing programs</strong> — runtime efficiency. (Often in conflict with reliability features like array bounds checking.)</li>
+        <li><strong>Cost of language implementation</strong> — building compilers/interpreters.</li>
+        <li><strong>Cost of poor reliability</strong> — bugs found late, in production, are far more expensive to fix.</li>
+        <li><strong>Cost of maintenance</strong> — readability directly drives long-term maintenance cost.</li>
+      </ul>
+
+      <h2 id="influences">Influences on Language Design</h2>
+
+      <h3>Computer Architecture</h3>
+      <p>The dominant influence on imperative languages is the <strong>von Neumann architecture</strong>: a CPU, memory, and a connection (bus) between them. Programs store data in memory and fetch/execute instructions sequentially. This naturally maps to:</p>
+      <ul>
+        <li>Variables as named memory locations</li>
+        <li>Assignment statements as the primary computation step (fetch, modify, store)</li>
+        <li>Iteration (loops) rather than recursion as the natural repetition mechanism</li>
+      </ul>
+      <p>Functional and logic languages emerged partly as a reaction against von Neumann thinking.</p>
+
+      <h3>Programming Methodology</h3>
+      <p>Software engineering movements directly influenced language design:</p>
+      <ul>
+        <li><strong>1950s–60s</strong>: focus on machine efficiency → FORTRAN, COBOL</li>
+        <li><strong>1960s–70s</strong>: structured programming (Dijkstra, Hoare) → Pascal, Algol</li>
+        <li><strong>1970s–80s</strong>: data abstraction → Ada, Modula-2</li>
+        <li><strong>1980s–90s</strong>: object-oriented programming → Smalltalk, C++, Java</li>
+      </ul>
+
+      <h2 id="categories">Language Categories</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>Category</th><th>Computation Model</th><th>Examples</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Imperative / Procedural</td>
+              <td>Sequences of statements that change program state</td>
+              <td>C, Pascal, FORTRAN, Ada</td>
+            </tr>
+            <tr>
+              <td>Object-Oriented</td>
+              <td>Objects encapsulate state and behaviour; computation via message passing</td>
+              <td>Smalltalk, Java, C++, Python, Ruby</td>
+            </tr>
+            <tr>
+              <td>Functional</td>
+              <td>Computation as evaluation of mathematical functions; avoids mutable state</td>
+              <td>LISP, Scheme, Haskell, ML, F#</td>
+            </tr>
+            <tr>
+              <td>Logic</td>
+              <td>Programs as sets of logical propositions; engine proves queries</td>
+              <td>Prolog</td>
+            </tr>
+            <tr>
+              <td>Markup / Special Purpose</td>
+              <td>Declarative description of structure or data</td>
+              <td>HTML, XML, SQL</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Many modern languages are <em>multi-paradigm</em>: Python, Scala, and JavaScript support both OOP and functional styles.</p>
+
+      <h2 id="tradeoffs">Language Design Trade-offs</h2>
+
+      <p>Language features often conflict with each other. Designers must make explicit trade-offs:</p>
+
+      <div class="collapsible open">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">Trade-off 1</span><span class="ch-title">Reliability vs. Cost of Execution</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p><strong>Example — array bounds checking:</strong> Checking array indices at runtime prevents buffer overflows and memory corruption, greatly improving reliability. However, it adds overhead to every array access, which can be significant in tight loops. C omits bounds checking for performance; Java and Python include it for reliability.</p>
+          <p>A hypothetical language that performs bounds checking only for the first access to an array and skips it thereafter would improve performance at the cost of reliability.</p>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">Trade-off 2</span><span class="ch-title">Writability vs. Readability</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p><strong>Example — APL operators:</strong> APL is extremely writable: a complete matrix manipulation can fit on one line using special operators. But those same programs are nearly unreadable to anyone who hasn't memorised the operator set. Writability was maximised at the cost of readability.</p>
+          <p><strong>Example — operator overloading:</strong> Overloaded operators make programs shorter and more natural to write, but they can confuse a reader if the overloaded meaning is not obvious from context.</p>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">Trade-off 3</span><span class="ch-title">Flexibility vs. Safety (Reliability)</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p><strong>Example — pointers in C:</strong> Pointer arithmetic gives programmers tremendous flexibility (direct memory access, efficient data structures). But unrestricted pointer use is a major source of errors: dangling pointers, buffer overflows, memory leaks. Java removed pointer arithmetic entirely; Ada restricts it heavily. Safety improved, but some low-level flexibility was lost.</p>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">Trade-off 4</span><span class="ch-title">Uniformity vs. Special Features</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>A uniform, orthogonal language is easier to learn but may lack special-purpose features that would make specific tasks much easier. Domain-specific languages sacrifice generality for expressivity in a narrow area.</p>
+        </div>
+      </div>
+
+      <h2 id="implementation">Implementation Methods</h2>
+
+      <p>There are three main methods for implementing a programming language. You need to understand the concepts, not the detailed internal steps.</p>
+
+      <div class="definition">
+        <dt>Compilation</dt>
+        <dd>The source program is translated into <strong>machine code</strong> (or an intermediate form) by a <em>compiler</em> before execution. The resulting binary runs directly on hardware. High execution speed; errors detected at compile time. Examples: C, C++, FORTRAN, Ada.</dd>
+      </div>
+
+      <div class="definition">
+        <dt>Pure Interpretation</dt>
+        <dd>The source program is executed directly by an <em>interpreter</em>, statement by statement, with no prior translation. No separate compilation step; easier to debug interactively; much slower at runtime due to overhead of decoding each statement on every execution. Examples: early BASIC, some scripting languages. Rare today for full programs.</dd>
+      </div>
+
+      <div class="definition">
+        <dt>Hybrid Implementation</dt>
+        <dd>Source is translated to an <strong>intermediate language</strong> (e.g., bytecode), which is then interpreted or compiled at runtime. Combines portability (the intermediate form runs on any platform with an interpreter) with better performance than pure interpretation. Examples: Java (JVM bytecode), Python (.pyc bytecode), .NET (CIL).</dd>
+      </div>
+
+      <div class="callout note">
+        <div class="callout-label">Just-In-Time (JIT) Compilation</div>
+        <p>A further refinement of hybrid implementation: the bytecode interpreter compiles <em>hot</em> code paths to native machine code at runtime. This allows Java and JavaScript engines to approach the speed of compiled code while retaining portability.</p>
+      </div>
+
+      <div class="quiz">
+        <div class="quiz-header"><span>Quick Check</span></div>
+        <div class="quiz-body">
+          <p class="quiz-question">A language allows any expression to appear wherever any other expression is expected, with no special cases or exceptions. Which evaluation criterion does this primarily describe?</p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="true"
+                data-feedback="Orthogonality means a small set of primitives combine freely and consistently, with no context-dependent exceptions. This is a property of readability (and writability) — not reliability or cost.">
+              <span class="opt-key">A</span> Orthogonality (a component of readability)
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Reliability concerns whether programs behave correctly, not whether language features combine freely.">
+              <span class="opt-key">B</span> Reliability
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Cost concerns training, execution, and maintenance — not the combinability of features.">
+              <span class="opt-key">C</span> Cost
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Exception handling is one component of reliability, not a description of how features combine.">
+              <span class="opt-key">D</span> Exception handling
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">Try again</button>
+        </div>
+      </div>
+
+      <div class="quiz">
+        <div class="quiz-header"><span>Quick Check</span></div>
+        <div class="quiz-body">
+          <p class="quiz-question">A junior programmer at a company is told to study programming language concepts. Which reason is MOST directly relevant to their day-to-day work?</p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="true"
+                data-feedback="A junior programmer's primary concern is writing better programs in the languages they already use, and picking up new languages quickly. Both 'better use of available languages' and 'better ability to learn new languages' apply directly.">
+              <span class="opt-key">A</span> Better use of available languages and faster learning of new languages
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Designing new languages is typically done by researchers or senior language engineers, not junior developers.">
+              <span class="opt-key">B</span> Better ability to design new languages
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="While advancement of computing is a valid reason, it is the least relevant to a junior programmer's immediate work.">
+              <span class="opt-key">C</span> Overall advancement of computing
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Building compilers is specialised work unlikely to be the job of a junior programmer in a typical company.">
+              <span class="opt-key">D</span> Better understanding of compiler construction
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">Try again</button>
+        </div>
+      </div>
+
+      <div class="summary-box">
+        <h2>Chapter 1 Summary</h2>
+        <ul>
+          <li><strong>Readability</strong>: influenced by simplicity, orthogonality, data types, syntax. Most important long-term criterion.</li>
+          <li><strong>Orthogonality</strong>: small primitive set + unrestricted combination. High orthogonality means few exceptions but can reduce safety.</li>
+          <li><strong>Writability</strong>: how easily programs can be created for a domain. Requires simplicity + abstraction + expressivity.</li>
+          <li><strong>Reliability</strong>: type checking, exception handling, reducing aliasing.</li>
+          <li><strong>Cost</strong>: includes training, writing, compiling, executing, and maintaining programs.</li>
+          <li><strong>Trade-offs</strong>: reliability vs cost, writability vs readability, flexibility vs safety.</li>
+          <li><strong>Implementation</strong>: compilation (fast, static), interpretation (flexible, slow), hybrid (portable, moderate speed).</li>
+        </ul>
+      </div>
+
+    </article>
+  </main>
+</div>
+<script src="study-notes.js"></script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Notes — Programming Languages</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+
+  <!-- Mobile controls -->
+  <button class="menu-toggle" aria-label="Open menu">☰</button>
+  <div class="sidebar-overlay"></div>
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="course-label">COS 333 · Concepts of PL</span>
+      <h1>Programming Language Concepts</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Overview</span>
+      <a href="index.html" class="active">
+        <span class="nav-chapter">00</span> Home &amp; Topics
+      </a>
+
+      <span class="nav-section-label">Chapters</span>
+      <a href="chapter1.html"><span class="nav-chapter">01</span> Preliminaries</a>
+      <a href="chapter2.html"><span class="nav-chapter">02</span> Evolution of PLs</a>
+      <a href="chapter5.html"><span class="nav-chapter">05</span> Names, Bindings &amp; Scopes</a>
+      <a href="chapter6.html"><span class="nav-chapter">06</span> Data Types</a>
+      <a href="chapter7.html"><span class="nav-chapter">07</span> Expressions &amp; Assignments</a>
+      <a href="chapter8.html"><span class="nav-chapter">08</span> Control Structures</a>
+      <a href="chapter9.html"><span class="nav-chapter">09</span> Subprograms</a>
+      <a href="chapter12.html"><span class="nav-chapter">12</span> OOP Support</a>
+      <a href="chapter15.html"><span class="nav-chapter">15</span> Functional Programming</a>
+      <a href="chapter16.html"><span class="nav-chapter">16</span> Logic Programming</a>
+
+      <span class="nav-section-label">Practical</span>
+      <a href="prolog-practical.html"><span class="nav-chapter">P3</span> Prolog in Practice</a>
+      <a href="prolog-list-patterns.html"><span class="nav-chapter">P4</span> List Patterns</a>
+      <a href="scheme-practical.html"><span class="nav-chapter">P5</span> Scheme in Practice</a>
+
+      <span class="nav-section-label">Assessment</span>
+      <a href="past-papers.html"><span class="nav-chapter">PP</span> Past Papers</a>
+      <a href="mcq.html"><span class="nav-chapter">MC</span> MCQ Bank</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle">
+        <span class="toggle-icon">☾</span>
+        <span class="toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <main class="main">
+    <div class="reading-progress"><div class="reading-progress-bar"></div></div>
+
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+    </div>
+
+    <header class="page-header">
+      <span class="chapter-tag">Study Notes · Overview</span>
+      <h1>Programming Language Concepts</h1>
+      <p class="subtitle">
+        Complete exam coverage — Chapters 1, 2, 5, 6, 7, 8, 9, 12, 15 &amp; 16,
+        Prolog practicals, Scheme list processing, and past paper archive.
+      </p>
+      <div class="topic-pills">
+        <span class="pill">Evaluation Criteria</span>
+        <span class="pill">Orthogonality</span>
+        <span class="pill">History</span>
+        <span class="pill">Names &amp; Scopes</span>
+        <span class="pill">Data Types</span>
+        <span class="pill">Expressions</span>
+        <span class="pill">Control Flow</span>
+        <span class="pill">Subprograms</span>
+        <span class="pill">Closures</span>
+        <span class="pill">OOP</span>
+        <span class="pill">Scheme</span>
+        <span class="pill">Prolog</span>
+        <span class="pill">Past Papers</span>
+      </div>
+    </header>
+
+    <article class="article">
+
+      <h2>What's in these notes</h2>
+      <p>
+        Full coverage of every chapter explicitly listed in the examination scope document.
+        Each page is self-contained but builds on earlier concepts — reading in chapter order is recommended for first pass.
+      </p>
+
+      <!-- ── Chapter cards ─────────────────────────── -->
+      <div style="display:flex; flex-direction:column; gap: var(--sp-5); margin: var(--sp-6) 0; max-width: var(--content-max);">
+
+        <a href="chapter1.html" style="text-decoration:none; display:block;">
+          <div style="border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--sp-6); background: var(--bg-hover); transition: border-color 0.2s, box-shadow 0.2s; cursor: pointer;"
+               onmouseover="this.style.borderColor='var(--accent)'; this.style.boxShadow='var(--shadow-md)'"
+               onmouseout="this.style.borderColor='var(--border)'; this.style.boxShadow='none'">
+            <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: var(--sp-2);">Chapter 1</div>
+            <div style="font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; color: var(--text-primary); margin-bottom: var(--sp-2);">Preliminaries</div>
+            <div style="font-size: var(--fs-sm); color: var(--text-muted);">Reasons for studying PLs, language evaluation criteria (readability, writability, reliability, cost), orthogonality, design trade-offs, implementation methods.</div>
+          </div>
+        </a>
+
+        <a href="chapter2.html" style="text-decoration:none; display:block;">
+          <div style="border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--sp-6); background: var(--bg-hover); transition: border-color 0.2s, box-shadow 0.2s; cursor: pointer;"
+               onmouseover="this.style.borderColor='var(--accent)'; this.style.boxShadow='var(--shadow-md)'"
+               onmouseout="this.style.borderColor='var(--border)'; this.style.boxShadow='none'">
+            <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: var(--sp-2);">Chapter 2</div>
+            <div style="font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; color: var(--text-primary); margin-bottom: var(--sp-2);">Evolution of Programming Languages</div>
+            <div style="font-size: var(--fs-sm); color: var(--text-muted);">FORTRAN to Java — environment, effect on language design, and main contribution of each major language.</div>
+          </div>
+        </a>
+
+        <a href="chapter5.html" style="text-decoration:none; display:block;">
+          <div style="border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--sp-6); background: var(--bg-hover); transition: border-color 0.2s, box-shadow 0.2s; cursor: pointer;"
+               onmouseover="this.style.borderColor='var(--accent)'; this.style.boxShadow='var(--shadow-md)'"
+               onmouseout="this.style.borderColor='var(--border)'; this.style.boxShadow='none'">
+            <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: var(--sp-2);">Chapter 5</div>
+            <div style="font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; color: var(--text-primary); margin-bottom: var(--sp-2);">Names, Bindings &amp; Scopes</div>
+            <div style="font-size: var(--fs-sm); color: var(--text-muted);">Variable attributes, binding times, static vs dynamic type binding, storage lifetimes, static and dynamic scoping, named constants.</div>
+          </div>
+        </a>
+
+        <a href="chapter6.html" style="text-decoration:none; display:block;">
+          <div style="border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--sp-6); background: var(--bg-hover); transition: border-color 0.2s, box-shadow 0.2s; cursor: pointer;"
+               onmouseover="this.style.borderColor='var(--accent)'; this.style.boxShadow='var(--shadow-md)'"
+               onmouseout="this.style.borderColor='var(--border)'; this.style.boxShadow='none'">
+            <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: var(--sp-2);">Chapter 6</div>
+            <div style="font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; color: var(--text-primary); margin-bottom: var(--sp-2);">Data Types</div>
+            <div style="font-size: var(--fs-sm); color: var(--text-muted);">Primitive types, strings, arrays, records, tuples, unions, pointers, type checking, strong typing, coercion, and type equivalence.</div>
+          </div>
+        </a>
+
+        <a href="chapter7.html" style="text-decoration:none; display:block;">
+          <div style="border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--sp-6); background: var(--bg-hover); transition: border-color 0.2s, box-shadow 0.2s; cursor: pointer;"
+               onmouseover="this.style.borderColor='var(--accent)'; this.style.boxShadow='var(--shadow-md)'"
+               onmouseout="this.style.borderColor='var(--border)'; this.style.boxShadow='none'">
+            <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: var(--sp-2);">Chapter 7</div>
+            <div style="font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; color: var(--text-primary); margin-bottom: var(--sp-2);">Expressions &amp; Assignment Statements</div>
+            <div style="font-size: var(--fs-sm); color: var(--text-muted);">Operator precedence, associativity, operator overloading, type conversions, short-circuit evaluation, side effects, and referential transparency.</div>
+          </div>
+        </a>
+
+        <a href="chapter8.html" style="text-decoration:none; display:block;">
+          <div style="border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--sp-6); background: var(--bg-hover); transition: border-color 0.2s, box-shadow 0.2s; cursor: pointer;"
+               onmouseover="this.style.borderColor='var(--accent)'; this.style.boxShadow='var(--shadow-md)'"
+               onmouseout="this.style.borderColor='var(--border)'; this.style.boxShadow='none'">
+            <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: var(--sp-2);">Chapter 8</div>
+            <div style="font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; color: var(--text-primary); margin-bottom: var(--sp-2);">Statement-Level Control Structures</div>
+            <div style="font-size: var(--fs-sm); color: var(--text-muted);">Selection, iteration, for-each loops, Ruby blocks, and Dijkstra's guarded commands with non-determinism.</div>
+          </div>
+        </a>
+
+        <a href="chapter9.html" style="text-decoration:none; display:block;">
+          <div style="border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--sp-6); background: var(--bg-hover); transition: border-color 0.2s, box-shadow 0.2s; cursor: pointer;"
+               onmouseover="this.style.borderColor='var(--accent)'; this.style.boxShadow='var(--shadow-md)'"
+               onmouseout="this.style.borderColor='var(--border)'; this.style.boxShadow='none'">
+            <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: var(--sp-2);">Chapter 9</div>
+            <div style="font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; color: var(--text-primary); margin-bottom: var(--sp-2);">Subprograms</div>
+            <div style="font-size: var(--fs-sm); color: var(--text-muted);">Parameter passing (value, reference, value-result, name), generics in C++/Java/C#, closures (MakeAdder), and coroutines.</div>
+          </div>
+        </a>
+
+        <a href="chapter12.html" style="text-decoration:none; display:block;">
+          <div style="border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--sp-6); background: var(--bg-hover); transition: border-color 0.2s, box-shadow 0.2s; cursor: pointer;"
+               onmouseover="this.style.borderColor='var(--accent)'; this.style.boxShadow='var(--shadow-md)'"
+               onmouseout="this.style.borderColor='var(--border)'; this.style.boxShadow='none'">
+            <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: var(--sp-2);">Chapter 12</div>
+            <div style="font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; color: var(--text-primary); margin-bottom: var(--sp-2);">Support for Object-Oriented Programming</div>
+            <div style="font-size: var(--fs-sm); color: var(--text-muted);">Encapsulation, inheritance, polymorphism, dynamic binding, abstract classes, design issues, Smalltalk, C#, and Ruby OOP.</div>
+          </div>
+        </a>
+
+        <a href="chapter15.html" style="text-decoration:none; display:block;">
+          <div style="border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--sp-6); background: var(--bg-hover); transition: border-color 0.2s, box-shadow 0.2s; cursor: pointer;"
+               onmouseover="this.style.borderColor='var(--accent)'; this.style.boxShadow='var(--shadow-md)'"
+               onmouseout="this.style.borderColor='var(--border)'; this.style.boxShadow='none'">
+            <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: var(--sp-2);">Chapter 15</div>
+            <div style="font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; color: var(--text-primary); margin-bottom: var(--sp-2);">Functional Programming &amp; Scheme</div>
+            <div style="font-size: var(--fs-sm); color: var(--text-muted);">FP paradigm, Scheme syntax, DEFINE/IF/COND/LET, car/cdr/cons, tail recursion, MAP/APPLY, and list functions: member, equal, append.</div>
+          </div>
+        </a>
+
+        <a href="chapter16.html" style="text-decoration:none; display:block;">
+          <div style="border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--sp-6); background: var(--bg-hover); transition: border-color 0.2s, box-shadow 0.2s; cursor: pointer;"
+               onmouseover="this.style.borderColor='var(--accent)'; this.style.boxShadow='var(--shadow-md)'"
+               onmouseout="this.style.borderColor='var(--border)'; this.style.boxShadow='none'">
+            <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: var(--sp-2);">Chapter 16</div>
+            <div style="font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; color: var(--text-primary); margin-bottom: var(--sp-2);">Logic Programming</div>
+            <div style="font-size: var(--fs-sm); color: var(--text-muted);">Predicate calculus, Horn clauses, Prolog syntax (facts, rules, goals), backtracking, list processing, and Prolog's deficiencies.</div>
+          </div>
+        </a>
+
+        <a href="prolog-practical.html" style="text-decoration:none; display:block;">
+          <div style="border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--sp-6); background: var(--bg-hover); transition: border-color 0.2s, box-shadow 0.2s; cursor: pointer;"
+               onmouseover="this.style.borderColor='var(--accent)'; this.style.boxShadow='var(--shadow-md)'"
+               onmouseout="this.style.borderColor='var(--border)'; this.style.boxShadow='none'">
+            <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: var(--sp-2);">Practical 3</div>
+            <div style="font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; color: var(--text-primary); margin-bottom: var(--sp-2);">Prolog in Practice</div>
+            <div style="font-size: var(--fs-sm); color: var(--text-muted);">Writing real Prolog — syntax rules, unification, list patterns, recursion, the cut operator, and full worked examples.</div>
+          </div>
+        </a>
+
+        <a href="past-papers.html" style="text-decoration:none; display:block;">
+          <div style="border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--sp-6); background: var(--bg-hover); transition: border-color 0.2s, box-shadow 0.2s; cursor: pointer;"
+               onmouseover="this.style.borderColor='var(--accent)'; this.style.boxShadow='var(--shadow-md)'"
+               onmouseout="this.style.borderColor='var(--border)'; this.style.boxShadow='none'">
+            <div style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: var(--sp-2);">Assessment</div>
+            <div style="font-family: var(--font-display); font-size: var(--fs-xl); font-weight: 700; color: var(--text-primary); margin-bottom: var(--sp-2);">Past Papers Archive</div>
+            <div style="font-size: var(--fs-sm); color: var(--text-muted);">Semester Test 2 papers (2022–2025) and exam paper placeholders with an embedded viewer — all accessible without leaving this site.</div>
+          </div>
+        </a>
+
+      </div>
+
+      <h2>Key Themes Across All Chapters</h2>
+
+      <div class="callout key">
+        <div class="callout-label">Central Idea</div>
+        <p>
+          Programming languages make <strong>design choices</strong> at every level — from how names are resolved to how types are checked to how methods are dispatched. Each choice involves trade-offs between
+          <strong>writability</strong>, <strong>readability</strong>, <strong>reliability</strong>, and <strong>efficiency</strong>.
+          The same four criteria from Chapter 1 resurface throughout every subsequent chapter.
+        </p>
+      </div>
+
+      <h3>The Static/Dynamic Axis</h3>
+      <p>One of the most consistent themes across all chapters is the trade-off between <em>static</em> (compile-time) and <em>dynamic</em> (runtime) approaches:</p>
+      <ul>
+        <li><strong>Static</strong>: determined at compile time — more efficient, more reliable, less flexible.</li>
+        <li><strong>Dynamic</strong>: determined at runtime — more flexible, higher overhead, harder to debug.</li>
+        <li>Most modern languages use a mix (statically typed but with dynamic dispatch, e.g. Java).</li>
+      </ul>
+
+      <h3>Implementation Questions</h3>
+      <p>The exam has one Scheme (Chapter 15) and one Prolog (Chapter 16) implementation question, both involving list processing. Practice is essential — understanding the concepts is not enough, you must be able to write correct code under time pressure in the actual interpreter.</p>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Exam Focus Points</div>
+        <ul>
+          <li><strong>Ch 1</strong>: Apply evaluation criteria and reasons for studying PLs to given scenarios. Orthogonality.</li>
+          <li><strong>Ch 2</strong>: Environment → language effect → contribution for each language.</li>
+          <li><strong>Ch 5</strong>: Static vs dynamic scoping, binding times, storage lifetimes.</li>
+          <li><strong>Ch 6</strong>: Type checking, strong typing, type equivalence, unions.</li>
+          <li><strong>Ch 7</strong>: Side effects, referential transparency, short-circuit evaluation.</li>
+          <li><strong>Ch 8</strong>: Guarded commands (non-determinism), Ruby blocks.</li>
+          <li><strong>Ch 9</strong>: All parameter passing methods, closures (MakeAdder), coroutine output tracing, generics C++/Java/C#.</li>
+          <li><strong>Ch 12</strong>: Dynamic binding, abstract classes, interfaces, OOP design issues.</li>
+          <li><strong>Ch 15</strong>: Write Scheme list processing functions in DrRacket.</li>
+          <li><strong>Ch 16</strong>: Write Prolog list processing predicates in SWI-Prolog.</li>
+        </ul>
+      </div>
+
+    </article>
+  </main>
+</div>
+<script src="study-notes.js"></script>
+</body>
+</html>

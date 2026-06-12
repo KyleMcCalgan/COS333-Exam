@@ -1,0 +1,509 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 15 — Functional Programming &amp; Scheme</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+
+  <button class="menu-toggle" aria-label="Open menu">☰</button>
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="course-label">COS 333 · Concepts of PL</span>
+      <h1>Programming Language Concepts</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Overview</span>
+      <a href="index.html"><span class="nav-chapter">00</span> Home &amp; Topics</a>
+
+      <span class="nav-section-label">Chapters</span>
+      <a href="chapter1.html"><span class="nav-chapter">01</span> Preliminaries</a>
+      <a href="chapter2.html"><span class="nav-chapter">02</span> Evolution of PLs</a>
+      <a href="chapter5.html"><span class="nav-chapter">05</span> Names, Bindings &amp; Scopes</a>
+      <a href="chapter6.html"><span class="nav-chapter">06</span> Data Types</a>
+      <a href="chapter7.html"><span class="nav-chapter">07</span> Expressions &amp; Assignments</a>
+      <a href="chapter8.html"><span class="nav-chapter">08</span> Control Structures</a>
+      <a href="chapter9.html"><span class="nav-chapter">09</span> Subprograms</a>
+      <a href="chapter12.html"><span class="nav-chapter">12</span> OOP Support</a>
+      <a href="chapter15.html" class="active"><span class="nav-chapter">15</span> Functional Programming</a>
+      <a href="chapter16.html"><span class="nav-chapter">16</span> Logic Programming</a>
+
+      <span class="nav-section-label">Practical</span>
+      <a href="prolog-practical.html"><span class="nav-chapter">P3</span> Prolog in Practice</a>
+      <a href="prolog-list-patterns.html"><span class="nav-chapter">P4</span> List Patterns</a>
+      <a href="scheme-practical.html"><span class="nav-chapter">P5</span> Scheme in Practice</a>
+
+      <span class="nav-section-label">Assessment</span>
+      <a href="past-papers.html"><span class="nav-chapter">PP</span> Past Papers</a>
+      <a href="mcq.html"><span class="nav-chapter">MC</span> MCQ Bank</a>
+    </nav>
+
+    <div class="sidebar-toc">
+      <span class="sidebar-toc-title">On this page</span>
+      <a href="#intro">What is Functional?</a>
+      <a href="#vs-imperative">FP vs Imperative</a>
+      <a href="#scheme-intro">Scheme Overview</a>
+      <a href="#syntax">Syntax: S-Expressions</a>
+      <a href="#special-forms">Special Forms</a>
+      <a href="#define">DEFINE</a>
+      <a href="#if-cond">IF and COND</a>
+      <a href="#let">LET</a>
+      <a href="#predicates">Predicates &amp; Lists</a>
+      <a href="#tail">Tail Recursion</a>
+      <a href="#higher-order">Higher-Order Functions</a>
+      <a href="#list-functions">List Processing Functions</a>
+      <a href="#member">member</a>
+      <a href="#equalsimp">equalsimp &amp; equal</a>
+      <a href="#append">append</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle">
+        <span class="toggle-icon">☾</span>
+        <span class="toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="reading-progress"><div class="reading-progress-bar"></div></div>
+
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span>›</span> Chapter 15
+    </div>
+
+    <header class="page-header">
+      <span class="chapter-tag">Chapter 15</span>
+      <h1>Functional Programming &amp; Scheme</h1>
+      <p class="subtitle">
+        Functional programming computes by evaluating expressions, not executing statements.
+        Scheme, a dialect of LISP, is the implementation language for this course.
+        You must be able to write and analyse list-processing functions.
+      </p>
+      <div class="topic-pills">
+        <span class="pill">LISP/Scheme</span>
+        <span class="pill">S-Expressions</span>
+        <span class="pill">Recursion</span>
+        <span class="pill">Tail Recursion</span>
+        <span class="pill">Higher-Order Functions</span>
+        <span class="pill">MAP/APPLY</span>
+        <span class="pill">member</span>
+        <span class="pill">append</span>
+        <span class="pill">equal</span>
+      </div>
+    </header>
+
+    <article class="article">
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Scope — What is Examinable</div>
+        <p>Cover sections 15.1, 15.3, and 15.5 (up to and including 15.5.11). Leave out Common Lisp, ML, Haskell, F#. Lambda expressions (15.5.4) are NOT examinable. The exam will have ONE Scheme implementation question — list processing, no more complex than <code>member</code>, <code>equalsimp</code>, <code>equal</code>, and <code>append</code>.</p>
+      </div>
+
+      <h2 id="intro">What is Functional Programming?</h2>
+
+      <p>Functional programming (FP) is a programming paradigm in which computation is expressed as the evaluation of <strong>mathematical functions</strong>. It contrasts sharply with imperative programming.</p>
+
+      <div class="definition">
+        <dt>Pure Functional Programming</dt>
+        <dd>A style where programs consist entirely of function definitions and function applications. There are <strong>no assignment statements</strong>, <strong>no mutable state</strong>, and <strong>no side effects</strong>. Every function is <em>referentially transparent</em> (see Chapter 7).</dd>
+      </div>
+
+      <h3>Mathematical functions</h3>
+      <p>A mathematical function is a mapping from a set of inputs to a single output. It is purely determined by its inputs — calling it with the same arguments always returns the same result. This is what referential transparency means.</p>
+
+      <p>Contrast: in imperative languages, a function may read a global variable, modify state, or perform I/O — its result may differ between calls with identical arguments.</p>
+
+      <h2 id="vs-imperative">Functional vs Imperative Programming</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Aspect</th><th>Imperative</th><th>Functional</th></tr></thead>
+          <tbody>
+            <tr><td>Computation model</td><td>Sequence of state-changing statements</td><td>Evaluation of expressions</td></tr>
+            <tr><td>Variables</td><td>Mutable (can be reassigned)</td><td>Immutable (bound once)</td></tr>
+            <tr><td>Loops</td><td>while, for</td><td>Recursion (no loops needed)</td></tr>
+            <tr><td>Assignment</td><td>Fundamental operation</td><td>No assignment; only binding</td></tr>
+            <tr><td>State</td><td>Program has mutable state</td><td>No mutable state (pure FP)</td></tr>
+            <tr><td>Side effects</td><td>Normal and common</td><td>Avoided; functions are pure</td></tr>
+            <tr><td>Von Neumann ties</td><td>Strong (fetch-store cycle)</td><td>None — not tied to architecture</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Advantages of the functional model</h3>
+      <ul>
+        <li><strong>Easier to reason about</strong>: no side effects means substituting equals for equals (equational reasoning) is always valid.</li>
+        <li><strong>Easier to test</strong>: pure functions are fully determined by their inputs — no need to set up mutable state.</li>
+        <li><strong>Parallelism</strong>: pure functions can be evaluated in any order or concurrently without race conditions.</li>
+        <li><strong>No "off-by-one" loop errors</strong>: recursion replaces iteration — base case and recursive case clearly define the computation.</li>
+      </ul>
+
+      <h2 id="scheme-intro">Scheme — Overview</h2>
+
+      <p>Scheme is a minimalist, lexically-scoped dialect of LISP developed in the mid-1970s. Key characteristics:</p>
+      <ul>
+        <li><strong>S-expression syntax</strong>: all code is expressed as parenthesised lists (S-expressions).</li>
+        <li><strong>Functions are first-class</strong>: functions can be assigned to variables, passed as arguments, returned as values.</li>
+        <li><strong>Lexical scoping</strong>: variables are resolved in the static environment where the function is defined, not where it is called.</li>
+        <li><strong>Tail-call optimisation</strong>: properly tail-recursive implementations must optimise tail calls, enabling recursion without stack overflow.</li>
+        <li><strong>Dynamic typing</strong>: types are associated with values, not variables; no type declarations.</li>
+      </ul>
+
+      <p>In this course, you use DrRacket with the Scheme language (#lang r5rs or similar). All your programs must use the textbook's Scheme subset.</p>
+
+      <h2 id="syntax">Syntax: S-Expressions</h2>
+
+      <p>Everything in Scheme is either an <strong>atom</strong> or a <strong>list</strong>:</p>
+      <ul>
+        <li><strong>Atom</strong>: a number (<code>42</code>, <code>3.14</code>), a symbol (<code>foo</code>, <code>+</code>), a Boolean (<code>#t</code>, <code>#f</code>), a string (<code>"hello"</code>).</li>
+        <li><strong>List</strong>: <code>(element1 element2 ...)</code> — any number of elements between parentheses.</li>
+      </ul>
+
+      <p>A function call is written as a list where the <strong>first element is the function</strong> and the remaining elements are arguments. This is <strong>prefix notation</strong>:</p>
+
+      <pre><code class="language-scheme">(+ 3 4)         ; => 7
+(* 5 6)         ; => 30
+(+ 1 2 3 4)     ; => 10   (+ accepts any number of args)
+(> 5 3)         ; => #t   (true)
+(= 5 5)         ; => #t</code></pre>
+
+      <p>Everything is an S-expression — data and code have the same form. This is what LISP/Scheme mean by "code is data".</p>
+
+      <h2 id="special-forms">Special Forms</h2>
+
+      <p>Special forms look like function calls but are not evaluated like them — they have their own evaluation rules defined by the language.</p>
+
+      <h2 id="define">DEFINE</h2>
+      <p>Binds a name to a value or function in the current environment.</p>
+
+      <pre><code class="language-scheme">; Binding a variable
+(define pi 3.14159)
+(define name "Alice")
+
+; Defining a function
+(define (square x)
+  (* x x))
+
+(square 5)  ; => 25
+(square 3)  ; => 9
+
+; Alternative (using lambda implicitly):
+(define square (lambda (x) (* x x)))</code></pre>
+
+      <p>The function definition form <code>(define (name params...) body)</code> is syntactic sugar for <code>(define name (lambda (params...) body))</code>.</p>
+
+      <h2 id="if-cond">IF and COND</h2>
+
+      <pre><code class="language-scheme">; IF — two-way selection
+(if condition  then-expression  else-expression)
+
+(if (> x 0)
+    "positive"
+    "non-positive")
+
+; COND — multiple selection (like case/if-else-if)
+(cond
+  ((= x 0) "zero")
+  ((> x 0) "positive")
+  (else    "negative"))  ; else clause handles remaining cases</code></pre>
+
+      <p>Both <code>if</code> and <code>cond</code> are <strong>expressions</strong> in Scheme — they return a value. The else branch of <code>if</code> is required when the <code>if</code> is used for its value.</p>
+
+      <h2 id="let">LET</h2>
+      <p>Creates local variable bindings within a lexical scope.</p>
+
+      <pre><code class="language-scheme">; LET — bind local variables; bindings are parallel (all rhs evaluated first)
+(let ((x 5)
+      (y 3))
+  (+ x y))   ; => 8   (x and y only exist inside the let body)
+
+; LET* — sequential bindings (each binding sees the previous ones)
+(let* ((x 5)
+       (y (* x 2)))     ; y can reference x because let*
+  (+ x y))              ; => 15</code></pre>
+
+      <h2 id="predicates">Predicates and List Operations</h2>
+
+      <p>A <strong>predicate</strong> is a function that returns a Boolean (<code>#t</code> or <code>#f</code>). By convention, predicate names end with <code>?</code>.</p>
+
+      <pre><code class="language-scheme">(null? '())         ; #t  — is the list empty?
+(null? '(1 2))      ; #f
+(pair? '(1 2))      ; #t  — is this a non-empty list (a pair)?
+(pair? '())         ; #f
+(number? 42)        ; #t
+(symbol? 'foo)      ; #t
+(equal? '(1 2) '(1 2))   ; #t  — structural equality</code></pre>
+
+      <h3>Core list operations</h3>
+
+      <pre><code class="language-scheme">; car — first element of a list
+(car '(1 2 3))   ; => 1
+
+; cdr — rest of the list (everything except the first element)
+(cdr '(1 2 3))   ; => (2 3)
+(cdr '(x))       ; => ()    (empty list)
+
+; cons — construct: prepend an element to a list
+(cons 1 '(2 3))   ; => (1 2 3)
+(cons 1 '())      ; => (1)
+(cons 1 (cons 2 (cons 3 '())))  ; => (1 2 3)
+
+; list — construct a list from elements
+(list 1 2 3)      ; => (1 2 3)
+
+; Quote prevents evaluation
+'(1 2 3)          ; the list (1 2 3) as data, NOT a function call</code></pre>
+
+      <div class="callout note">
+        <div class="callout-label">The quote notation</div>
+        <p><code>'(1 2 3)</code> is shorthand for <code>(quote (1 2 3))</code>. It tells Scheme to treat the expression as data (a list), not as a function call. Without quote, <code>(1 2 3)</code> would try to call <code>1</code> as a function — an error.</p>
+      </div>
+
+      <h2 id="tail">Tail Recursion</h2>
+
+      <div class="definition">
+        <dt>Tail Call</dt>
+        <dd>A function call is a <strong>tail call</strong> if it is the <em>last operation</em> performed by the calling function — the calling function does nothing with the return value except return it directly.</dd>
+      </div>
+
+      <div class="definition">
+        <dt>Tail Recursion Optimisation (TCO)</dt>
+        <dd>When a recursive call is a tail call, the Scheme implementation is required to reuse the current stack frame for the recursive call (instead of creating a new one). This allows recursion to run in <strong>constant stack space</strong> — equivalent to a loop. Without TCO, deeply recursive functions would overflow the stack.</dd>
+      </div>
+
+      <h3>Non-tail-recursive vs tail-recursive</h3>
+      <pre><code class="language-scheme">; Non-tail-recursive factorial
+; The multiplication (* n ...) happens AFTER the recursive call returns
+; → NOT a tail call → stack grows with n
+(define (factorial n)
+  (if (= n 0)
+      1
+      (* n (factorial (- n 1)))))    ; recursive call is NOT in tail position
+
+; Tail-recursive factorial using an accumulator
+(define (factorial n acc)
+  (if (= n 0)
+      acc                            ; base case: return accumulator
+      (factorial (- n 1) (* n acc)))) ; tail call — nothing done after return
+
+(factorial 5 1)  ; => 120</code></pre>
+
+      <p>The tail-recursive version passes the accumulated result as a parameter, so the recursive call is the <em>last thing done</em> — a true tail call that can be optimised.</p>
+
+      <h2 id="higher-order">Higher-Order Functions</h2>
+
+      <div class="definition">
+        <dt>Higher-Order Function</dt>
+        <dd>A function that takes one or more functions as arguments, or returns a function as its result (or both).</dd>
+      </div>
+
+      <h3>APPLY</h3>
+      <p><code>apply</code> calls a function with a list as its argument list:</p>
+      <pre><code class="language-scheme">(apply + '(1 2 3 4))     ; => 10  (equivalent to (+ 1 2 3 4))
+(apply max '(3 1 4 1 5)) ; => 5</code></pre>
+
+      <h3>MAP</h3>
+      <p><code>map</code> applies a function to every element of a list and returns a new list of results:</p>
+      <pre><code class="language-scheme">(map (lambda (x) (* x x)) '(1 2 3 4 5))
+; => (1 4 9 16 25)
+
+(map car '((1 a) (2 b) (3 c)))
+; => (1 2 3)   — car of each sublist</code></pre>
+
+      <h2 id="list-functions">List Processing Functions</h2>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Exam Focus — Know These Functions Thoroughly</div>
+        <p>The exam implementation question will be at most as complex as <code>member</code>, <code>equalsimp</code>, <code>equal</code>, and <code>append</code>. Study each function until you can write it from scratch and trace its execution step by step.</p>
+      </div>
+
+      <h2 id="member">member — Check list membership</h2>
+
+      <p>Returns <code>#t</code> if <code>atm</code> is a member of list <code>lst</code>, <code>#f</code> otherwise. Assumes a flat list of atoms.</p>
+
+      <pre><code class="language-scheme">(define (member atm lst)
+  (cond
+    ((null? lst) #f)                   ; empty list — not found
+    ((equal? atm (car lst)) #t)        ; found at head
+    (else (member atm (cdr lst)))))    ; recurse on tail
+
+; Tests:
+(member 'b '(a b c))    ; => #t
+(member 'x '(a b c))    ; => #f
+(member 3 '(1 2 3 4))   ; => #t
+(member 3 '())           ; => #f</code></pre>
+
+      <h3>Trace of (member 'b '(a b c))</h3>
+      <pre><code>; Call 1: atm='b, lst='(a b c)
+;   (null? '(a b c)) => #f
+;   (equal? 'b (car '(a b c))) = (equal? 'b 'a) => #f
+;   Recurse: (member 'b '(b c))
+; Call 2: atm='b, lst='(b c)
+;   (null? '(b c)) => #f
+;   (equal? 'b (car '(b c))) = (equal? 'b 'b) => #t
+;   Return #t</code></pre>
+
+      <h2 id="equalsimp">equalsimp — Equality of simple lists</h2>
+
+      <p>Tests whether two lists of atoms are equal (element by element). Does not handle nested lists.</p>
+
+      <pre><code class="language-scheme">(define (equalsimp lst1 lst2)
+  (cond
+    ((null? lst1) (null? lst2))           ; both empty => #t; one empty => #f
+    ((null? lst2) #f)                     ; lst1 not empty but lst2 is
+    ((equal? (car lst1) (car lst2))
+     (equalsimp (cdr lst1) (cdr lst2)))   ; heads equal, compare tails
+    (else #f)))                           ; heads not equal
+
+; Tests:
+(equalsimp '(a b c) '(a b c))   ; => #t
+(equalsimp '(a b) '(a b c))     ; => #f
+(equalsimp '() '())              ; => #t
+(equalsimp '(1 2) '(1 3))       ; => #f</code></pre>
+
+      <h2 id="equalsimp">equal — Equality including nested lists</h2>
+
+      <p>Tests structural equality of any two S-expressions, including nested lists.</p>
+
+      <pre><code class="language-scheme">(define (equal? lst1 lst2)
+  (cond
+    ((not (pair? lst1)) (eqv? lst1 lst2))    ; both atoms: compare directly
+    ((not (pair? lst2)) #f)                   ; lst1 is pair but lst2 is atom
+    ((equal? (car lst1) (car lst2))
+     (equal? (cdr lst1) (cdr lst2)))          ; compare heads, then tails
+    (else #f)))
+
+; Tests:
+(equal? '(a (b c) d) '(a (b c) d))  ; => #t  (nested list)
+(equal? '(a (b c)) '(a (b x)))      ; => #f
+(equal? 'a 'a)                       ; => #t  (atoms)
+(equal? '() '())                     ; => #t</code></pre>
+
+      <p>Key difference from <code>equalsimp</code>: <code>equal</code> recurses into nested lists (<code>(car lst1)</code> might itself be a list), while <code>equalsimp</code> only compares flat lists of atoms.</p>
+
+      <h2 id="append">append — Concatenate two lists</h2>
+
+      <p>Returns a new list that is the concatenation of <code>lst1</code> and <code>lst2</code>.</p>
+
+      <pre><code class="language-scheme">(define (append lst1 lst2)
+  (if (null? lst1)
+      lst2                                    ; base: nothing to prepend
+      (cons (car lst1)
+            (append (cdr lst1) lst2))))        ; prepend head, recurse on tail
+
+; Tests:
+(append '(a b) '(c d))    ; => (a b c d)
+(append '() '(1 2))        ; => (1 2)
+(append '(1 2) '())        ; => (1 2)
+(append '(a) '(b c d))     ; => (a b c d)</code></pre>
+
+      <h3>Trace of (append '(a b) '(c d))</h3>
+      <pre><code>; (append '(a b) '(c d))
+;   lst1 = '(a b), not null
+;   (cons 'a (append '(b) '(c d)))
+;     lst1 = '(b), not null
+;     (cons 'b (append '() '(c d)))
+;       lst1 = '(), null → return '(c d)
+;     → (cons 'b '(c d)) = '(b c d)
+;   → (cons 'a '(b c d)) = '(a b c d)
+; Result: '(a b c d)</code></pre>
+
+      <h3>Additional example: reverse</h3>
+      <p>Using append, we can write a simple (non-tail-recursive) reverse:</p>
+      <pre><code class="language-scheme">(define (my-reverse lst)
+  (if (null? lst)
+      '()
+      (append (my-reverse (cdr lst))
+              (list (car lst)))))
+
+(my-reverse '(1 2 3 4))  ; => (4 3 2 1)</code></pre>
+
+      <div class="callout note">
+        <div class="callout-label">DrRacket — Practical 2</div>
+        <p>The exam implementation question must be answered using DrRacket. Make sure you have practised setting up a Racket file with <code>#lang r5rs</code> (or the scheme language module your practical used), loading it, and testing your functions interactively. These mechanics must be automatic on the day.</p>
+      </div>
+
+      <div class="quiz">
+        <div class="quiz-header"><span>Quick Check</span></div>
+        <div class="quiz-body">
+          <p class="quiz-question">What does <code>(cdr '(a b c))</code> evaluate to in Scheme?</p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="true"
+                data-feedback="cdr returns the rest of the list — everything except the first element. So (cdr '(a b c)) = '(b c).">
+              <span class="opt-key">A</span> <code>(b c)</code>
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="car returns the first element, not cdr.">
+              <span class="opt-key">B</span> <code>a</code>
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="(c) would be the result of (cddr '(a b c)), not cdr.">
+              <span class="opt-key">C</span> <code>(c)</code>
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="cdr of a non-empty list never returns #f — it returns the rest of the list.">
+              <span class="opt-key">D</span> <code>#f</code>
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">Try again</button>
+        </div>
+      </div>
+
+      <div class="quiz">
+        <div class="quiz-header"><span>Quick Check</span></div>
+        <div class="quiz-body">
+          <p class="quiz-question">Evaluate: <code>(cons 'x '(y z))</code></p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="true"
+                data-feedback="cons prepends the first argument to the front of the list (second argument). (cons 'x '(y z)) = '(x y z).">
+              <span class="opt-key">A</span> <code>(x y z)</code>
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="(y z x) would be the result of (append '(y z) (list 'x)), not cons.">
+              <span class="opt-key">B</span> <code>(y z x)</code>
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="((x) y z) would require cons-ing a list, not an atom.">
+              <span class="opt-key">C</span> <code>((x) y z)</code>
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="(x . (y z)) is the dotted pair notation, but (x y z) is the standard list form for the same structure.">
+              <span class="opt-key">D</span> <code>(x . (y z))</code> only
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">Try again</button>
+        </div>
+      </div>
+
+      <div class="summary-box">
+        <h2>Chapter 15 Summary</h2>
+        <ul>
+          <li><strong>Functional programming</strong>: computation via function application, no assignment, no mutable state, referential transparency.</li>
+          <li><strong>S-expressions</strong>: atoms or lists. Function call = list with function as first element (prefix notation).</li>
+          <li><strong>quote</strong>: prevents evaluation. <code>'(1 2 3)</code> is data, not a call to function <code>1</code>.</li>
+          <li><strong>DEFINE</strong>: bind a name to a value or function.</li>
+          <li><strong>IF</strong>: two-way selection expression. <strong>COND</strong>: multi-way selection expression.</li>
+          <li><strong>LET</strong>: parallel local bindings. <strong>LET*</strong>: sequential (each binding sees previous ones).</li>
+          <li><strong>car</strong>: first element. <strong>cdr</strong>: rest. <strong>cons</strong>: prepend. <strong>null?</strong>: empty list test.</li>
+          <li><strong>Tail recursion</strong>: recursive call is the last operation; Scheme optimises to constant stack space.</li>
+          <li><strong>APPLY</strong>: call function with a list as argument list. <strong>MAP</strong>: apply function to each element, return list of results.</li>
+          <li><strong>member</strong>: flat list membership test. <strong>equalsimp</strong>: flat list equality. <strong>equal</strong>: nested list equality. <strong>append</strong>: list concatenation.</li>
+        </ul>
+      </div>
+
+    </article>
+  </main>
+</div>
+<script src="study-notes.js"></script>
+</body>
+</html>

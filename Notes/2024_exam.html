@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>COS 333 Examination 2024</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f6f7f9; color: #20242a; }
+    main { max-width: 940px; margin: 0 auto; padding: 28px 18px 48px; }
+    .back-link { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px; color: #243246; text-decoration: none; font-size: 14px; font-weight: 600; }
+    .back-link:hover { color: #0f172a; text-decoration: underline; }
+    h1 { font-size: 28px; margin: 0 0 4px; }
+    .meta { font-size: 14px; color: #5a6272; margin-bottom: 20px; }
+    .question { background: white; border: 1px solid #d9dde3; border-radius: 8px; padding: 20px; margin: 16px 0; }
+    .question h2 { font-size: 18px; margin: 0 0 12px; }
+    .points { font-size: 13px; color: #5f6f89; font-weight: normal; margin-left: 8px; }
+    .prompt { line-height: 1.6; margin-bottom: 14px; }
+    .prompt p { margin: 0 0 10px; }
+    .prompt pre { background: #f4f6f8; border: 1px solid #d8dde4; border-radius: 6px; overflow-x: auto; padding: 12px; white-space: pre-wrap; font-size: 13px; }
+    .options { display: grid; gap: 8px; }
+    button { font: inherit; }
+    button.option { text-align: left; border: 1px solid #c7cdd6; background: #fff; padding: 10px 12px; border-radius: 6px; cursor: pointer; font-size: 15px; }
+    button.option:hover { border-color: #62748e; background: #f8fafc; }
+    button.show-answer { border: 1px solid #5f6f89; background: #f8fafc; color: #243246; padding: 9px 12px; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+    button.show-answer:hover { background: #edf2f7; }
+    button.correct { border-color: #198754; background: #eaf7ef; }
+    button.wrong { border-color: #c73333; background: #fdecec; }
+    .feedback, .answer { display: none; margin-top: 12px; padding: 12px; border-radius: 6px; background: #eef3fb; line-height: 1.5; font-size: 14px; }
+    .feedback.show, .answer.show { display: block; }
+    .answer pre { background: #f4f6f8; border: 1px solid #d8dde4; border-radius: 6px; padding: 12px; white-space: pre-wrap; font-size: 13px; margin: 6px 0 0; }
+    .coding { border-left: 4px solid #667085; }
+    .multi-hint { font-size: 13px; color: #a0522d; font-style: italic; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+<main>
+  <a class="back-link" href="past-papers.html">&larr; Back to Past Papers</a>
+  <h1>COS 333 Examination <span class="points">25 June 2024</span></h1>
+  <div class="meta">Examiner: Mr W. S. van Heerden &nbsp;|&nbsp; Total: 40 marks &nbsp;|&nbsp; 28 Questions</div>
+  <div id="quiz"></div>
+</main>
+<script>
+const questions = [
+  {n:1, pts:1, multi:false, interactive:true,
+   prompt:"There are often trade-offs between the evaluation criteria. Select the statement that most correctly describes a likely <strong>trade-off when readability improves</strong>.",
+   opts:["The cost of execution becomes worse.","The cost of maintenance becomes worse.","The cost of implementation becomes worse.","Reliability becomes worse."],
+   ans:[1], reason:"More readable (higher-level, expressive) languages often add abstraction layers that increase execution overhead — a classic trade-off between readability and execution efficiency."},
+  {n:2, pts:1, multi:false, interactive:true,
+   prompt:"An additional criterion is <strong>generality</strong>. Select the programming language that has the <strong>best generality</strong>.",
+   opts:["Fortran I","ALGOL 60","SIMULA 67","PL/I"],
+   ans:[4], reason:"PL/I was explicitly designed to combine the best features of FORTRAN (scientific), COBOL (business), and ALGOL 60 (structured) — making it the most general-purpose of these options."},
+  {n:3, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>Pascal and C</strong>, and select the most correct statement.",
+   opts:["Pascal is more readable than C.","Pascal is more writable than C.","Pascal is less reliable than C.","Pascal has a higher cost of maintenance than C."],
+   ans:[1], reason:"Pascal was designed specifically for teaching and clarity — structured programming, strict typing, and clean block structure make it more readable than C."},
+  {n:4, pts:1, multi:false, interactive:true,
+   prompt:"An additional criterion is <strong>portability</strong>. Select the programming language that is the <strong>most portable</strong>.",
+   opts:["Fortran 90","C++","PL/I","JavaScript"],
+   ans:[4], reason:"JavaScript runs in any browser and via Node.js on any OS — its ubiquity on the web makes it the most portable of these options."},
+  {n:5, pts:5, multi:false, interactive:false, coding:true,
+   prompt:"Write a Scheme function named <code>removePositiveOddValues</code>, which receives a simple list of numeric atoms. Yield a list containing the values in the parameter list, in order, with all <strong>positive odd values removed</strong>.<br><br>Examples:<pre>(removePositiveOddValues '(3 9))       ; =&gt; ()\n(removePositiveOddValues '(-5 3 0 5 9)) ; =&gt; (-5 0)</pre>Submit <code>s99999999.scm</code> to slot <em>\"Examination: Scheme Function\"</em>.",
+   shortAnswer:"(define (removePositiveOddValues lst)\n  (cond\n    ((null? lst) '())\n    ((and (> (car lst) 0) (odd? (car lst)))\n     (removePositiveOddValues (cdr lst)))\n    (else (cons (car lst) (removePositiveOddValues (cdr lst))))))"},
+  {n:6, pts:5, multi:false, interactive:false, coding:true,
+   prompt:"Write a Prolog proposition called <code>doublePositives(L1, L2)</code>, which succeeds if L2 contains all elements in L1, in order, with every <strong>positive value doubled</strong> and every <strong>non-positive value unchanged</strong>.<br><br>Examples:<pre>?- doublePositives([-4, -9], X).         % X = [-4, -9]\n?- doublePositives([-3, 6, 7, -1, -5], X). % X = [-3, 12, 14, -1, -5]</pre>Submit <code>s99999999.pl</code> to slot <em>\"Examination: Prolog Proposition\"</em>.",
+   shortAnswer:"doublePositives([], []).\ndoublePositives([H|T], [D|R]) :- H > 0, D is H * 2, doublePositives(T, R).\ndoublePositives([H|T], [H|R]) :- H =< 0, doublePositives(T, R)."},
+  {n:7, pts:1, multi:false, interactive:true,
+   prompt:"Select the option that most correctly describes the <strong>binding time</strong> of a standard 32-bit signed integer type in a statically typed language to either sign-and-magnitude or two's complement representation.",
+   opts:["Language design time","Language implementation time","Compile time","Load time","Runtime"],
+   ans:[2], reason:"The decision to use two's complement (or sign-and-magnitude) for integer representation is made when implementing the language on a particular platform — that's language implementation time."},
+  {n:8, pts:1, multi:false, interactive:true,
+   prompt:"Consider this C# code:<pre>1. {\n2.    int y;\n3.    {\n4.       int x = 5;\n5.    }\n6.    int x = 2;\n7. }</pre>Select the most correct statement.",
+   opts:["Does not compile because y is not initialised.","Does not compile because x on line 4 hides x on line 6.","Does not compile because x on line 6 hides x on line 4.","Compiles and runs successfully."],
+   ans:[4], reason:"x on line 4 is in an inner block that closes on line 5. After that block ends, x is out of scope. Declaring x again on line 6 in the outer block is perfectly legal in C#."},
+  {n:9, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>character string types</strong> in programming languages, and select the most correct statement.",
+   opts:["In languages that represent character strings using only classes, strings are always mutable.","In languages that represent character strings using only classes, strings are always immutable.","Limited dynamic length strings have a higher overall hardware cost than static length strings, and a lower cost than dynamic length strings.","C supports character strings as a primitive type."],
+   ans:[3], reason:"Limited dynamic strings need a length field and some allocation overhead (more than static), but don't resize arbitrarily like full dynamic strings — so they fall between the two in hardware cost."},
+  {n:10, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>unions</strong>, and select the most correct statement.",
+   opts:["Unions are closely related to classes in OOP, but are more limited in functionality.","Discriminated unions are more memory efficient than free unions.","Unions can be used as a mechanism for returning multiple values from a subprogram.","Unions are used when memory cost is of great concern."],
+   ans:[4], reason:"The primary motivation for unions is memory efficiency — overlaying multiple type representations in the same storage space to reduce memory usage."},
+  {n:11, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>arithmetic operations in Scheme</strong>, and select the most correct statement.",
+   opts:["Order is unambiguously determined based on clear precedence levels and associativity rules.","Order is unambiguously determined based on function and parameter evaluation.","Order is unambiguously determined because all operators have the same precedence and associate left-to-right.","Order is ambiguous because function parameters are evaluated in no particular order."],
+   ans:[2], reason:"In Scheme, arithmetic is expressed as function calls (prefix notation). The nesting of function applications unambiguously determines evaluation order — no separate precedence rules are needed."},
+  {n:12, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>expressions in Ada</strong>, and select the most correct statement.",
+   opts:["The lack of coercions in Ada makes the language more readable.","The lack of coercions in Ada makes the language less reliable.","The common use of coercions in Ada makes the language more writable.","The common use of coercions in Ada makes the language less reliable."],
+   ans:[1], reason:"With no implicit coercions, every type conversion is explicit and visible in the source code — making the program's behaviour clearer and more readable."},
+  {n:13, pts:1, multi:false, interactive:true,
+   prompt:"Consider:<pre>while ((count > 0) and (result = (10.0 / count))) { print result; count = count - 1; }</pre>Assume C-like syntax, assignment as expression, integers as Booleans. Select the most correct statement.",
+   opts:["Produces an error regardless of short-circuit evaluation.","Produces an error if <code>and</code> IS short-circuit evaluated.","Produces an error if <code>and</code> is NOT short-circuit evaluated.","Produces no error regardless of short-circuit evaluation."],
+   ans:[3], reason:"When count = 0, (count > 0) is false. Without short-circuit, the right side (10.0/count) is still evaluated — causing division by zero. With short-circuit, the right side is skipped and no error occurs."},
+  {n:14, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>unary assignment operators</strong>, and select the most correct statement.",
+   opts:["Unary assignment operators reduce readability if overloaded to provide prefix and postfix versions.","Unary assignment operators reduce writability if overloaded to provide prefix and postfix versions.","Unary assignment operators reduce the execution cost of a programming language.","Unary assignment operators are essential within a programming language."],
+   ans:[1], reason:"When ++ appears in both prefix (++i) and postfix (i++) forms, reading an expression requires knowing which form is used and its subtle side-effect timing — reducing readability."},
+  {n:15, pts:2, multi:true, interactive:true,
+   prompt:"Select <strong>only</strong> the statements that are true about <strong>counter-controlled loops</strong>. <em>(Incorrectly selected options will be penalised.)</em>",
+   opts:["Counter-controlled loops are required to implement any flowchart-represented algorithm.","Counter-controlled loops in Python are more reliable than in C.","Counter-controlled loops in C are more readable than in Java.","Counter-controlled loops are not directly supported in purely functional programming languages."],
+   ans:[2,4], reason:"Python's range-based for loop prevents index manipulation errors (more reliable than C's general for). Purely functional languages use recursion instead of counter loops."},
+  {n:16, pts:2, multi:true, interactive:true,
+   prompt:"Select <strong>only</strong> the correct statements about <strong>disambiguating nested selection statements</strong>. <em>(Incorrectly selected options will be penalised.)</em>",
+   opts:["Python's approach is less readable than Java's approach.","Python's approach is less reliable than Java's approach.","Ruby and Perl use very similar approaches, but Perl's approach is more writable than Ruby's.","Python and Ruby use very similar approaches, but Python's approach is more writable than Ruby's."],
+   ans:[2,3], reason:"Python's indentation is error-prone (a mis-indent silently changes logic) — less reliable than Java's explicit braces. Perl's brace syntax (like C) is generally more familiar/writable than Ruby's end-keyword approach."},
+  {n:17, pts:1, multi:false, interactive:false,
+   prompt:"Consider this guarded-commands program:<pre>var myVal = 2\ndo (myVal &lt; 0) -&gt; print(\"A \"); myVal = 1\n[] (myVal &gt; 0) -&gt; print(\"B \"); myVal = myVal - 1\nod</pre>Provide the <strong>output</strong>.",
+   shortAnswer:"B B \n\nTrace:\n  myVal=2: (2<0) false, (2>0) true → print 'B ', myVal=1\n  myVal=1: (1<0) false, (1>0) true → print 'B ', myVal=0\n  myVal=0: neither guard true → exit do...od"},
+  {n:18, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>subprograms defined outside a class definition</strong>, and select the most correct statement.",
+   opts:["Ruby subprograms defined outside a class definition are more writable than C++ subprograms defined outside a class definition.","Ruby subprograms defined outside a class definition are less writable than C++ subprograms defined outside a class definition.","Ruby subprograms defined outside a class definition are more orthogonal than C++ subprograms defined outside a class definition.","Ruby subprograms defined outside a class definition behave in exactly the same way as C++ subprograms defined outside a class definition."],
+   ans:[3], reason:"In Ruby, functions defined outside a class automatically become methods of the Object class — everything is a method, which is more orthogonal than C++'s standalone functions that exist outside the object system."},
+  {n:19, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>procedures and functions</strong>, and select the most correct statement.",
+   opts:["A procedure can produce a result if all its parameters use pass-by-value semantics.","A procedure is guaranteed to produce no side effect if it produces a result.","A function is guaranteed to produce a side effect if it produces a result.","A procedure can more easily produce multiple results than a function can."],
+   ans:[4], reason:"A procedure can modify multiple reference parameters simultaneously, effectively returning multiple results — easier than a function which formally returns a single value."},
+  {n:20, pts:1, multi:false, interactive:false,
+   prompt:"Consider this code — the language uses <strong>pass-by-name</strong>:<pre>doSomething(int first, int second) {\n   first = 2\n   print(first)\n   print(\" \")\n   print(second)\n}\nvoid main() {\n   int val1 = 5\n   int val2 = val1 + 1\n   doSomething(val1, val2)\n}</pre>Provide the <strong>output</strong>.",
+   shortAnswer:"2 6\n\nWith pass-by-name:\n  first ≡ val1, second ≡ val2\n  first = 2  →  val1 = 2\n  print(first) → print(val1) = 2\n  print(\" \")  → space\n  print(second) → print(val2)\n  val2 was assigned val1+1 = 5+1 = 6 before the call; it is a separate variable → still 6\n  Output: 2 6"},
+  {n:21, pts:1, multi:false, interactive:false,
+   prompt:"Consider this code — language uses <strong>deep binding</strong> and <strong>dynamic scoping</strong>:<pre>var A = 2\nmain()  { var A = 5; call sub1(sub2) }\nsub1(param) { var A = 3; call param() }\nsub2()  { print(A) }</pre>Provide the <strong>output</strong>.",
+   shortAnswer:"5\n\nDeep binding captures the referencing environment when sub2 is PASSED (inside main, where A = 5 locally). When sub2 is eventually called, it uses that captured environment. Dynamic scoping finds the most recently bound A in the captured environment, which is main's A = 5."},
+  {n:22, pts:1, multi:false, interactive:true,
+   prompt:"Consider this C# generic method called with <code>doSomething(5, 2)</code> and <code>doSomething(false, true)</code>. Select the most correct statement about its use.",
+   opts:["One version created at compile time, used with int and bool parameters.","Two versions created at compile time — one for int, one for bool.","One version created at runtime, used with Object parameters.","Two versions created at runtime — one for int, one for bool."],
+   ans:[4], reason:"C# uses reified generics. Value types (int, bool) each get a separate JIT-compiled version at runtime. Reference types would share one version, but both int and bool are value types here."},
+  {n:23, pts:1, multi:false, interactive:false,
+   prompt:"Consider this coroutine program:<pre>main()        { resume first }\ncoroutine first  { print(\"X \"); resume second; print(\"Y \") }\ncoroutine second { print(\"A \"); resume first;  print(\"B \") }</pre>Provide the <strong>output</strong>.",
+   shortAnswer:"X A Y B\n\nTrace:\n1. main → resume first\n2. first: print X, resume second\n3. second: print A, resume first\n4. first resumes: print Y, first ends\n5. second resumes: print B, second ends"},
+  {n:24, pts:2, multi:true, interactive:true,
+   prompt:"Select <strong>only</strong> the C++ features that <strong>detract from ADT representation hiding</strong>. <em>(Incorrectly selected options will be penalised.)</em>",
+   opts:["The existence of friend functions and friend classes.","The fact that C++ supports stand-alone functions not part of a class.","The fact that C++ requires class and member function definitions must appear in the same file.","The fact that all class data members must appear in header files."],
+   ans:[1,4], reason:"Friend functions/classes can access private members directly (breaking encapsulation). Data members in header files expose implementation details since headers are visible to clients."},
+  {n:25, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>ADTs in Ruby</strong>, and select the most correct statement.",
+   opts:["Instance and class variable names are more readable in Ruby than in Java.","Ruby supports multiple constructors, each implicitly called with the appropriate parameters.","It is impossible to implement multiple constructor functionality in Ruby.","The interface of a Ruby ADT is very unreliable."],
+   ans:[4], reason:"Ruby classes are dynamic — they can be reopened and modified at any time. This makes the interface unreliable because what a class provides can change at runtime."},
+  {n:26, pts:1, multi:false, interactive:true,
+   prompt:"Imagine a language where a subclass can inherit a public method and <strong>change its access to private or protected</strong>. Select the most correct statement.",
+   opts:["Dynamic binding is less efficient.","Dynamic binding is impossible.","Subclasses are subtypes.","Subclasses are not subtypes."],
+   ans:[4], reason:"A subtype must be substitutable for its parent (Liskov principle) — this requires all public methods to remain accessible. Restricting access breaks that guarantee, so subclasses cannot be subtypes."},
+  {n:27, pts:2, multi:true, interactive:true,
+   prompt:"Select <strong>only</strong> the approaches that make <strong>Smalltalk more orthogonal than Java</strong>. <em>(Incorrectly selected options will be penalised.)</em>",
+   opts:["The difference in approach to the exclusivity of objects.","The difference in approach to dynamic and static binding.","The difference in approach to subclasses and subtypes.","The difference in approach to object deallocation."],
+   ans:[1,2], reason:"Smalltalk treats EVERYTHING as an object (no primitives) — more orthogonal exclusivity. Smalltalk always uses dynamic binding — more orthogonal binding (one rule, not two)."},
+  {n:28, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>OOP in C++ and C#</strong>, and select the most correct statement.",
+   opts:["C++ provides worse support for multiple inheritance than C#.","C++ provides less writability in terms of nested classes than C#.","C++ uses a more orthogonal approach to OOP than C#.","C++ provides a more readable approach to dynamic message binding than C#."],
+   ans:[4], reason:"C# requires both the <code>virtual</code> keyword in the parent and <code>override</code> in the child — this explicit declaration makes the intent clearer and more readable than C++'s approach."}
+];
+
+const quiz = document.getElementById('quiz');
+for (const q of questions) {
+  const sec = document.createElement('section');
+  sec.className = 'question' + (q.coding ? ' coding' : '');
+  let body = '';
+  if (q.interactive) {
+    if (q.multi) body += `<p class="multi-hint">Select ALL correct options. (Incorrectly selected options are penalised.)</p>`;
+    body += `<div class="options">`;
+    q.opts.forEach((o,i) => { body += `<button class="option" data-idx="${i+1}">${i+1}. ${o}</button>`; });
+    body += `</div><div class="feedback"></div>`;
+  } else {
+    body += `<button class="show-answer">Show model answer</button><div class="answer"><strong>Model Answer:</strong><pre>${escHtml(q.shortAnswer)}</pre></div>`;
+  }
+  sec.innerHTML = `<h2>Question ${q.n} <span class="points">(${q.pts} pt${q.pts>1?'s':''})</span></h2><div class="prompt">${q.prompt}</div>${body}`;
+  quiz.appendChild(sec);
+  if (q.interactive) {
+    const selected = new Set();
+    const btns = sec.querySelectorAll('button.option');
+    const fb = sec.querySelector('.feedback');
+    btns.forEach(btn => btn.addEventListener('click', () => {
+      const idx = +btn.dataset.idx;
+      if (!q.multi) { btns.forEach(b => b.classList.remove('correct','wrong')); selected.clear(); }
+      selected.has(idx) ? selected.delete(idx) : selected.add(idx);
+      if (!q.multi) {
+        const ok = q.ans.includes(idx);
+        btn.classList.add(ok?'correct':'wrong');
+        if (!ok) q.ans.forEach(a => btns[a-1].classList.add('correct'));
+        fb.textContent = (ok?'✓ Correct. ':'✗ Incorrect. ') + q.reason;
+        fb.className = 'feedback show';
+      } else {
+        btns.forEach(b => b.classList.remove('correct','wrong'));
+        selected.forEach(s => btns[s-1].classList.add(q.ans.includes(s)?'correct':'wrong'));
+        q.ans.forEach(a => btns[a-1].classList.add('correct'));
+        fb.textContent = q.reason; fb.className = 'feedback show';
+      }
+    }));
+  } else {
+    const btn = sec.querySelector('.show-answer'), ans = sec.querySelector('.answer');
+    if (btn) btn.addEventListener('click', () => { ans.classList.toggle('show'); btn.textContent = ans.classList.contains('show')?'Hide answer':'Show model answer'; });
+  }
+}
+function escHtml(s) { return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+</script>
+</body>
+</html>

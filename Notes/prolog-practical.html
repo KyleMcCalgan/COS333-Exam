@@ -1,0 +1,1395 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prolog in Practice — Deep Dive</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Extra styles specific to this page ─────────────── */
+
+    /* Inline execution trace styling */
+    .trace-block {
+      background: var(--bg-sidebar);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-5) var(--sp-6);
+      margin: var(--sp-5) 0;
+      max-width: var(--content-max);
+      font-family: var(--font-mono);
+      font-size: var(--fs-sm);
+      line-height: 1.85;
+    }
+
+    .trace-block .t-call   { color: #7ab8e8; }
+    .trace-block .t-exit   { color: #88c870; }
+    .trace-block .t-redo   { color: #e8c870; }
+    .trace-block .t-fail   { color: #e87870; }
+    .trace-block .t-result { color: #e8a070; font-weight: 600; }
+    .trace-block .t-cm     { color: #5a5048; font-style: italic; }
+
+    /* Execution step diagram */
+    .step-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: var(--content-max);
+      margin: var(--sp-5) 0;
+    }
+
+    .step-row {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+    }
+
+    .step-indent {
+      display: flex;
+      align-items: center;
+      padding: 0 var(--sp-3);
+      min-width: 40px;
+    }
+
+    .step-line {
+      width: 2px;
+      background: var(--border);
+      margin: 0 auto;
+      height: 100%;
+    }
+
+    .step-card {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: var(--sp-3) var(--sp-4);
+      margin: 2px 0;
+      background: var(--bg-hover);
+      font-size: var(--fs-sm);
+    }
+
+    .step-card.call  { border-left: 3px solid #7ab8e8; }
+    .step-card.exit  { border-left: 3px solid #88c870; }
+    .step-card.fail  { border-left: 3px solid #e87870; }
+    .step-card.redo  { border-left: 3px solid #e8c870; }
+
+    .step-badge {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-right: var(--sp-2);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    .step-badge.call  { background: rgba(122,184,232,0.15); color: #7ab8e8; }
+    .step-badge.exit  { background: rgba(136,200,112,0.15); color: #88c870; }
+    .step-badge.fail  { background: rgba(232,120,112,0.15); color: #e87870; }
+    .step-badge.redo  { background: rgba(232,200,112,0.15); color: #e8c870; }
+
+    /* Network diagram (SVG inline) */
+    .network-diagram {
+      max-width: var(--content-max);
+      margin: var(--sp-5) 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--bg-hover);
+      padding: var(--sp-5);
+    }
+
+    .network-diagram svg { display: block; width: 100%; height: auto; }
+
+    /* Proposition anatomy label */
+    .anatomy {
+      background: var(--bg-sidebar);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-6);
+      margin: var(--sp-5) 0;
+      max-width: var(--content-max);
+      font-family: var(--font-mono);
+      font-size: 1.05rem;
+      color: #d4cec4;
+      line-height: 2.2;
+      overflow-x: auto;
+    }
+
+    .anatomy .a-head   { color: #88c870; }
+    .anatomy .a-neck   { color: #5a8060; }
+    .anatomy .a-body   { color: #7ab8e8; }
+    .anatomy .a-punct  { color: #5a5048; }
+    .anatomy .a-var    { color: #e8a070; }
+    .anatomy .a-atom   { color: #d4cec4; }
+    .anatomy .a-sep    { color: #c8884a; }
+    .anatomy .a-label  {
+      font-family: var(--font-body);
+      font-size: var(--fs-xs);
+      color: var(--text-muted);
+      font-style: italic;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+
+    /* Bidirectional indicator */
+    .bidir {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      background: var(--bg-key);
+      border: 1px solid #4878b0;
+      border-radius: var(--radius);
+      padding: 2px var(--sp-3);
+      font-family: var(--font-mono);
+      font-size: var(--fs-xs);
+      color: #2a5888;
+      margin: 2px 4px;
+    }
+
+    [data-theme="dark"] .bidir {
+      background: #0a1825;
+      color: #7ab8e8;
+    }
+
+    /* Pattern match diagram */
+    .pattern-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-4);
+      max-width: var(--content-max);
+      margin: var(--sp-4) 0;
+    }
+
+    .pattern-card {
+      background: var(--bg-sidebar);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-4) var(--sp-5);
+      border: 1px solid var(--border-strong);
+    }
+
+    .pattern-card .pc-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--sp-2);
+    }
+
+    .pattern-card pre {
+      margin: 0;
+      background: transparent;
+      border: none;
+      padding: 0;
+    }
+
+    .pattern-card pre code {
+      font-size: 0.8rem;
+    }
+
+    /* Worked example box */
+    .worked {
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin: var(--sp-6) 0;
+      max-width: var(--content-max);
+    }
+
+    .worked-header {
+      background: var(--bg-table-head);
+      padding: var(--sp-3) var(--sp-6);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+    }
+
+    .worked-header .wh-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .worked-header .wh-title {
+      font-family: var(--font-display);
+      font-size: var(--fs-base);
+      color: #f5efe6;
+      font-weight: 600;
+    }
+
+    .worked-body {
+      padding: var(--sp-6);
+      background: var(--bg-content);
+    }
+
+    .worked-body h4 { margin-top: var(--sp-5); }
+    .worked-body h4:first-child { margin-top: 0; }
+
+    /* Query/response rows */
+    .qr-table {
+      width: 100%;
+      max-width: var(--content-max);
+      margin: var(--sp-4) 0;
+      border-collapse: collapse;
+    }
+
+    .qr-table td {
+      padding: var(--sp-2) var(--sp-4);
+      font-family: var(--font-mono);
+      font-size: var(--fs-sm);
+      vertical-align: top;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .qr-table tr:last-child td { border-bottom: none; }
+
+    .qr-table .qr-q {
+      color: #7ab8e8;
+      white-space: nowrap;
+      width: 1%;
+      padding-right: var(--sp-3);
+    }
+
+    .qr-table .qr-qtext { color: #c8c0b4; }
+    .qr-table .qr-resp  { color: #88c870; }
+
+    .qr-table { background: var(--bg-sidebar); border-radius: var(--radius-lg); overflow: hidden; }
+
+    /* Tip strip */
+    .tip-strip {
+      display: flex;
+      gap: var(--sp-4);
+      flex-wrap: wrap;
+      max-width: var(--content-max);
+      margin: var(--sp-5) 0;
+    }
+
+    .tip-item {
+      flex: 1;
+      min-width: 180px;
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-4);
+    }
+
+    .tip-item .ti-icon {
+      font-size: 1.4rem;
+      margin-bottom: var(--sp-2);
+      display: block;
+    }
+
+    .tip-item .ti-title {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: var(--fs-sm);
+      color: var(--text-primary);
+      margin-bottom: var(--sp-1);
+    }
+
+    .tip-item p {
+      font-size: var(--fs-xs);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    @media (max-width: 600px) {
+      .pattern-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <button class="menu-toggle" aria-label="Open menu">☰</button>
+  <div class="sidebar-overlay"></div>
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="course-label">COS 333 · Programming Languages</span>
+      <h1>Programming Language Concepts</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Overview</span>
+      <a href="index.html"><span class="nav-chapter">00</span> Home &amp; Topics</a>
+
+      <span class="nav-section-label">Chapters</span>
+      <a href="chapter1.html"><span class="nav-chapter">01</span> Preliminaries</a>
+      <a href="chapter2.html"><span class="nav-chapter">02</span> Evolution of PLs</a>
+      <a href="chapter5.html"><span class="nav-chapter">05</span> Names, Bindings &amp; Scopes</a>
+      <a href="chapter6.html"><span class="nav-chapter">06</span> Data Types</a>
+      <a href="chapter7.html"><span class="nav-chapter">07</span> Expressions &amp; Assignments</a>
+      <a href="chapter8.html"><span class="nav-chapter">08</span> Control Structures</a>
+      <a href="chapter9.html"><span class="nav-chapter">09</span> Subprograms</a>
+      <a href="chapter12.html"><span class="nav-chapter">12</span> OOP Support</a>
+      <a href="chapter15.html"><span class="nav-chapter">15</span> Functional Programming</a>
+      <a href="chapter16.html"><span class="nav-chapter">16</span> Logic Programming</a>
+
+      <span class="nav-section-label">Practical</span>
+      <a href="prolog-practical.html" class="active"><span class="nav-chapter">P3</span> Prolog in Practice</a>
+      <a href="prolog-list-patterns.html"><span class="nav-chapter">P4</span> List Patterns</a>
+      <a href="scheme-practical.html"><span class="nav-chapter">P5</span> Scheme in Practice</a>
+
+      <span class="nav-section-label">Assessment</span>
+      <a href="past-papers.html"><span class="nav-chapter">PP</span> Past Papers</a>
+      <a href="mcq.html"><span class="nav-chapter">MC</span> MCQ Bank</a>
+    </nav>
+
+    <div class="sidebar-toc">
+      <span class="sidebar-toc-title">On this page</span>
+      <a href="#syntax">Prolog Syntax Rules</a>
+      <a href="#unification">Unification Deep Dive</a>
+      <a href="#list-patterns">List Patterns</a>
+      <a href="#recursion">Writing Recursive Rules</a>
+      <a href="#tracing">Reading Traces</a>
+      <a href="#cut">The Cut Operator</a>
+      <a href="#networks">Task 1 — Networks</a>
+      <a href="#filter">Task 2 — Filter Lists</a>
+      <a href="#pairs">Task 3 — Consecutive Pairs</a>
+      <a href="#common-mistakes">Common Mistakes</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle">
+        <span class="toggle-icon">☾</span>
+        <span class="toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <main class="main">
+    <div class="reading-progress"><div class="reading-progress-bar"></div></div>
+
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span>›</span>
+      <a href="chapter16.html">Chapter 16</a>
+      <span>›</span> Prolog in Practice
+    </div>
+
+    <header class="page-header">
+      <span class="chapter-tag">Practical 3 · Deep Dive</span>
+      <h1>Prolog in Practice</h1>
+      <p class="subtitle">
+        Writing real Prolog — syntax, unification, recursion, list processing,
+        the cut operator, and full worked examples for all three prac tasks.
+      </p>
+      <div class="topic-pills">
+        <span class="pill">SWI-Prolog</span>
+        <span class="pill">Unification</span>
+        <span class="pill">List Patterns</span>
+        <span class="pill">Recursion</span>
+        <span class="pill">Cut</span>
+        <span class="pill">Network Facts</span>
+        <span class="pill">Filtering</span>
+        <span class="pill">Counting</span>
+      </div>
+    </header>
+
+    <article class="article">
+
+      <div class="callout key">
+        <div class="callout-label">🔑 Mental Model Shift</div>
+        <p>
+          Stop thinking "<em>how do I compute this?</em>" and start thinking "<em>what is true about this?</em>"
+          You are writing <strong>logical descriptions</strong>, not algorithms.
+          Prolog's engine figures out the execution — your job is to define truth correctly.
+        </p>
+      </div>
+
+      <!-- ═══ SYNTAX ═══════════════════════════════════════════ -->
+      <h2 id="syntax">Prolog Syntax — The Complete Picture</h2>
+
+      <h3>The Anatomy of a Rule</h3>
+
+      <div class="anatomy">
+        <span class="a-head">grandparent</span><span class="a-punct">(</span><span class="a-var">X</span><span class="a-punct">,</span> <span class="a-var">Z</span><span class="a-punct">)</span>
+        <span class="a-neck"> :-</span>
+        <span class="a-body"> parent</span><span class="a-punct">(</span><span class="a-var">X</span><span class="a-punct">,</span> <span class="a-var">Y</span><span class="a-punct">),</span>
+        <span class="a-body"> parent</span><span class="a-punct">(</span><span class="a-var">Y</span><span class="a-punct">,</span> <span class="a-var">Z</span><span class="a-punct">).</span>
+        <br>
+        <span class="a-label a-head">head / consequent</span>
+        <span style="margin-left:12px" class="a-label a-neck">neck — "if"</span>
+        <span style="margin-left:8px" class="a-label a-body">body / antecedent (comma = AND)</span>
+      </div>
+
+      <h3>Syntactic Rules — Memorise These</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>Rule</th><th>Correct</th><th>Wrong</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Every clause ends with <code>.</code></td>
+              <td><code>fact(a).</code></td>
+              <td><code>fact(a)</code> ← missing period, silent error</td>
+            </tr>
+            <tr>
+              <td>Atoms start lowercase</td>
+              <td><code>router1</code>, <code>alice</code></td>
+              <td><code>Router1</code> ← this is a variable!</td>
+            </tr>
+            <tr>
+              <td>Variables start uppercase or <code>_</code></td>
+              <td><code>X</code>, <code>MyVar</code>, <code>_Unused</code></td>
+              <td><code>x</code>, <code>myVar</code> ← these are atoms</td>
+            </tr>
+            <tr>
+              <td>Conjunctions use commas</td>
+              <td><code>a(X), b(X)</code></td>
+              <td><code>a(X) and b(X)</code> ← not valid</td>
+            </tr>
+            <tr>
+              <td>Head is a single term</td>
+              <td><code>foo(X) :- bar(X).</code></td>
+              <td><code>foo(X), baz(X) :- bar(X).</code> ← multiple heads invalid</td>
+            </tr>
+            <tr>
+              <td>Facts need no body</td>
+              <td><code>computer(pc1).</code></td>
+              <td><code>computer(pc1) :- true.</code> ← works but redundant</td>
+            </tr>
+            <tr>
+              <td>Empty list is <code>[]</code></td>
+              <td><code>process([]).</code></td>
+              <td><code>process([|]).</code> ← invalid</td>
+            </tr>
+            <tr>
+              <td><code>is</code> evaluates arithmetic</td>
+              <td><code>Y is X + 1</code></td>
+              <td><code>Y = X + 1</code> ← this only unifies structurally</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>The Difference Between <code>=</code> and <code>is</code></h3>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label advantage"><code>=</code> — Unification</div>
+          <pre style="background:transparent;border:none;padding:0;margin-top:var(--sp-3)"><code>X = 3 + 2.
+% X becomes the STRUCTURE 3+2
+% NOT the number 5</code></pre>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label advantage"><code>is</code> — Arithmetic Evaluation</div>
+          <pre style="background:transparent;border:none;padding:0;margin-top:var(--sp-3)"><code>X is 3 + 2.
+% X becomes 5
+% RHS must be fully instantiated</code></pre>
+        </div>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ The is Rule</div>
+        <p>
+          All variables on the right-hand side of <code>is</code> must <strong>already be instantiated</strong>
+          before the <code>is</code> goal is evaluated. And the variable on the left must <strong>not yet be instantiated</strong>.
+          You cannot do <code>Sum is Sum + 1</code> — Prolog variables are not mutable.
+        </p>
+      </div>
+
+      <!-- ═══ UNIFICATION ═══════════════════════════════════════ -->
+      <h2 id="unification">Unification — How Prolog Matches</h2>
+
+      <p>
+        Unification is the core mechanism of Prolog. When you write a query or a rule body,
+        Prolog tries to <strong>unify</strong> terms — finding variable bindings that make two terms identical.
+      </p>
+
+      <h3>Unification Rules</h3>
+      <ul>
+        <li>Two atoms unify iff they are <strong>identical</strong>: <code>alice = alice</code> → true, <code>alice = bob</code> → false.</li>
+        <li>A variable unifies with <strong>anything</strong> and gets bound to that value: <code>X = alice</code> → <code>X = alice</code>.</li>
+        <li>Two structures unify iff they have the same functor, same arity, and all corresponding arguments unify: <code>f(a, X) = f(a, b)</code> → <code>X = b</code>.</li>
+        <li>A variable unifies with a structure — <code>X = f(a, b)</code> → <code>X = f(a, b)</code>.</li>
+        <li>Two <strong>different uninstantiated variables</strong> unify and become <em>co-references</em>.</li>
+      </ul>
+
+      <pre><code>?- foo(X, b) = foo(a, Y).
+X = a, Y = b.        % both variables unified
+
+?- [H | T] = [1, 2, 3].
+H = 1, T = [2, 3].   % list unification
+
+?- [H | T] = [].
+false.               % empty list has no head</code></pre>
+
+      <h3>Instantiation During Resolution</h3>
+      <p>
+        When Prolog tries to satisfy a goal, it looks for a matching fact or rule head.
+        Variables in the goal get <strong>instantiated</strong> to the values needed for the match.
+        If later a subgoal fails, Prolog <strong>undoes</strong> these instantiations (backtracking)
+        and tries the next candidate.
+      </p>
+
+      <div class="callout note">
+        <div class="callout-label">📝 Scope of Instantiation</div>
+        <p>
+          Variables are local to a clause. Each time a rule is invoked, Prolog creates a fresh copy
+          of all variables. So calling <code>parent(X, Y)</code> twice in the same rule body gives you
+          <em>two independent sets</em> of fresh variables, not the same X and Y.
+        </p>
+      </div>
+
+      <!-- ═══ LIST PATTERNS ══════════════════════════════════════ -->
+      <h2 id="list-patterns">List Patterns — The Building Blocks</h2>
+
+      <p>
+        Every list predicate you write uses one or more of these canonical patterns.
+        Internalise these and recursive list predicates become straightforward.
+      </p>
+
+      <div class="pattern-grid">
+        <div class="pattern-card">
+          <div class="pc-label">Empty list</div>
+          <pre><code>process([]).
+% matches [] only</code></pre>
+        </div>
+        <div class="pattern-card">
+          <div class="pc-label">Single element</div>
+          <pre><code>process([X]).
+% matches [anything]
+% X bound to that element</code></pre>
+        </div>
+        <div class="pattern-card">
+          <div class="pc-label">Head + tail</div>
+          <pre><code>process([H | T]).
+% H = first element
+% T = rest (always a list)</code></pre>
+        </div>
+        <div class="pattern-card">
+          <div class="pc-label">Two elements + tail</div>
+          <pre><code>process([A, B | T]).
+% A = 1st, B = 2nd
+% T = rest (may be [])</code></pre>
+        </div>
+        <div class="pattern-card">
+          <div class="pc-label">Anonymous head</div>
+          <pre><code>process([_ | T]).
+% ignore the head value
+% T = tail</code></pre>
+        </div>
+        <div class="pattern-card">
+          <div class="pc-label">Result in parameter</div>
+          <pre><code>transform([H|T], [H2|R]) :-
+    H2 is H * 2,
+    transform(T, R).
+% No "return" — result IS a param</code></pre>
+        </div>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ The Tail is Always a List</div>
+        <p>
+          In <code>[H | T]</code>, T is always a list — possibly <code>[]</code>.
+          If the list is <code>[a]</code>, then H = <code>a</code> and T = <code>[]</code>.
+          This is why the base case for empty list is almost always needed.
+        </p>
+      </div>
+
+      <!-- ═══ RECURSION ══════════════════════════════════════════ -->
+      <h2 id="recursion">Writing Recursive Rules — The Formula</h2>
+
+      <p>
+        Almost all useful list predicates in Prolog follow the same structural template.
+        Learn this template and apply it to every new predicate you write.
+      </p>
+
+      <div class="anatomy">
+        <span class="a-head">myPred</span><span class="a-punct">(</span><span class="t-exit">[]</span><span class="a-punct">,</span> <span class="a-var">BaseResult</span><span class="a-punct">).</span>
+        <span class="t-cm" style="font-family:var(--font-mono)">    % ← (1) base case: empty list</span>
+        <br><br>
+        <span class="a-head">myPred</span><span class="a-punct">(</span><span class="a-punct">[</span><span class="a-var">Head</span> <span class="a-sep">|</span> <span class="a-var">Tail</span><span class="a-punct">],</span> <span class="a-var">Result</span><span class="a-punct">)</span> <span class="a-neck">:-</span>
+        <span class="t-cm" style="font-family:var(--font-mono)">% ← (2) recursive case</span>
+        <br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="a-body">myPred</span><span class="a-punct">(</span><span class="a-var">Tail</span><span class="a-punct">,</span> <span class="a-var">SubResult</span><span class="a-punct">),</span>
+        <span class="t-cm" style="font-family:var(--font-mono)">       % ← (3) recurse on tail</span>
+        <br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="a-body">combine</span><span class="a-punct">(</span><span class="a-var">Head</span><span class="a-punct">,</span> <span class="a-var">SubResult</span><span class="a-punct">,</span> <span class="a-var">Result</span><span class="a-punct">).</span>
+        <span class="t-cm" style="font-family:var(--font-mono)">  % ← (4) build result from head + subresult</span>
+      </div>
+
+      <h3>Step-by-step: How to Design a New Predicate</h3>
+      <ol>
+        <li><strong>Name and arity</strong>: What does success mean? What are all the parameters (inputs AND outputs)?</li>
+        <li><strong>Base case</strong>: What is the answer for the simplest input (empty list, single element)?</li>
+        <li><strong>Recursive case</strong>: If I already knew the answer for the tail, how would I compute the answer for [Head | Tail]?</li>
+        <li><strong>Order</strong>: Always put the base case clause <em>first</em>. Prolog matches top-to-bottom.</li>
+        <li><strong>Test with small examples</strong>: Trace manually before running.</li>
+      </ol>
+
+      <!-- ═══ TRACING ════════════════════════════════════════════ -->
+      <h2 id="tracing">Reading Traces — Step by Step</h2>
+
+      <p>
+        The tracing model has four events: <span class="step-badge call">Call</span> <span class="step-badge exit">Exit</span> <span class="step-badge fail">Fail</span> <span class="step-badge redo">Redo</span>.
+        Understanding traces is essential for debugging and for the exam.
+      </p>
+
+      <h3>Worked Trace: <code>member(b, [a, b, c])</code></h3>
+
+      <pre><code>member(Element, [Element | _]).
+member(Element, [_ | Lis]) :- member(Element, Lis).</code></pre>
+
+      <div class="trace-block">
+        <span class="t-call">Call:</span> member(b, [a, b, c])
+        <br><span class="t-cm">  Try clause 1: member(b, [b | _])? head=a ≠ b → no match</span>
+        <br><span class="t-call">Call:</span> member(b, [a, b, c])   <span class="t-cm">% try clause 2</span>
+        <br><span class="t-cm">  Match: [_ | Lis] = [a, b, c] → Lis = [b, c]</span>
+        <br><span class="t-call">Call:</span> member(b, [b, c])     <span class="t-cm">% recurse on tail</span>
+        <br><span class="t-cm">  Try clause 1: member(b, [b | _])? head=b = b ✓</span>
+        <br><span class="t-exit">Exit:</span> member(b, [b, c])
+        <br><span class="t-exit">Exit:</span> member(b, [a, b, c])
+        <br><span class="t-result">true.</span>
+      </div>
+
+      <h3>Worked Trace with Backtracking: <code>likes(jake, X), likes(darcie, X)</code></h3>
+
+      <pre><code>likes(jake, chocolate).
+likes(jake, apricots).
+likes(darcie, licorice).
+likes(darcie, apricots).</code></pre>
+
+      <div class="trace-block">
+        <span class="t-call">Call:</span>  likes(jake, _X)                  <span class="t-cm">% subgoal 1 — find what jake likes</span>
+        <br><span class="t-exit">Exit:</span>  likes(jake, chocolate)           <span class="t-cm">% X = chocolate (first fact)</span>
+        <br>
+        <br><span class="t-call">Call:</span>  likes(darcie, chocolate)         <span class="t-cm">% subgoal 2 — test with X = chocolate</span>
+        <br><span class="t-fail">Fail:</span>  likes(darcie, chocolate)         <span class="t-cm">% darcie doesn't like chocolate</span>
+        <br>
+        <br><span class="t-redo">Redo:</span>  likes(jake, _X)                  <span class="t-cm">% backtrack: try next value for X</span>
+        <br><span class="t-exit">Exit:</span>  likes(jake, apricots)            <span class="t-cm">% X = apricots (second fact)</span>
+        <br>
+        <br><span class="t-call">Call:</span>  likes(darcie, apricots)          <span class="t-cm">% try subgoal 2 again</span>
+        <br><span class="t-exit">Exit:</span>  likes(darcie, apricots)          <span class="t-cm">% ✓ darcie does like apricots</span>
+        <br>
+        <br><span class="t-result">X = apricots.</span>
+      </div>
+
+      <div class="callout note">
+        <div class="callout-label">📝 Subgoal Order Efficiency</div>
+        <p>
+          Notice: the query checked <strong>all</strong> of jake's likes for each attempt.
+          If you put the <em>more restrictive</em> subgoal first, Prolog backtracks less.
+          For example, if darcie only likes one thing, query <code>likes(darcie, X), likes(jake, X)</code>
+          would be much more efficient.
+        </p>
+      </div>
+
+      <!-- ═══ CUT ════════════════════════════════════════════════ -->
+      <h2 id="cut">The Cut Operator <code>!</code></h2>
+
+      <p>
+        The <strong>cut</strong> (<code>!</code>) is a special goal that always succeeds,
+        but prevents backtracking past the point it appears. It "commits" Prolog to the current clause choice.
+      </p>
+
+      <pre><code>% Without cut — re-querying after the base case tries the recursive case:
+getValues(_, [], []).
+getValues(Min, [H|T], [H|R]) :- H > Min, getValues(Min, T, R).
+getValues(Min, [H|T], R) :- H =< Min, getValues(Min, T, R).
+
+% With cut — once base case matches, no backtracking into recursive cases:
+getValues(_, [], []) :- !.
+getValues(Min, [H|T], [H|R]) :- H > Min, !, getValues(Min, T, R).
+getValues(Min, [H|T], R) :- getValues(Min, T, R).</code></pre>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label advantage">✓ What Cut Does</div>
+          <ul>
+            <li>Succeeds immediately as a goal</li>
+            <li>Prevents backtracking into the current clause's alternatives</li>
+            <li>Fixes the choice of clause for the current goal</li>
+            <li>Used to prevent redundant re-evaluation of base/recursive cases</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label disadvantage">✗ What Cut Does NOT Do</div>
+          <ul>
+            <li>Does not make Prolog "stop" or "return"</li>
+            <li>Does not affect other goals outside the clause</li>
+            <li>Does not prevent trying other solutions to the overall query</li>
+            <li>Is not required — programs work without it; it's an optimisation</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout note">
+        <div class="callout-label">📝 Practical 3 — Cut is Optional</div>
+        <p>
+          The spec notes you may get a spurious <code>false</code> on re-querying without a cut.
+          This is <strong>not penalised</strong>. Adding a cut is an optimisation,
+          not a correctness requirement. Focus on getting the logic right first.
+        </p>
+      </div>
+
+      <!-- ═══ TASK 1 — NETWORKS ══════════════════════════════════ -->
+      <h2 id="networks">Task 1 — Network Connectivity</h2>
+
+      <p>
+        This task models a network topology using only three types of facts, then builds rules
+        for connectivity at increasing levels of abstraction.
+        The key is understanding the <strong>bidirectionality</strong> constraint and
+        building up from small predicates to large ones.
+      </p>
+
+      <h3>The Network Topology</h3>
+
+      <div class="network-diagram">
+        <svg viewBox="0 0 640 280" xmlns="http://www.w3.org/2000/svg" style="font-family: 'JetBrains Mono', monospace;">
+          <!-- Connections -->
+          <line x1="100" y1="140" x2="220" y2="140" stroke="#b85c2a" stroke-width="2"/>
+          <line x1="220" y1="140" x2="340" y2="90"  stroke="#b85c2a" stroke-width="2"/>
+          <line x1="220" y1="140" x2="340" y2="190" stroke="#b85c2a" stroke-width="2"/>
+          <line x1="340" y1="90"  x2="460" y2="90"  stroke="#b85c2a" stroke-width="2"/>
+          <line x1="340" y1="190" x2="460" y2="190" stroke="#b85c2a" stroke-width="2"/>
+          <line x1="460" y1="90"  x2="580" y2="90"  stroke="#b85c2a" stroke-width="2"/>
+          <line x1="460" y1="190" x2="340" y2="90"  stroke="#888" stroke-width="1.5" stroke-dasharray="6,3"/>
+
+          <!-- Disconnected cluster -->
+          <line x1="100" y1="240" x2="220" y2="240" stroke="#b85c2a" stroke-width="2"/>
+
+          <!-- Nodes — Routers (square) -->
+          <rect x="205" y="125" width="30" height="30" rx="4" fill="#2b2620" stroke="#b85c2a" stroke-width="2"/>
+          <rect x="325" y="75"  width="30" height="30" rx="4" fill="#2b2620" stroke="#b85c2a" stroke-width="2"/>
+          <rect x="445" y="175" width="30" height="30" rx="4" fill="#2b2620" stroke="#b85c2a" stroke-width="2"/>
+
+          <!-- Nodes — Computers (circle) -->
+          <circle cx="100" cy="140" r="18" fill="#1e1a15" stroke="#7ab8e8" stroke-width="2"/>
+          <circle cx="460" cy="90"  r="18" fill="#1e1a15" stroke="#7ab8e8" stroke-width="2"/>
+          <circle cx="580" cy="90"  r="18" fill="#1e1a15" stroke="#7ab8e8" stroke-width="2"/>
+          <circle cx="340" cy="190" r="18" fill="#1e1a15" stroke="#7ab8e8" stroke-width="2"/>
+          <circle cx="100" cy="240" r="18" fill="#1e1a15" stroke="#7ab8e8" stroke-width="2"/>
+          <circle cx="220" cy="240" r="18" fill="#1e1a15" stroke="#7ab8e8" stroke-width="2"/>
+
+          <!-- Labels -->
+          <text x="100" y="144" text-anchor="middle" dominant-baseline="middle" fill="#c8c0b4" font-size="10">pc1</text>
+          <text x="220" y="144" text-anchor="middle" dominant-baseline="middle" fill="#e8a070" font-size="10">r1</text>
+          <text x="340" y="93"  text-anchor="middle" dominant-baseline="middle" fill="#e8a070" font-size="10">r2</text>
+          <text x="460" y="193" text-anchor="middle" dominant-baseline="middle" fill="#e8a070" font-size="10">r3</text>
+          <text x="460" y="93"  text-anchor="middle" dominant-baseline="middle" fill="#c8c0b4" font-size="10">pc2</text>
+          <text x="580" y="93"  text-anchor="middle" dominant-baseline="middle" fill="#888" font-size="10">?</text>
+          <text x="340" y="193" text-anchor="middle" dominant-baseline="middle" fill="#c8c0b4" font-size="10">pc3</text>
+          <text x="100" y="244" text-anchor="middle" dominant-baseline="middle" fill="#c8c0b4" font-size="10">pc5</text>
+          <text x="220" y="244" text-anchor="middle" dominant-baseline="middle" fill="#c8c0b4" font-size="10">pc6</text>
+
+          <!-- Caption -->
+          <text x="320" y="270" text-anchor="middle" fill="#5a5048" font-size="11">○ = computer &nbsp;&nbsp; □ = router &nbsp;&nbsp; — = connection fact &nbsp;&nbsp; - - = implied inverse</text>
+        </svg>
+      </div>
+
+      <h3>The Facts (only these three types allowed)</h3>
+      <pre><code>computer(pc1). computer(pc2). computer(pc3).
+computer(pc4). computer(pc5). computer(pc6).
+
+router(router1). router(router2). router(router3).
+
+connection(pc1,    router1).
+connection(router1, pc2).
+connection(router1, router2).
+connection(router3, router2).
+connection(router2, pc3).
+connection(pc4,    router3).
+connection(pc5,    pc6).</code></pre>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Only These Three Fact Types</div>
+        <p>
+          The spec is strict: <strong>no other facts</strong>. You cannot add
+          <code>connected(router1, pc1).</code> as a shortcut for bidirectionality.
+          That must come from a rule.
+        </p>
+      </div>
+
+      <h3>Step 1 — Handle Bidirectionality</h3>
+      <p>
+        <code>connection/2</code> facts are directional (A→B is a fact, B→A is implied).
+        Create a helper predicate that treats both directions as equivalent:
+      </p>
+
+      <pre><code>% connected/2: true if there is a connection in either direction
+connected(X, Y) :- connection(X, Y).
+connected(X, Y) :- connection(Y, X).</code></pre>
+
+      <div class="callout note">
+        <div class="callout-label">📝 Why a Helper?</div>
+        <p>
+          Wrapping bidirectionality in its own predicate means every higher-level predicate
+          only needs to call <code>connected</code> once, rather than repeating both directions.
+          Keep each predicate focused on one job.
+        </p>
+      </div>
+
+      <h3>Step 2 — <code>routersConnected/2</code></h3>
+      <p>
+        True when two routers X and Y are connected directly or through one intermediate router.
+        The spec guarantees at most three routers, so at most one hop between them.
+      </p>
+
+      <div class="worked">
+        <div class="worked-header">
+          <span class="wh-tag">Predicate</span>
+          <span class="wh-title">routersConnected(X, Y)</span>
+        </div>
+        <div class="worked-body">
+          <h4>Strategy</h4>
+          <ul>
+            <li>Direct case: X and Y are both routers and directly connected.</li>
+            <li>One-hop case: there is an intermediate router Z such that X–Z is connected and Z–Y is connected.</li>
+            <li>Both cases must be bidirectional (handled by <code>connected</code>).</li>
+          </ul>
+          <h4>Implementation</h4>
+          <pre><code>routersConnected(X, Y) :-
+    router(X), router(Y),
+    connected(X, Y).
+
+routersConnected(X, Y) :-
+    router(X), router(Y),
+    router(Z),
+    connected(X, Z),
+    connected(Z, Y).</code></pre>
+          <h4>Expected Queries</h4>
+          <table class="qr-table">
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">routersConnected(router1, router2).</td><td class="qr-resp">true</td></tr>
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">routersConnected(router3, router1).</td><td class="qr-resp">true</td></tr>
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">routersConnected(router1, pc1).</td><td class="qr-resp">false</td></tr>
+          </table>
+          <div class="callout note" style="margin-top:var(--sp-4)">
+            <div class="callout-label">📝 Why check <code>router(X)</code> and <code>router(Y)</code>?</div>
+            <p>
+              Without these guards, variables in queries like <code>routersConnected(X, Y)</code>
+              could bind to computers or other atoms. Always restrict to the expected types.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <h3>Step 3 — <code>computerConnectedToRouter/2</code></h3>
+
+      <div class="worked">
+        <div class="worked-header">
+          <span class="wh-tag">Predicate</span>
+          <span class="wh-title">computerConnectedToRouter(X, Y)</span>
+        </div>
+        <div class="worked-body">
+          <h4>Strategy</h4>
+          <p>X is a computer and Y is a router and they are directly connected (either direction).</p>
+          <pre><code>computerConnectedToRouter(X, Y) :-
+    computer(X), router(Y),
+    connected(X, Y).</code></pre>
+          <h4>Expected Queries</h4>
+          <table class="qr-table">
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">computerConnectedToRouter(pc1, router1).</td><td class="qr-resp">true</td></tr>
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">computerConnectedToRouter(pc2, router1).</td><td class="qr-resp">true</td></tr>
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">computerConnectedToRouter(pc1, router2).</td><td class="qr-resp">false</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <h3>Step 4 — <code>computersConnected/2</code></h3>
+
+      <div class="worked">
+        <div class="worked-header">
+          <span class="wh-tag">Predicate</span>
+          <span class="wh-title">computersConnected(X, Y)</span>
+        </div>
+        <div class="worked-body">
+          <h4>Three Cases</h4>
+          <ol>
+            <li><strong>Direct</strong>: X and Y are computers directly connected (e.g., pc5–pc6).</li>
+            <li><strong>Same router</strong>: X and Y are both connected to the same router R.</li>
+            <li><strong>Via router chain</strong>: X is connected to router Rx, Y is connected to router Ry, and Rx and Ry are connected (directly or through a third router).</li>
+          </ol>
+          <pre><code>% Case 1: directly connected computers
+computersConnected(X, Y) :-
+    computer(X), computer(Y),
+    connected(X, Y).
+
+% Case 2: both connected to the same router
+computersConnected(X, Y) :-
+    computer(X), computer(Y),
+    computerConnectedToRouter(X, R),
+    computerConnectedToRouter(Y, R).
+
+% Case 3: connected through (potentially different) routers
+computersConnected(X, Y) :-
+    computer(X), computer(Y),
+    computerConnectedToRouter(X, Rx),
+    computerConnectedToRouter(Y, Ry),
+    routersConnected(Rx, Ry).</code></pre>
+          <h4>Expected Queries</h4>
+          <table class="qr-table">
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">computersConnected(pc5, pc6).</td><td class="qr-resp">true</td></tr>
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">computersConnected(pc1, pc4).</td><td class="qr-resp">true</td></tr>
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">computersConnected(pc4, pc1).</td><td class="qr-resp">true (bidirectional)</td></tr>
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">computersConnected(pc1, pc5).</td><td class="qr-resp">false</td></tr>
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">computersConnected(router1, pc1).</td><td class="qr-resp">false (router1 is not a computer)</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══ TASK 2 — FILTER ════════════════════════════════════ -->
+      <h2 id="filter">Task 2 — <code>getValuesGreaterThan/3</code></h2>
+
+      <p>
+        Filter a list, keeping only values strictly greater than a threshold.
+        Preserve the original order. The result is the third parameter.
+      </p>
+
+      <h3>Thinking It Through</h3>
+
+      <div class="tip-strip">
+        <div class="tip-item">
+          <span class="ti-icon">📥</span>
+          <div class="ti-title">Parameters</div>
+          <p><code>Min</code>, input list, output list (result — values &gt; Min)</p>
+        </div>
+        <div class="tip-item">
+          <span class="ti-icon">🎯</span>
+          <div class="ti-title">Base Case</div>
+          <p>Empty input → empty output. Done.</p>
+        </div>
+        <div class="tip-item">
+          <span class="ti-icon">🔀</span>
+          <div class="ti-title">Recursive Cases</div>
+          <p>Head &gt; Min → include head. Head ≤ Min → skip head. Both recurse on Tail.</p>
+        </div>
+        <div class="tip-item">
+          <span class="ti-icon">📤</span>
+          <div class="ti-title">Building Output</div>
+          <p>When including: output = <code>[Head | SubResult]</code>. When skipping: output = SubResult.</p>
+        </div>
+      </div>
+
+      <div class="worked">
+        <div class="worked-header">
+          <span class="wh-tag">Predicate</span>
+          <span class="wh-title">getValuesGreaterThan(Min, InputList, ResultList)</span>
+        </div>
+        <div class="worked-body">
+          <pre><code>% Base case: empty input → empty output
+getValuesGreaterThan(_, [], []).
+
+% Recursive case 1: head IS greater — include it
+getValuesGreaterThan(Min, [H | T], [H | R]) :-
+    H > Min,
+    getValuesGreaterThan(Min, T, R).
+
+% Recursive case 2: head is NOT greater — skip it
+getValuesGreaterThan(Min, [H | T], R) :-
+    H =< Min,
+    getValuesGreaterThan(Min, T, R).</code></pre>
+
+          <h4>Manual Trace: <code>getValuesGreaterThan(5, [-1, 6, 0, 8, -5], X)</code></h4>
+          <div class="trace-block">
+            <span class="t-call">Call:</span> gVGT(5, [-1, 6, 0, 8, -5], X)<br>
+            <span class="t-cm">  Head=-1, -1 =&lt; 5 → skip. Recurse on [6, 0, 8, -5]</span><br>
+            <br>
+            <span class="t-call">Call:</span> gVGT(5, [6, 0, 8, -5], X1)<br>
+            <span class="t-cm">  Head=6, 6 &gt; 5 → include. Recurse on [0, 8, -5]</span><br>
+            <br>
+            <span class="t-call">Call:</span> gVGT(5, [0, 8, -5], X2)<br>
+            <span class="t-cm">  Head=0, 0 =&lt; 5 → skip. Recurse on [8, -5]</span><br>
+            <br>
+            <span class="t-call">Call:</span> gVGT(5, [8, -5], X3)<br>
+            <span class="t-cm">  Head=8, 8 &gt; 5 → include. Recurse on [-5]</span><br>
+            <br>
+            <span class="t-call">Call:</span> gVGT(5, [-5], X4)<br>
+            <span class="t-cm">  Head=-5, -5 =&lt; 5 → skip. Recurse on []</span><br>
+            <br>
+            <span class="t-call">Call:</span> gVGT(5, [], X5)<br>
+            <span class="t-exit">Exit:</span> X5 = []   <span class="t-cm">% base case</span><br>
+            <br>
+            <span class="t-cm">  Unwind: X4=[], X3=[8], X2=[8], X1=[6,8], X=<br></span>
+            <span class="t-result">X = [6, 8].</span>
+          </div>
+
+          <h4>Expected Queries</h4>
+          <table class="qr-table">
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">getValuesGreaterThan(5, [], X).</td><td class="qr-resp">X = [].</td></tr>
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">getValuesGreaterThan(5, [-1, 4], X).</td><td class="qr-resp">X = [].</td></tr>
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">getValuesGreaterThan(5, [-1, 6, 0, 8, -5], X).</td><td class="qr-resp">X = [6, 8].</td></tr>
+          </table>
+
+          <div class="callout note" style="margin-top:var(--sp-4)">
+            <div class="callout-label">📝 Adding the Cut (optional)</div>
+            <p>
+              On re-querying, Prolog may try the "include" case using the "skip" clause and fail.
+              You can add cuts to prevent this. Place <code>!</code> after the comparison guard:
+            </p>
+            <pre><code>getValuesGreaterThan(_, [], []) :- !.
+getValuesGreaterThan(Min, [H|T], [H|R]) :-
+    H > Min, !,
+    getValuesGreaterThan(Min, T, R).
+getValuesGreaterThan(Min, [_|T], R) :-
+    getValuesGreaterThan(Min, T, R).</code></pre>
+            <p>Note: with a cut, the third case no longer needs <code>H =&lt; Min</code> because the cut ensures
+              we only reach it if case 2 didn't match.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ TASK 3 — CONSECUTIVE PAIRS ════════════════════════ -->
+      <h2 id="pairs">Task 3 — <code>countConsecutivePairs/2</code></h2>
+
+      <p>
+        Count consecutive pairs of identical elements. A pair is consumed as a unit — so
+        <code>[a, a, a]</code> yields 1 (first two form a pair, leaving one lone <code>a</code>).
+        <code>[a, a, a, a]</code> yields 2 (pairs: [a,a] then [a,a]).
+      </p>
+
+      <h3>The Key Insight — Pairs Are Consumed</h3>
+
+      <div class="callout key">
+        <div class="callout-label">🔑 Pair semantics</div>
+        <p>
+          After consuming a pair <code>[X, X | Rest]</code>, you continue from <code>Rest</code> —
+          <em>not</em> from <code>[X | Rest]</code>. This is what makes <code>[a,a,a]</code> = 1 pair,
+          not 2. The third <code>a</code> is not the start of a new pair.
+        </p>
+      </div>
+
+      <h3>Thinking It Through</h3>
+
+      <div class="tip-strip">
+        <div class="tip-item">
+          <span class="ti-icon">📥</span>
+          <div class="ti-title">Parameters</div>
+          <p>Input list, output count</p>
+        </div>
+        <div class="tip-item">
+          <span class="ti-icon">🎯</span>
+          <div class="ti-title">Base Case</div>
+          <p>Empty list → 0 pairs. Also: single element → 0 pairs.</p>
+        </div>
+        <div class="tip-item">
+          <span class="ti-icon">✅</span>
+          <div class="ti-title">Pair found case</div>
+          <p>List starts with <code>[X, X | Rest]</code> → count 1 + recurse on Rest</p>
+        </div>
+        <div class="tip-item">
+          <span class="ti-icon">⏭</span>
+          <div class="ti-title">No pair case</div>
+          <p>Head ≠ second element → recurse on <code>[Second | Rest]</code></p>
+        </div>
+      </div>
+
+      <div class="worked">
+        <div class="worked-header">
+          <span class="wh-tag">Predicate</span>
+          <span class="wh-title">countConsecutivePairs(List, Count)</span>
+        </div>
+        <div class="worked-body">
+          <pre><code>% Base case 1: empty list → 0 pairs
+countConsecutivePairs([], 0).
+
+% Base case 2: single element → 0 pairs
+countConsecutivePairs([_], 0).
+
+% Recursive case 1: found a pair (first two elements are equal)
+% CONSUME BOTH and continue from Rest
+countConsecutivePairs([X, X | Rest], Count) :-
+    countConsecutivePairs(Rest, SubCount),
+    Count is SubCount + 1.
+
+% Recursive case 2: no pair (first two elements differ)
+% Advance by ONE element (keep the second for potential future pairing)
+countConsecutivePairs([_ | T], Count) :-
+    countConsecutivePairs(T, Count).</code></pre>
+
+          <h4>Manual Trace: <code>countConsecutivePairs([b, b, a, c, c, c, d], X)</code></h4>
+          <div class="trace-block">
+            <span class="t-call">Call:</span> ccP([b, b, a, c, c, c, d], X)<br>
+            <span class="t-cm">  [b, b | Rest]: b=b → PAIR found. Rest=[a,c,c,c,d]</span><br>
+            <br>
+            <span class="t-call">Call:</span> ccP([a, c, c, c, d], X1)<br>
+            <span class="t-cm">  [a, c | ...]: a≠c → no pair. Advance to [c,c,c,d]</span><br>
+            <br>
+            <span class="t-call">Call:</span> ccP([c, c, c, d], X2)<br>
+            <span class="t-cm">  [c, c | Rest]: c=c → PAIR found. Rest=[c,d]</span><br>
+            <br>
+            <span class="t-call">Call:</span> ccP([c, d], X3)<br>
+            <span class="t-cm">  [c, d | ...]: c≠d → no pair. Advance to [d]</span><br>
+            <br>
+            <span class="t-call">Call:</span> ccP([d], X4)<br>
+            <span class="t-exit">Exit:</span> X4 = 0    <span class="t-cm">% base case: single element</span><br>
+            <br>
+            <span class="t-cm">  Unwind: X3=0, X2=0+1=1, X1=1, X=1+1=2</span><br>
+            <span class="t-result">X = 2.</span>
+          </div>
+
+          <h4>Verify the [a, a, a] = 1 case</h4>
+          <div class="trace-block">
+            <span class="t-call">Call:</span> ccP([a, a, a], X)<br>
+            <span class="t-cm">  [a, a | Rest]: a=a → PAIR. Rest=[a]</span><br>
+            <br>
+            <span class="t-call">Call:</span> ccP([a], X1)<br>
+            <span class="t-exit">Exit:</span> X1 = 0    <span class="t-cm">% single element base case</span><br>
+            <br>
+            <span class="t-cm">  Unwind: X = 0 + 1 = 1</span><br>
+            <span class="t-result">X = 1.  ✓ (not 2)</span>
+          </div>
+
+          <h4>Expected Queries</h4>
+          <table class="qr-table">
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">countConsecutivePairs([], X).</td><td class="qr-resp">X = 0.</td></tr>
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">countConsecutivePairs([a, b], X).</td><td class="qr-resp">X = 0.</td></tr>
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">countConsecutivePairs([b, a, a, a, c], X).</td><td class="qr-resp">X = 1.</td></tr>
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">countConsecutivePairs([b, b, a, c, c, c, d], X).</td><td class="qr-resp">X = 2.</td></tr>
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">countConsecutivePairs([a, a, a, a], X).</td><td class="qr-resp">X = 2.</td></tr>
+            <tr><td class="qr-q">?-</td><td class="qr-qtext">countConsecutivePairs([x, x, x], X).</td><td class="qr-resp">X = 1.</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══ COMMON MISTAKES ════════════════════════════════════ -->
+      <h2 id="common-mistakes">Common Mistakes &amp; How to Fix Them</h2>
+
+      <div class="collapsible open">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">MISTAKE</span><span class="ch-title">Using uppercase for atoms</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <div class="compare-grid">
+            <div class="compare-card">
+              <div class="cc-label disadvantage">✗ Wrong</div>
+              <pre style="background:transparent;border:none;padding:0;margin-top:8px"><code>computer(PC1).
+router(Router1).</code></pre>
+              <p style="font-size:var(--fs-xs); margin-top:8px"><code>PC1</code> is a variable, not the atom <code>pc1</code>. This matches anything.</p>
+            </div>
+            <div class="compare-card">
+              <div class="cc-label advantage">✓ Correct</div>
+              <pre style="background:transparent;border:none;padding:0;margin-top:8px"><code>computer(pc1).
+router(router1).</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">MISTAKE</span><span class="ch-title">Missing base case</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>If you forget the empty list base case, every recursive predicate will eventually fail when it hits <code>[]</code>.</p>
+          <div class="compare-grid">
+            <div class="compare-card">
+              <div class="cc-label disadvantage">✗ Wrong</div>
+              <pre style="background:transparent;border:none;padding:0;margin-top:8px"><code>% Only recursive case — will fail on []
+myPred([H|T], R) :- myPred(T, R).</code></pre>
+            </div>
+            <div class="compare-card">
+              <div class="cc-label advantage">✓ Correct</div>
+              <pre style="background:transparent;border:none;padding:0;margin-top:8px"><code>myPred([], []).
+myPred([H|T], R) :- myPred(T, R).</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">MISTAKE</span><span class="ch-title">Using = instead of is for arithmetic</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <div class="compare-grid">
+            <div class="compare-card">
+              <div class="cc-label disadvantage">✗ Wrong</div>
+              <pre style="background:transparent;border:none;padding:0;margin-top:8px"><code>Count = SubCount + 1.
+% Count = the STRUCTURE (SubCount+1)
+% not the numeric value</code></pre>
+            </div>
+            <div class="compare-card">
+              <div class="cc-label advantage">✓ Correct</div>
+              <pre style="background:transparent;border:none;padding:0;margin-top:8px"><code>Count is SubCount + 1.
+% Count = SubCount evaluated plus 1</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">MISTAKE</span><span class="ch-title">Forgetting bidirectionality handling</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>
+            The <code>connection</code> facts only go one direction. Without handling both directions,
+            <code>computersConnected(pc2, pc1)</code> will fail even though <code>computersConnected(pc1, pc2)</code> succeeds.
+            Always wrap directional facts in a bidirectional helper.
+          </p>
+          <pre><code>% BAD: will fail for connection(router1, pc2) when called as connected(pc2, router1)
+routerToComputer(R, C) :- connection(R, C).
+
+% GOOD: bidirectional helper handles both orderings
+connected(X, Y) :- connection(X, Y).
+connected(X, Y) :- connection(Y, X).</code></pre>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">MISTAKE</span><span class="ch-title">Missing type guards in network predicates</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>
+            Without type guards, queries like <code>routersConnected(X, Y)</code> will enumerate
+            computers and other atoms as routers. Always add <code>router(X)</code> / <code>computer(X)</code> guards.
+          </p>
+          <pre><code>% BAD: X and Y could be anything
+routersConnected(X, Y) :- connected(X, Y).
+
+% GOOD: guards restrict to routers
+routersConnected(X, Y) :-
+    router(X), router(Y),
+    connected(X, Y).</code></pre>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">MISTAKE</span><span class="ch-title">Recursive case without consuming the pair</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>
+            For <code>countConsecutivePairs</code>, when a pair <code>[X, X | Rest]</code> is found,
+            you must recurse on <code>Rest</code> — not on <code>[X | Rest]</code>. Recursing on <code>[X | Rest]</code>
+            would try to pair the second element with the third again, double-counting.
+          </p>
+          <div class="compare-grid">
+            <div class="compare-card">
+              <div class="cc-label disadvantage">✗ Wrong</div>
+              <pre style="background:transparent;border:none;padding:0;margin-top:8px"><code>countConsecutivePairs([X, X | R], C) :-
+    countConsecutivePairs([X | R], Sub),
+    C is Sub + 1.
+% [a,a,a] would give 2 (wrong!)</code></pre>
+            </div>
+            <div class="compare-card">
+              <div class="cc-label advantage">✓ Correct</div>
+              <pre style="background:transparent;border:none;padding:0;margin-top:8px"><code>countConsecutivePairs([X, X | R], C) :-
+    countConsecutivePairs(R, Sub),
+    C is Sub + 1.
+% [a,a,a] gives 1 (correct)</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── QUIZ ──────────────────────────────────── -->
+      <h2>Self-Check Quiz</h2>
+
+      <div class="quiz">
+        <div class="quiz-header"><span>📝 Check your understanding</span></div>
+        <div class="quiz-body">
+          <p class="quiz-question">What does <code>[H | T] = [1, 2, 3]</code> unify H and T to?</p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="false"
+                data-feedback="H would be 1 (the head), not the whole list.">
+              <span class="opt-key">A</span> H = [1, 2, 3], T = []
+            </li>
+            <li class="quiz-option" data-correct="true"
+                data-feedback="✓ Correct! [H | T] splits a list into its first element (head) and the remaining list (tail). H = 1, T = [2, 3].">
+              <span class="opt-key">B</span> H = 1, T = [2, 3]
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="The tail T is always a list — [2, 3] here, not just the last element.">
+              <span class="opt-key">C</span> H = 1, T = 3
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="This unification succeeds — the list [1,2,3] matches [H | T] for any H and T.">
+              <span class="opt-key">D</span> Fails — cannot unify
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="quiz">
+        <div class="quiz-header"><span>📝 Check your understanding</span></div>
+        <div class="quiz-body">
+          <p class="quiz-question"><code>countConsecutivePairs([x, x, x, x, x], X)</code> — what is X?</p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="false"
+                data-feedback="5 elements can form at most 2 complete pairs. Let's trace: [x,x | rest=[x,x,x]] → pair 1. Then [x,x | rest=[x]] → pair 2. Then [x] → base, 0. Total = 2.">
+              <span class="opt-key">A</span> 5
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Not quite — trace again. Pairs are consumed as units, so [x,x,x,x,x] → [x,x] consumed, rest=[x,x,x]. Then [x,x] consumed, rest=[x]. Then [x]=0. Total=2.">
+              <span class="opt-key">B</span> 4
+            </li>
+            <li class="quiz-option" data-correct="true"
+                data-feedback="✓ Correct! [x,x,x,x,x]: consume pair → rest=[x,x,x]. Consume pair → rest=[x]. Single element → 0. Total = 2.">
+              <span class="opt-key">C</span> 2
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Think of pairs as being consumed two-at-a-time. 5 elements = 2 full pairs + 1 leftover.">
+              <span class="opt-key">D</span> 1
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="quiz">
+        <div class="quiz-header"><span>📝 Check your understanding</span></div>
+        <div class="quiz-body">
+          <p class="quiz-question">In SWI-Prolog, after getting a true/variable answer, pressing <code>r</code> does what?</p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Pressing r doesn't restart Prolog — it re-queries for more solutions.">
+              <span class="opt-key">A</span> Restarts the SWI-Prolog interpreter
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="r doesn't undo the last query — it asks for additional solutions.">
+              <span class="opt-key">B</span> Undoes the last query
+            </li>
+            <li class="quiz-option" data-correct="true"
+                data-feedback="✓ Correct! Pressing r re-queries Prolog, triggering backtracking to find the next solution. Press Enter to stop looking.">
+              <span class="opt-key">C</span> Re-queries for more solutions (backtracking continues)
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="r doesn't load a file — that's done through File → Consult.">
+              <span class="opt-key">D</span> Reloads the source file
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">↺ Reset</button>
+        </div>
+      </div>
+
+      <!-- ─── SUMMARY ──────────────────────────────── -->
+      <div class="summary-box">
+        <h2>Prolog Practical — Quick Reference</h2>
+        <ul>
+          <li><strong>Atoms lowercase, variables uppercase</strong> — never mix these up; it causes silent logic errors.</li>
+          <li><strong>Every clause ends with <code>.</code></strong> — missing periods cause syntax errors or silent failures.</li>
+          <li><strong><code>=</code> unifies, <code>is</code> evaluates arithmetic</strong> — use <code>is</code> for any computation.</li>
+          <li><strong>List patterns</strong>: <code>[]</code> (empty), <code>[H|T]</code> (head+tail), <code>[A, B|T]</code> (two elements+tail), <code>[_|T]</code> (ignore head).</li>
+          <li><strong>Recursive predicates</strong>: base case first, always. Recurse on the tail.</li>
+          <li><strong>Bidirectionality in Task 1</strong>: wrap <code>connection/2</code> in a <code>connected/2</code> helper that tries both directions.</li>
+          <li><strong>Type guards</strong>: add <code>computer(X)</code>/<code>router(X)</code> to prevent variables binding to wrong types.</li>
+          <li><strong>Pair consumption in Task 3</strong>: after matching <code>[X, X | Rest]</code>, recurse on <code>Rest</code> not <code>[X | Rest]</code>.</li>
+          <li><strong>Cut <code>!</code></strong>: optional optimisation to suppress spurious false on re-query. Not required for correctness.</li>
+        </ul>
+      </div>
+
+    </article>
+  </main>
+</div>
+<script src="study-notes.js"></script>
+</body>
+</html>

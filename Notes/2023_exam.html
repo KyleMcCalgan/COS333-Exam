@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>COS 333 Examination 2023</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f6f7f9; color: #20242a; }
+    main { max-width: 940px; margin: 0 auto; padding: 28px 18px 48px; }
+    .back-link { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px; color: #243246; text-decoration: none; font-size: 14px; font-weight: 600; }
+    .back-link:hover { color: #0f172a; text-decoration: underline; }
+    h1 { font-size: 28px; margin: 0 0 4px; }
+    .meta { font-size: 14px; color: #5a6272; margin-bottom: 20px; }
+    .question { background: white; border: 1px solid #d9dde3; border-radius: 8px; padding: 20px; margin: 16px 0; }
+    .question h2 { font-size: 18px; margin: 0 0 12px; }
+    .points { font-size: 13px; color: #5f6f89; font-weight: normal; margin-left: 8px; }
+    .prompt { line-height: 1.6; margin-bottom: 14px; }
+    .prompt p { margin: 0 0 10px; }
+    .prompt pre { background: #f4f6f8; border: 1px solid #d8dde4; border-radius: 6px; overflow-x: auto; padding: 12px; white-space: pre-wrap; font-size: 13px; }
+    .options { display: grid; gap: 8px; }
+    button { font: inherit; }
+    button.option { text-align: left; border: 1px solid #c7cdd6; background: #fff; padding: 10px 12px; border-radius: 6px; cursor: pointer; font-size: 15px; }
+    button.option:hover { border-color: #62748e; background: #f8fafc; }
+    button.show-answer { border: 1px solid #5f6f89; background: #f8fafc; color: #243246; padding: 9px 12px; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+    button.show-answer:hover { background: #edf2f7; }
+    button.correct { border-color: #198754; background: #eaf7ef; }
+    button.wrong { border-color: #c73333; background: #fdecec; }
+    .feedback, .answer { display: none; margin-top: 12px; padding: 12px; border-radius: 6px; background: #eef3fb; line-height: 1.5; font-size: 14px; }
+    .feedback.show, .answer.show { display: block; }
+    .answer pre { background: #f4f6f8; border: 1px solid #d8dde4; border-radius: 6px; padding: 12px; white-space: pre-wrap; font-size: 13px; margin: 6px 0 0; }
+    .coding { border-left: 4px solid #667085; }
+    .multi-hint { font-size: 13px; color: #a0522d; font-style: italic; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+<main>
+  <a class="back-link" href="past-papers.html">&larr; Back to Past Papers</a>
+  <h1>COS 333 Examination <span class="points">14 November 2023</span></h1>
+  <div class="meta">Examiner: Mr W. S. van Heerden &nbsp;|&nbsp; Total: 40 marks &nbsp;|&nbsp; 29 Questions</div>
+  <div id="quiz"></div>
+</main>
+<script>
+const questions = [
+  {n:1, pts:1, multi:false, interactive:true,
+   prompt:"Various factors can influence programming language design. Select the one that had its <strong>earliest impact on the design of SIMULA 67</strong>.",
+   opts:["Computer architecture.","Programmer efficiency becoming more important than machine efficiency.","The move from process-oriented programming to data-oriented programming.","The move to object-oriented programming."],
+   ans:[3], reason:"SIMULA 67 was designed for simulation; the move toward data-oriented programming (modelling real-world entities as data structures with behaviour) was the defining influence that led to classes and objects."},
+  {n:2, pts:2, multi:true, interactive:true,
+   prompt:"Consider the programming language evaluation criteria, and select <strong>only</strong> those that benefit from the use of a <strong>hybrid implementation system</strong>. <em>(Incorrectly selected options will be penalised.)</em>",
+   opts:["Readability.","Writability.","Cost.","Portability."],
+   ans:[3,4], reason:"Hybrid systems compile to an intermediate form (reducing execution cost vs pure interpretation) and run on any machine with the virtual machine (improving portability)."},
+  {n:3, pts:1, multi:false, interactive:true,
+   prompt:"Consider only the syntax used by <strong>Plankalkül</strong> for an assignment using arrays and subscripts. Select the statement that is most correct.",
+   opts:["The syntax had poor readability.","The syntax had poor writability.","The syntax had poor reliability.","The syntax had poor execution cost."],
+   ans:[1], reason:"Plankalkül used a two-dimensional notation for subscripts that was highly unusual and difficult to read."},
+  {n:4, pts:1, multi:false, interactive:true,
+   prompt:"The language specification of <strong>ALGOL 60</strong> lacked support for I/O operations. Select the statement that most correctly describes a consequence this had on a main design goal of ALGOL 60.",
+   opts:["The reliability of ALGOL 60 suffered.","The execution cost of ALGOL 60 suffered.","The execution cost of ALGOL 60 improved.","The machine independence of ALGOL 60 suffered."],
+   ans:[4], reason:"Each implementation defined its own I/O, meaning ALGOL 60 programs were not truly portable/machine-independent — one of its key goals."},
+  {n:5, pts:1, multi:false, interactive:true,
+   prompt:"Consider the following statements about <strong>Lua</strong>, and select the one that is most correct.",
+   opts:["Lua uses full compilation for the sake of reduced execution cost.","Lua requires heap allocated variables to be explicitly deallocated.","Lua supports functional programming.","Lua is a fully featured object-oriented programming language."],
+   ans:[3], reason:"Lua supports first-class functions, closures, and higher-order functions — the hallmarks of functional programming."},
+  {n:6, pts:5, multi:false, interactive:false, coding:true,
+   prompt:"Write a Scheme function named <code>doublePositives</code>, which receives one parameter: a simple numeric list. Yield a list with the same values but with <strong>positive values doubled</strong>. Negative and zero values remain unchanged.<br><br>Examples:<pre>(doublePositives '())        ; =&gt; ()\n(doublePositives '(2 -4 7 -3)) ; =&gt; (4 -4 14 -3)</pre><em>Note: Start your program with <code>#lang racket</code>.</em><br>Submit <code>s99999999.scm</code> to slot <em>\"Examination: Scheme Function\"</em>.",
+   shortAnswer:"#lang racket\n(define (doublePositives lst)\n  (cond\n    ((null? lst) '())\n    ((> (car lst) 0)\n     (cons (* 2 (car lst)) (doublePositives (cdr lst))))\n    (else (cons (car lst) (doublePositives (cdr lst))))))"},
+  {n:7, pts:5, multi:false, interactive:false, coding:true,
+   prompt:"Write a Prolog proposition called <code>doubleNonMatching(L1, X, L2)</code>, which succeeds if L2 contains the same values as L1, in order, but with all <strong>values that do not match X doubled</strong>. Values that match X remain unchanged.<br><br>Examples:<pre>?- doubleNonMatching([], 2, X).          % X = []\n?- doubleNonMatching([3, 2, 4, 4, 2], 2, X). % X = [6, 2, 8, 8, 2]</pre>Submit <code>s99999999.pl</code> to slot <em>\"Examination: Prolog Proposition\"</em>.",
+   shortAnswer:"doubleNonMatching([], _, []).\ndoubleNonMatching([X|T], X, [X|R]) :- doubleNonMatching(T, X, R).\ndoubleNonMatching([H|T], X, [D|R]) :- not(H = X), D is H * 2, doubleNonMatching(T, X, R)."},
+  {n:8, pts:1, multi:false, interactive:true,
+   prompt:"Consider this code: <code>var myVariable = \"Test\"</code> then <code>myVariable = anotherVariable * 2</code>. Select the option that most correctly describes the <strong>category of <code>myVariable</code></strong> in terms of lifetime.",
+   opts:["Static variable.","Stack-dynamic variable.","Explicit heap-dynamic variable.","Implicit heap-dynamic variable."],
+   ans:[4], reason:"The variable is implicitly typed and can hold values of different types at different points — this is characteristic of implicit heap-dynamic variables (e.g. in JavaScript/Python)."},
+  {n:9, pts:1, multi:false, interactive:false,
+   prompt:"Subprogram <code>f1</code> uses <code>constant LENGTH = 3</code> to declare an array, while <code>f2</code> uses <code>constant INPUT_LENGTH</code> read at runtime — which does not compile. Name the <strong>type of named constants</strong> supported in this language.",
+   shortAnswer:"Manifest constants (also called static constants or compile-time constants).\n\nThe language only supports constants whose values are known at compile time — dynamic (runtime-bound) constants are not allowed."},
+  {n:10, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>list comprehensions in Python</strong>, and select the statement that is most correct.",
+   opts:["List comprehensions increase the readability of Python.","List comprehensions increase the writability of Python.","List comprehensions improve the reliability of Python.","List comprehensions reduce the execution cost of Python."],
+   ans:[2], reason:"List comprehensions provide a more concise way to create lists from existing sequences, directly improving writability."},
+  {n:11, pts:1, multi:false, interactive:true,
+   prompt:"C++ is not considered a very strongly typed language. Select the reason that most correctly describes a reason contributing to the <strong>weak typing of C++</strong>.",
+   opts:["The way in which C++ supports pointers.","The fact that C++ supports only discriminated unions.","The fact that C++ performs no parameter type checking.","The fact that C++ does not perform index range checking."],
+   ans:[1], reason:"C++ allows void pointers (any type), unchecked pointer casts, and unsafe pointer arithmetic — all of which undermine type safety."},
+  {n:12, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>arithmetic operators in Ruby and Java</strong>, and select the statement that is most correct.",
+   opts:["Arithmetic operators in Ruby are less flexible than in Java.","Arithmetic operators in Ruby are always as reliable as in Java.","Arithmetic operators in Ruby are implemented in a more orthogonal way than in Java.","Arithmetic operators in Ruby have a lower execution cost than in Java."],
+   ans:[3], reason:"In Ruby, all operators (including arithmetic) are implemented as methods on objects — a single consistent mechanism, making them more orthogonal than Java's separate primitive and object handling."},
+  {n:13, pts:1, multi:false, interactive:true,
+   prompt:"Consider the <strong>unary <code>*</code> operator in C++</strong>, and select the statement that is most correct.",
+   opts:["The unary * operator is poorly designed, because it is overloaded to produce very different results depending on context.","The unary * operator is poorly designed, because C++ could be designed to avoid its use without losing flexibility.","The unary * operator is well designed, because it is not overloaded.","The unary * operator is well designed, because it cannot be confused with non-unary operators."],
+   ans:[1], reason:"The unary * serves as both pointer dereference (in expressions) and pointer type declaration (in declarations) — two very different meanings depending on context, reducing readability."},
+  {n:14, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>conditional targets</strong>, and select the statement that is most correct.",
+   opts:["Conditional targets improve the readability of assignments.","Conditional targets improve the writability of assignments.","Conditional targets improve the reliability of assignments.","Conditional targets decrease the cost of execution of assignments."],
+   ans:[2], reason:"A conditional target like <code>(a > 0 ? a : b) = val</code> allows concise conditional assignment in a single expression — a writability improvement."},
+  {n:15, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>mixed-mode assignments in Ada and C</strong>, and select the statement that is most correct.",
+   opts:["Mixed-mode assignments in Ada are less readable than in C.","Mixed-mode assignments in Ada are less writable than in C.","Mixed-mode assignments in Ada are less reliable than in C.","Mixed-mode assignments in Ada have a higher execution cost than in C."],
+   ans:[2], reason:"Ada disallows mixed-mode assignments — every type conversion must be explicit. This is safer but less writable than C's implicit coercions."},
+  {n:16, pts:1, multi:false, interactive:true,
+   prompt:"Consider the <strong>approaches used by Ruby and Perl to disambiguate nested selectors</strong>, and select the statement that is most correct.",
+   opts:["Ruby uses a less reliable approach than Perl.","Ruby uses a less readable approach than Perl.","Ruby uses a less writable approach than Perl.","Ruby uses a more writable approach than Perl."],
+   ans:[4], reason:"Ruby uses <code>end</code> keywords for each block and has cleaner syntax for nested if/case, which many consider more writable than Perl's brace-heavy approach."},
+  {n:17, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>selector expressions used in assignments</strong>, and select the statement that is most correct.",
+   opts:["Readability is improved if the <code>else</code> clause is left out of a selector expression used in an assignment.","Readability is reduced if the <code>else</code> clause is left out of a selector expression used in an assignment.","Reliability is improved if the <code>else</code> clause is left out.","The evaluation criteria are not affected if the <code>else</code> clause is left out."],
+   ans:[2], reason:"Without an else clause, it's unclear what value is assigned when no condition matches — the undefined result reduces readability."},
+  {n:18, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>counter-controlled loops in Ada and C</strong>, and select the statement that is most correct.",
+   opts:["Counter-controlled loops are more writable in Ada than in C.","Counter-controlled loops are less readable in Ada than in C.","Counter-controlled loops are more reliable in Ada than in C.","Counter-controlled loops have a higher cost of execution in Ada than in C."],
+   ans:[3], reason:"Ada's for-loop variable is implicitly declared and read-only inside the loop; the range is clearly specified. This prevents common C-style loop modification bugs, making Ada loops more reliable."},
+  {n:19, pts:1, multi:false, interactive:false,
+   prompt:"This Ruby subprogram uses <code>yield</code> with a block that has one parameter and prints it followed by a space:<pre>def doSomething()\n   count = 1; value = 1\n   while count &lt;= 3\n      value = value * 2\n      count = count + 1\n      yield value\n   end\nend</pre>Provide the <strong>output</strong>.",
+   shortAnswer:"2 4 8 \n\nTrace: count=1: value=2, yield 2 → print '2 '\n       count=2: value=4, yield 4 → print '4 '\n       count=3: value=8, yield 8 → print '8 '"},
+  {n:20, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>default values for subprogram parameters</strong>, and select the statement that is most correct.",
+   opts:["There is no way for a default parameter to appear anywhere but the beginning of a parameter list.","There is no way for a default parameter to appear anywhere but the end of a parameter list.","A default parameter can appear anywhere if positional parameters are used.","A default parameter can appear anywhere if keyword parameters are used."],
+   ans:[4], reason:"Keyword parameters let the caller name each argument explicitly, so default parameters can be placed anywhere in the list — the caller simply omits the named argument they want defaulted."},
+  {n:21, pts:1, multi:false, interactive:true,
+   prompt:"Consider a <strong>drawback associated with Lua</strong>, and select the statement that is most correct.",
+   opts:["Anonymous functions in Lua cannot be used after the function's definition.","It is easy for a programmer to unintentionally create a stack-dynamic variable in Lua.","It is easy for a programmer to unintentionally create a global variable in Lua.","Lua does not allow a function to receive a variable number of parameters."],
+   ans:[3], reason:"In Lua, any undeclared variable is automatically global — a programmer who forgets 'local' accidentally creates a global, which is a well-known source of bugs."},
+  {n:22, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>pass-by-result subprogram parameters</strong>, and select the statement that is most correct.",
+   opts:["Pass-by-result parameters can only copy a value to the caller.","Pass-by-result parameters can only transfer an access path to the caller.","Pass-by-result parameters can either copy a value to the caller, or transfer an access path to the caller.","Pass-by-result can neither copy a value nor transfer an access path to the caller."],
+   ans:[3], reason:"From Sebesta: pass-by-result can be implemented with either a physical copy (value written back on return) or via an access path (pointer to the caller's actual parameter)."},
+  {n:23, pts:2, multi:false, interactive:false,
+   prompt:"Consider this code (static scoping):<pre>var A = 12\nfun sub1() { print A }\nfun sub2(param) { var A = 35; call param() }\nfun main() { var A = 22; sub2(sub1) }</pre>Provide the output for each binding type used to determine the referencing environment of the passed subprogram.<br><br><strong>Ad-hoc binding:</strong> ___<br><strong>Shallow binding:</strong> ___",
+   shortAnswer:"Ad-hoc binding: 12\n  Under static scoping, sub1's reference to A is statically bound to the global scope (where A = 12). Ad-hoc binding respects the static scope chain.\n\nShallow binding: 35\n  Shallow binding uses the referencing environment at the point where the subprogram is CALLED (inside sub2, where local A = 35 is on the call stack). The dynamic environment overrides the static chain."},
+  {n:24, pts:1, multi:false, interactive:false,
+   prompt:"Consider this coroutine program:<pre>sub main()    { resume second }\ncoroutine first  { print \"1 \"; resume second; print \"2 \" }\ncoroutine second { print \"3 \"; resume first;  print \"4 \" }</pre>Provide the <strong>output</strong>.",
+   shortAnswer:"3 1 4 2\n\nTrace:\n1. main → resume second\n2. second starts: print '3 ', resume first\n3. first starts: print '1 ', resume second\n4. second resumes: print '4 ', second ends\n5. first resumes: print '2 ', first ends"},
+  {n:25, pts:1, multi:false, interactive:true,
+   prompt:"Consider <strong>properties in C# classes</strong>, and select the statement that is most correct.",
+   opts:["Properties provide instance variables within a C# class.","Properties provide class variables within a C# class.","Properties provide a less writable alternative to getters/setters within a C# class, from the user's perspective.","Properties provide a more writable alternative to getters/setters within a C# class, from the user's perspective."],
+   ans:[4], reason:"C# properties allow the caller to use assignment and access syntax (obj.Prop = val; x = obj.Prop) rather than verbose method calls (obj.SetProp(val); obj.GetProp()) — more writable from the user's perspective."},
+  {n:26, pts:1, multi:false, interactive:true,
+   prompt:"Consider the <strong>approach used by Java to hide the representation of ADT objects</strong> from users, and select the statement that is most correct.",
+   opts:["The ADT interface is provided in a header file which the user can see; the implementation is compiled to a class file and only the class file is provided.","The ADT interface is not provided to the user; only the compiled class file is provided.","The ADT interface is automatically generated as documentation (Javadoc) which the user can see; the implementation is compiled to a class file and only the class file is provided.","Java does not hide the representation of ADT objects from users."],
+   ans:[3], reason:"Java compiles source to bytecode (.class); Javadoc generates API documentation from source comments. Users see the documented interface but receive only the compiled bytecode."},
+  {n:27, pts:1, multi:false, interactive:false,
+   prompt:"Consider this Java generic class <code>MyClass&lt;T&gt;</code> used with both <code>MyClass&lt;String&gt;</code> and <code>MyClass&lt;Integer&gt;</code>. Identify the <strong>number of versions of <code>MyClass</code></strong> that exist after compile time. Write only the digit.",
+   shortAnswer:"1\n\nJava uses type erasure: regardless of how many different type arguments are used, only one compiled version of MyClass exists (with Object replacing T). Casts are inserted at use sites by the compiler."},
+  {n:28, pts:2, multi:true, interactive:true,
+   prompt:"Four classes: A (base), B and C inherit from A, D inherits from both B and C. An <strong>implicit name collision</strong> is possible. Select <strong>only</strong> the details that together result in an implicit (not explicit) collision. <em>(Incorrectly selected options will be penalised.)</em>",
+   opts:["Defining a method named <code>myMethod</code> in class A.","Defining a method named <code>myMethod</code> in class B.","Defining a method named <code>myMethod</code> in class C.","Defining a method named <code>myMethod</code> in class D."],
+   ans:[1], reason:"If only A defines myMethod and B/C don't override it, D implicitly inherits two copies (via B and via C) — a collision without any explicit redefinition in B, C, or D."},
+  {n:29, pts:2, multi:true, interactive:true,
+   prompt:"C++ has lower cost of execution than Smalltalk. Select <strong>only</strong> the factors that contribute to the <strong>lower cost of execution in C++</strong>. <em>(Incorrectly selected options will be penalised.)</em>",
+   opts:["The approach C++ uses in relation to the exclusivity of classes.","The approach C++ uses to perform message binding.","The fact that C++ supports heap allocated objects.","The fact that subclasses are not necessarily subtypes in C++."],
+   ans:[1,2], reason:"C++ allows primitive types (not just objects), avoiding object overhead (exclusivity). C++ also uses static binding by default (non-virtual), avoiding vtable dispatch cost (binding approach)."}
+];
+
+const quiz = document.getElementById('quiz');
+for (const q of questions) {
+  const sec = document.createElement('section');
+  sec.className = 'question' + (q.coding ? ' coding' : '');
+  let body = '';
+  if (q.interactive) {
+    if (q.multi) body += `<p class="multi-hint">Select ALL correct options. (Incorrectly selected options are penalised.)</p>`;
+    body += `<div class="options">`;
+    q.opts.forEach((o,i) => { body += `<button class="option" data-idx="${i+1}">${i+1}. ${o}</button>`; });
+    body += `</div><div class="feedback"></div>`;
+  } else {
+    body += `<button class="show-answer">Show model answer</button><div class="answer"><strong>Model Answer:</strong><pre>${escHtml(q.shortAnswer)}</pre></div>`;
+  }
+  sec.innerHTML = `<h2>Question ${q.n} <span class="points">(${q.pts} pt${q.pts>1?'s':''})</span></h2><div class="prompt">${q.prompt}</div>${body}`;
+  quiz.appendChild(sec);
+  if (q.interactive) {
+    const selected = new Set();
+    const btns = sec.querySelectorAll('button.option');
+    const fb = sec.querySelector('.feedback');
+    btns.forEach(btn => btn.addEventListener('click', () => {
+      const idx = +btn.dataset.idx;
+      if (!q.multi) { btns.forEach(b => b.classList.remove('correct','wrong')); selected.clear(); }
+      selected.has(idx) ? selected.delete(idx) : selected.add(idx);
+      if (!q.multi) {
+        const ok = q.ans.includes(idx);
+        btn.classList.add(ok?'correct':'wrong');
+        if (!ok) q.ans.forEach(a => btns[a-1].classList.add('correct'));
+        fb.textContent = (ok?'✓ Correct. ':'✗ Incorrect. ') + q.reason;
+        fb.className = 'feedback show';
+      } else {
+        btns.forEach(b => b.classList.remove('correct','wrong'));
+        selected.forEach(s => btns[s-1].classList.add(q.ans.includes(s)?'correct':'wrong'));
+        q.ans.forEach(a => btns[a-1].classList.add('correct'));
+        fb.textContent = q.reason; fb.className = 'feedback show';
+      }
+    }));
+  } else {
+    const btn = sec.querySelector('.show-answer'), ans = sec.querySelector('.answer');
+    if (btn) btn.addEventListener('click', () => { ans.classList.toggle('show'); btn.textContent = ans.classList.contains('show')?'Hide answer':'Show model answer'; });
+  }
+}
+function escHtml(s) { return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+</script>
+</body>
+</html>

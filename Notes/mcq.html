@@ -1,0 +1,1147 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCQ Bank — Programming Language Concepts</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── MCQ-specific layout ─────────────────────────────────────────── */
+    .mcq-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-3);
+      margin-bottom: var(--sp-6);
+      align-items: flex-end;
+    }
+    .mcq-search {
+      flex: 1 1 260px;
+    }
+    .mcq-search input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: var(--sp-2) var(--sp-3);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: var(--fs-base);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      transition: border-color var(--transition);
+    }
+    .mcq-search input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .mcq-filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-2);
+      align-items: center;
+    }
+    .mcq-filter-group label {
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .mcq-filter-group select {
+      padding: var(--sp-2) var(--sp-3);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: var(--fs-sm);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+    .mcq-filter-group select:focus { outline: none; border-color: var(--accent); }
+
+    .mcq-pill-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-2);
+      margin-bottom: var(--sp-4);
+    }
+    .filter-pill {
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .filter-pill:hover { border-color: var(--accent); color: var(--accent); }
+    .filter-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .mcq-stats {
+      font-size: var(--fs-sm);
+      color: var(--text-muted);
+      margin-bottom: var(--sp-4);
+    }
+
+    /* ── Question cards ──────────────────────────────────────────────── */
+    .mcq-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-5);
+      margin-bottom: var(--sp-4);
+    }
+    .mcq-card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--sp-3);
+      margin-bottom: var(--sp-3);
+      flex-wrap: wrap;
+    }
+    .mcq-card-meta {
+      display: flex;
+      gap: var(--sp-2);
+      flex-wrap: wrap;
+      flex: 1;
+    }
+    .mcq-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-year { background: #e0f0ff; color: #1560a8; }
+    .badge-exam { background: #fff0e0; color: #a85015; }
+    .badge-st1  { background: #e8ffe0; color: #2a8015; }
+    .badge-st2  { background: #f0e0ff; color: #6015a8; }
+    .badge-ch   { background: var(--bg-hover); color: var(--text-muted); }
+    .badge-multi { background: #fff3cd; color: #7d5a00; }
+
+    .mcq-question-text {
+      font-size: var(--fs-base);
+      line-height: 1.65;
+      margin-bottom: var(--sp-3);
+      color: var(--text-primary);
+    }
+    .mcq-question-text pre, .mcq-question-text code {
+      background: var(--bg-hover);
+      border-radius: var(--radius);
+      font-size: var(--fs-sm);
+    }
+    .mcq-question-text pre { padding: var(--sp-3); overflow-x: auto; white-space: pre-wrap; }
+    .mcq-question-text code { padding: 1px 5px; }
+
+    .mcq-options { display: grid; gap: var(--sp-2); }
+    .mcq-opt {
+      padding: var(--sp-2) var(--sp-3);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: var(--fs-sm);
+      cursor: pointer;
+      background: var(--bg-card);
+      color: var(--text-primary);
+      text-align: left;
+      transition: all 0.15s;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--sp-2);
+    }
+    .mcq-opt:hover { border-color: var(--accent); background: var(--bg-hover); }
+    .mcq-opt.correct { border-color: #198754; background: #eaf7ef; color: #0d4027; }
+    .mcq-opt.wrong   { border-color: #c73333; background: #fdecec; color: #6b1010; }
+    .opt-letter {
+      font-weight: 700;
+      min-width: 20px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .mcq-feedback {
+      display: none;
+      margin-top: var(--sp-3);
+      padding: var(--sp-3);
+      border-radius: var(--radius);
+      background: var(--bg-hover);
+      font-size: var(--fs-sm);
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+    .mcq-feedback.show { display: block; }
+
+    .mcq-reveal-btn {
+      margin-top: var(--sp-3);
+      padding: var(--sp-2) var(--sp-3);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: var(--fs-sm);
+      cursor: pointer;
+      background: var(--bg-card);
+      color: var(--text-secondary);
+    }
+    .mcq-reveal-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .no-results {
+      text-align: center;
+      padding: var(--sp-12);
+      color: var(--text-muted);
+      font-size: var(--fs-lg);
+    }
+
+    @media (max-width: 600px) {
+      .mcq-controls { flex-direction: column; }
+      .mcq-card-header { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<div class="reading-progress"><div class="reading-progress-bar"></div></div>
+<div class="layout">
+
+  <button class="menu-toggle" aria-label="Open menu">☰</button>
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="course-label">COS 333 · Concepts of PL</span>
+      <h1>Programming Language Concepts</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Overview</span>
+      <a href="index.html"><span class="nav-chapter">00</span> Home &amp; Topics</a>
+
+      <span class="nav-section-label">Chapters</span>
+      <a href="chapter1.html"><span class="nav-chapter">01</span> Preliminaries</a>
+      <a href="chapter2.html"><span class="nav-chapter">02</span> Evolution of PLs</a>
+      <a href="chapter5.html"><span class="nav-chapter">05</span> Names, Bindings &amp; Scopes</a>
+      <a href="chapter6.html"><span class="nav-chapter">06</span> Data Types</a>
+      <a href="chapter7.html"><span class="nav-chapter">07</span> Expressions &amp; Assignments</a>
+      <a href="chapter8.html"><span class="nav-chapter">08</span> Control Structures</a>
+      <a href="chapter9.html"><span class="nav-chapter">09</span> Subprograms</a>
+      <a href="chapter12.html"><span class="nav-chapter">12</span> OOP Support</a>
+      <a href="chapter15.html"><span class="nav-chapter">15</span> Functional Programming</a>
+      <a href="chapter16.html"><span class="nav-chapter">16</span> Logic Programming</a>
+
+      <span class="nav-section-label">Practical</span>
+      <a href="prolog-practical.html"><span class="nav-chapter">P3</span> Prolog in Practice</a>
+      <a href="prolog-list-patterns.html"><span class="nav-chapter">P4</span> List Patterns</a>
+      <a href="scheme-practical.html"><span class="nav-chapter">P5</span> Scheme in Practice</a>
+
+      <span class="nav-section-label">Assessment</span>
+      <a href="past-papers.html"><span class="nav-chapter">PP</span> Past Papers</a>
+      <a href="mcq.html" class="active"><span class="nav-chapter">MC</span> MCQ Bank</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle">
+        <span class="toggle-icon">☾</span>
+        <span class="toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span>›</span> MCQ Bank
+    </div>
+
+    <header class="page-header">
+      <span class="chapter-tag">Assessment · Practice</span>
+      <h1>MCQ Question Bank</h1>
+      <p class="subtitle">
+        180 multiple-choice questions drawn from all past papers (2022–2025 exams and semester tests). Filter by chapter, year, or paper type. Search by keyword. Toggle answers to check your reasoning.
+      </p>
+      <div class="topic-pills">
+        <span class="pill">180 Questions</span>
+        <span class="pill">Exams 2022–2025</span>
+        <span class="pill">ST1 &amp; ST2</span>
+        <span class="pill">All Chapters</span>
+        <span class="pill">Instant Feedback</span>
+      </div>
+    </header>
+
+    <article class="article">
+
+      <!-- Controls -->
+      <div class="mcq-controls">
+        <div class="mcq-search">
+          <input type="search" id="mcq-search" placeholder="Search questions and options…" autocomplete="off" />
+        </div>
+        <div class="mcq-filter-group">
+          <label for="sort-sel">Sort:</label>
+          <select id="sort-sel">
+            <option value="default">Default (year → chapter)</option>
+            <option value="chapter">Chapter</option>
+            <option value="year">Year</option>
+            <option value="points">Points (high first)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Pill filters: Chapter -->
+      <div style="margin-bottom: var(--sp-2)">
+        <span style="font-size: var(--fs-sm); font-weight: 700; color: var(--text-muted); margin-right: var(--sp-2);">CHAPTER</span>
+        <div class="mcq-pill-filters" id="ch-pills">
+          <button class="filter-pill active" data-ch="all">All</button>
+          <button class="filter-pill" data-ch="1">Ch 1 · Preliminaries</button>
+          <button class="filter-pill" data-ch="2">Ch 2 · Evolution</button>
+          <button class="filter-pill" data-ch="5">Ch 5 · Names &amp; Bindings</button>
+          <button class="filter-pill" data-ch="6">Ch 6 · Data Types</button>
+          <button class="filter-pill" data-ch="7">Ch 7 · Expressions</button>
+          <button class="filter-pill" data-ch="8">Ch 8 · Control Structures</button>
+          <button class="filter-pill" data-ch="9">Ch 9 · Subprograms</button>
+          <button class="filter-pill" data-ch="12">Ch 12 · OOP</button>
+          <button class="filter-pill" data-ch="15">Ch 15 · Functional</button>
+          <button class="filter-pill" data-ch="16">Ch 16 · Logic</button>
+        </div>
+      </div>
+
+      <!-- Pill filters: Year -->
+      <div style="margin-bottom: var(--sp-2)">
+        <span style="font-size: var(--fs-sm); font-weight: 700; color: var(--text-muted); margin-right: var(--sp-2);">YEAR</span>
+        <div class="mcq-pill-filters" id="yr-pills">
+          <button class="filter-pill active" data-yr="all">All</button>
+          <button class="filter-pill" data-yr="2022">2022</button>
+          <button class="filter-pill" data-yr="2023">2023</button>
+          <button class="filter-pill" data-yr="2024">2024</button>
+          <button class="filter-pill" data-yr="2025">2025</button>
+        </div>
+      </div>
+
+      <!-- Pill filters: Paper -->
+      <div style="margin-bottom: var(--sp-5)">
+        <span style="font-size: var(--fs-sm); font-weight: 700; color: var(--text-muted); margin-right: var(--sp-2);">PAPER</span>
+        <div class="mcq-pill-filters" id="paper-pills">
+          <button class="filter-pill active" data-paper="all">All</button>
+          <button class="filter-pill" data-paper="exam">Exam</button>
+          <button class="filter-pill" data-paper="st1">ST1</button>
+          <button class="filter-pill" data-paper="st2">ST2</button>
+        </div>
+      </div>
+
+      <div class="mcq-stats" id="mcq-stats"></div>
+      <div id="mcq-list"></div>
+
+    </article>
+  </main>
+</div>
+
+<script src="study-notes.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   MCQ DATA — 180 questions from all past papers 2022–2025
+   Format: { year, paper, ch, pts, multi, q, opts, ans[], reason }
+   ans[] is 1-indexed. multi = true for penalised multi-select.
+═══════════════════════════════════════════════════════════════════ */
+const ALL_MCQS = [
+/* ─── 2022 EXAM ─────────────────────────────────────────────────── */
+{year:2022,paper:"exam",ch:1,pts:1,multi:false,
+ q:"For programming languages designed for <strong>systems programming</strong>, the primary concern is efficiency. Select the one that most correctly identifies the <strong>second most important concern</strong>.",
+ opts:["Portability.","Generality.","Orthogonality.","Reliability."],
+ ans:[4],reason:"After efficiency, reliability is the second most important concern for systems-programming languages."},
+{year:2022,paper:"exam",ch:2,pts:1,multi:false,
+ q:"Pseudocode languages were interpreted rather than compiled. Select the option that most correctly identifies <strong>why these languages were interpreted</strong>.",
+ opts:["Interpretation offers the advantage of cross-platform compatibility.","Interpretation is more reliable in terms of error detection than compilation.","Certain operations were not supported in hardware at the time, meaning execution was slow regardless of whether interpretation was used.","Interpretation requires less computing resources than compilation does."],
+ ans:[3],reason:"Early hardware lacked floating-point support; programs had to be 'expanded' (interpreted) regardless — compilation offered no advantage."},
+{year:2022,paper:"exam",ch:2,pts:1,multi:false,
+ q:"Select the option that most correctly describes <strong>Objective-C</strong>.",
+ opts:["OOP in Objective-C is based on C.","OOP in Objective-C is based on C++.","OOP in Objective-C is based on Smalltalk.","Objective-C does not support OOP."],
+ ans:[3],reason:"Objective-C adds Smalltalk-style message passing to C; its OOP model derives from Smalltalk."},
+{year:2022,paper:"exam",ch:5,pts:1,multi:false,
+ q:"Consider the <strong>scope and lifetime of static variables</strong>, and select the statement that is most correct.",
+ opts:["Scope is from the variable declaration to the end of its block; lifetime is from the start of program execution to the end of program execution.","Scope is from start to end of program execution; lifetime is from the variable declaration to the end of its block.","Scope and lifetime are both from the variable declaration to the end of its block.","Scope and lifetime are both from start to end of program execution."],
+ ans:[1],reason:"A static variable's scope is local (declaration to block end), but its storage persists for the entire program execution."},
+{year:2022,paper:"exam",ch:6,pts:1,multi:false,
+ q:"Consider the following possible <strong>disadvantages of implicitly dereferenced pointers</strong>, and select the one that is most correct.",
+ opts:["Void pointers cannot be used.","Pointer arithmetic is disallowed.","Pointers cannot be used for indirect addressing.","Pointers cannot be used for dynamic memory management."],
+ ans:[2],reason:"When pointers are always implicitly dereferenced, explicit pointer arithmetic (ptr+1) becomes impossible."},
+{year:2022,paper:"exam",ch:7,pts:1,multi:false,
+ q:"Consider <strong>operator precedence and associativity in APL</strong>, and select the one that is most correct.",
+ opts:["Precedence rules in APL are more orthogonal than in other languages, but associativity rules are less orthogonal.","Associativity rules in APL are more orthogonal, but precedence rules are less orthogonal.","Both precedence and associativity rules in APL are more orthogonal than in other programming languages.","Both precedence and associativity rules in APL are less orthogonal than in other programming languages."],
+ ans:[3],reason:"APL has one uniform rule: all operators have the same precedence and associate right-to-left — highly orthogonal."},
+{year:2022,paper:"exam",ch:15,pts:1,multi:false,
+ q:"In Scheme, operator overloading isn't supported due to dynamic typing. Select the reason that most correctly explains why <strong>dynamic typing results in a lack of operator overloading in Scheme</strong>.",
+ opts:["Dynamic typing means Scheme operators can receive operands of any type.","Dynamic typing means overloaded operators would be very unreliable.","Dynamic typing means overloaded versions of operators are automatically generated.","Dynamic typing means operator support doesn't make sense in Scheme."],
+ ans:[1],reason:"Dynamic typing allows any type at runtime, so a single '+' function works on all numeric types — separate overloads are unnecessary."},
+{year:2022,paper:"exam",ch:7,pts:1,multi:false,
+ q:"Ada supports <strong>no assignment coercions</strong>. Select the statement that most correctly describes a result.",
+ opts:["Ada is more writable.","Ada is more orthogonal.","Ada is more reliable.","Ada has lower cost."],
+ ans:[3],reason:"Without implicit coercions, type mismatches are caught explicitly — improving reliability."},
+{year:2022,paper:"exam",ch:7,pts:1,multi:false,
+ q:"Perl supports <strong>multiple assignments</strong>. Select the statement that most correctly describes an advantage.",
+ opts:["Perl is more writable.","Perl is more orthogonal.","Perl has reduced cost.","Perl is more reliable."],
+ ans:[1],reason:"Multiple assignment (e.g. swapping variables in one line) directly improves writability."},
+{year:2022,paper:"exam",ch:7,pts:1,multi:false,
+ q:"Consider this loop condition: <code>while ((myArr[index] == threshold) or (++index &lt; length))</code>. Select the option that most correctly describes a <strong>problem</strong>.",
+ opts:["If <code>or</code> is short-circuit evaluated, a side effect will not occur, which causes a problem.","If <code>or</code> is short-circuit evaluated, a side effect occurs, which causes a problem.","If <code>or</code> is not short-circuit evaluated, a side effect will not occur, which causes a problem.","If <code>or</code> is not short-circuit evaluated, a side effect occurs, which causes a problem."],
+ ans:[1],reason:"When short-circuit evaluation skips the right side (left is true), ++index is NOT evaluated — index doesn't advance, potentially causing an infinite loop."},
+{year:2022,paper:"exam",ch:8,pts:2,multi:true,
+ q:"Fortran I had a <strong>three-way selection statement</strong> (branch on &lt;0, =0, &gt;0). Select <strong>only</strong> the statements that are properties of this statement.",
+ opts:["The three-way statement allows flow control that cannot be written using two-way selection and pretest loops.","The three-way selection statement is very efficient.","The three-way selection statement is an example of programmer time being considered more important than execution time.","The three-way selection statement is too closely based on the IBM 704 hardware."],
+ ans:[2,4],reason:"It jumps directly to one of three labels (efficient), and mirrors the IBM 704 conditional branch instruction (hardware-specific)."},
+{year:2022,paper:"exam",ch:8,pts:1,multi:false,
+ q:"Counter-controlled loops are supported in <strong>C and Ada</strong>. Select the most correct statement.",
+ opts:["Counter-controlled loops in C are less writable than in Ada.","Counter-controlled loops in C are more costly than in Ada.","Counter-controlled loops in C are less reliable than in Ada.","Counter-controlled loops in C are more orthogonal than in Ada."],
+ ans:[3],reason:"Ada's for loop has a read-only loop variable and restricted range — prevents common C-style loop modification bugs."},
+{year:2022,paper:"exam",ch:8,pts:1,multi:false,
+ q:"Consider the drawback that applies to situations in which <strong>a conditional is part of a break</strong> used in a loop.",
+ opts:["Writability is reduced.","Readability is reduced.","Orthogonality is reduced.","Cost is reduced."],
+ ans:[2],reason:"An embedded conditional in a break obscures the exit logic — the reader must inspect the loop body to understand termination conditions."},
+{year:2022,paper:"exam",ch:9,pts:1,multi:false,
+ q:"In C++, default parameters must appear last. Select the solution for <strong>allowing default parameters to appear anywhere</strong> in the parameter list.",
+ opts:["Use a variable number of parameters.","Use positional parameters.","Use keyword parameters.","It is not possible to allow default parameters anywhere."],
+ ans:[3],reason:"Keyword parameters let the caller name each argument, so defaults can be omitted in any position."},
+{year:2022,paper:"exam",ch:9,pts:1,multi:false,
+ q:"Procedures are a specific kind of subprogram. Select the statement that is most correct.",
+ opts:["Procedures are guaranteed to never have side effects.","Procedures are guaranteed to always have side effects.","Procedures have a high probability of having side effects, unless they are written carefully.","Procedures generate side effects unpredictably."],
+ ans:[3],reason:"Procedures typically modify shared state (reference parameters, global variables, I/O) — they can produce side effects unless explicitly written to avoid them."},
+{year:2022,paper:"exam",ch:12,pts:1,multi:false,
+ q:"Java supports a mechanism for ensuring clients can't depend on the implementation of ADTs. Select the feature that <strong>ensures a lack of client dependence on implementation</strong>.",
+ opts:["Header files and implementation files.","Base classes and derived classes.","Classes implementing interfaces.","Javadoc and bytecode."],
+ ans:[4],reason:"Javadoc exposes the public interface; the implementation is compiled to bytecode — clients receive only the .class files, not source."},
+{year:2022,paper:"exam",ch:12,pts:1,multi:false,
+ q:"Classes are dynamic in Ruby. Select the statement about the <strong>implications of dynamic classes</strong> that is most correct.",
+ opts:["Dynamic classes increase writability.","Dynamic classes increase readability.","Dynamic classes decrease cost.","Dynamic classes increase reliability."],
+ ans:[1],reason:"Dynamic classes allow classes to be reopened and extended at runtime (monkey patching), greatly increasing writability."},
+{year:2022,paper:"exam",ch:12,pts:1,multi:false,
+ q:"Assume a language supports <strong>multiple inheritance</strong>: A is base, B and C inherit from A, D inherits from both B and C. Select the statement that causes an <strong>implicit problem</strong>.",
+ opts:["If any class member is defined in class A.","If any class member is defined in class B.","If any class member is defined in class C.","If any class member with the same name is defined in B and C."],
+ ans:[1],reason:"If A defines a member and B/C don't override it, D implicitly inherits two copies — an implicit collision without explicit redefinition."},
+{year:2022,paper:"exam",ch:12,pts:1,multi:false,
+ q:"C++ provides support for <strong>private derivation</strong>. Select the statement describing a valid use for it.",
+ opts:["When a derived class wishes to only add to the public interface of its base class.","When a derived class wishes to only modify one part of the public interface of its base class.","When a derived class wishes to only make part of its base class interface publicly visible.","When a derived class wishes to ensure it is a subtype of its base class."],
+ ans:[3],reason:"Private derivation makes the base's public members private in the derived class — the derived class can then selectively expose only what it chooses."},
+{year:2022,paper:"exam",ch:12,pts:1,multi:false,
+ q:"C++ and Java both support <strong>object-oriented message binding</strong>. Select the most correct statement.",
+ opts:["C++ support for message binding is more writable than Java's.","C++ support for message binding is more readable than Java's.","C++ support for message binding is less efficient than Java's.","C++ support for message binding is more reliable than Java's."],
+ ans:[1],reason:"C++ allows the programmer to choose between static (default) and dynamic (virtual) binding — this flexibility makes it more writable for performance-sensitive code."},
+{year:2022,paper:"exam",ch:12,pts:1,multi:false,
+ q:"Consider <strong>classes and structs in C#</strong>, and select the most correct statement.",
+ opts:["C# only supports classes, not structs.","Classes are more writable than structs in C#.","Structs are more writable than classes in C#.","Classes and structs are equally writable in C#."],
+ ans:[2],reason:"C# classes support inheritance, constructors, destructors, and all OOP features. Structs are value types with significant restrictions."},
+
+/* ─── 2023 EXAM ─────────────────────────────────────────────────── */
+{year:2023,paper:"exam",ch:2,pts:1,multi:false,
+ q:"Select the programming language design influence that had its <strong>earliest impact on the design of SIMULA 67</strong>.",
+ opts:["Computer architecture.","Programmer efficiency becoming more important than machine efficiency.","The move from process-oriented to data-oriented programming.","The move to object-oriented programming."],
+ ans:[3],reason:"SIMULA 67 was designed for simulation — the move toward data-oriented programming (modelling real-world entities) was the defining influence leading to classes and objects."},
+{year:2023,paper:"exam",ch:1,pts:2,multi:true,
+ q:"Select <strong>only</strong> the evaluation criteria that benefit from the use of a <strong>hybrid implementation system</strong>.",
+ opts:["Readability.","Writability.","Cost.","Portability."],
+ ans:[3,4],reason:"Hybrid systems compile to an intermediate form (reducing execution cost vs pure interpretation) and run on any VM (improving portability)."},
+{year:2023,paper:"exam",ch:2,pts:1,multi:false,
+ q:"Consider only the syntax used by <strong>Plankalkül</strong> for assignments using arrays and subscripts. Select the most correct statement.",
+ opts:["The syntax had poor readability.","The syntax had poor writability.","The syntax had poor reliability.","The syntax had poor execution cost."],
+ ans:[1],reason:"Plankalkül used an unusual two-dimensional notation for subscripts that was highly unreadable."},
+{year:2023,paper:"exam",ch:2,pts:1,multi:false,
+ q:"The language specification of <strong>ALGOL 60</strong> lacked support for I/O operations. Select the statement that most correctly describes a consequence.",
+ opts:["The reliability of ALGOL 60 suffered.","The execution cost of ALGOL 60 suffered.","The execution cost of ALGOL 60 improved.","The machine independence of ALGOL 60 suffered."],
+ ans:[4],reason:"Each implementation defined its own I/O, meaning ALGOL 60 programs were not truly portable — a main design goal was undermined."},
+{year:2023,paper:"exam",ch:2,pts:1,multi:false,
+ q:"Consider <strong>Lua</strong>, and select the most correct statement.",
+ opts:["Lua uses full compilation for reduced execution cost.","Lua requires heap allocated variables to be explicitly deallocated.","Lua supports functional programming.","Lua is a fully featured OOP language."],
+ ans:[3],reason:"Lua supports first-class functions, closures, and higher-order functions — the hallmarks of functional programming."},
+{year:2023,paper:"exam",ch:5,pts:1,multi:false,
+ q:"Consider this code: <code>var myVariable = \"Test\"</code> later reassigned to an integer. Select the <strong>category of <code>myVariable</code></strong> in terms of lifetime.",
+ opts:["Static variable.","Stack-dynamic variable.","Explicit heap-dynamic variable.","Implicit heap-dynamic variable."],
+ ans:[4],reason:"The variable is implicitly typed and can hold values of different types — characteristic of implicit heap-dynamic variables."},
+{year:2023,paper:"exam",ch:6,pts:1,multi:false,
+ q:"Consider <strong>list comprehensions in Python</strong>, and select the most correct statement.",
+ opts:["List comprehensions increase the readability of Python.","List comprehensions increase the writability of Python.","List comprehensions improve the reliability of Python.","List comprehensions reduce the execution cost of Python."],
+ ans:[2],reason:"List comprehensions provide a concise, expressive syntax for building lists, directly improving writability."},
+{year:2023,paper:"exam",ch:6,pts:1,multi:false,
+ q:"C++ is not strongly typed. Select the reason most correctly describing a reason contributing to the <strong>weak typing of C++</strong>.",
+ opts:["The way in which C++ supports pointers.","The fact that C++ supports only discriminated unions.","The fact that C++ performs no parameter type checking.","The fact that C++ does not perform index range checking."],
+ ans:[1],reason:"C++ allows void pointers, unchecked pointer casts, and unsafe pointer arithmetic — all undermine type safety."},
+{year:2023,paper:"exam",ch:7,pts:1,multi:false,
+ q:"Consider <strong>arithmetic operators in Ruby and Java</strong>, and select the most correct statement.",
+ opts:["Arithmetic operators in Ruby are less flexible than in Java.","Arithmetic operators in Ruby are always as reliable as in Java.","Arithmetic operators in Ruby are implemented in a more orthogonal way than in Java.","Arithmetic operators in Ruby have a lower execution cost than in Java."],
+ ans:[3],reason:"In Ruby, all operators (including arithmetic) are implemented as methods on objects — a single consistent mechanism, more orthogonal than Java's separate primitive/object handling."},
+{year:2023,paper:"exam",ch:7,pts:1,multi:false,
+ q:"Consider the <strong>unary <code>*</code> operator in C++</strong>, and select the most correct statement.",
+ opts:["Poorly designed — overloaded to produce very different results depending on context.","Poorly designed — C++ could avoid its use without losing flexibility.","Well designed — it is not overloaded.","Well designed — it cannot be confused with non-unary operators."],
+ ans:[1],reason:"The unary * serves as both pointer dereference (in expressions) and pointer type declaration (in declarations) — two very different meanings depending on context."},
+{year:2023,paper:"exam",ch:7,pts:1,multi:false,
+ q:"Consider <strong>conditional targets</strong>, and select the most correct statement.",
+ opts:["Conditional targets improve the readability of assignments.","Conditional targets improve the writability of assignments.","Conditional targets improve the reliability of assignments.","Conditional targets decrease the cost of execution of assignments."],
+ ans:[2],reason:"A conditional target like (a>0?a:b)=val allows concise conditional assignment in a single expression — a writability improvement."},
+{year:2023,paper:"exam",ch:7,pts:1,multi:false,
+ q:"Consider <strong>mixed-mode assignments in Ada and C</strong>, and select the most correct statement.",
+ opts:["Mixed-mode assignments in Ada are less readable than in C.","Mixed-mode assignments in Ada are less writable than in C.","Mixed-mode assignments in Ada are less reliable than in C.","Mixed-mode assignments in Ada have a higher execution cost than in C."],
+ ans:[2],reason:"Ada disallows mixed-mode assignments — every type conversion must be explicit. Safer but less writable than C's implicit coercions."},
+{year:2023,paper:"exam",ch:8,pts:1,multi:false,
+ q:"Consider the <strong>approaches used by Ruby and Perl to disambiguate nested selectors</strong>, and select the most correct statement.",
+ opts:["Ruby uses a less reliable approach than Perl.","Ruby uses a less readable approach than Perl.","Ruby uses a less writable approach than Perl.","Ruby uses a more writable approach than Perl."],
+ ans:[4],reason:"Ruby uses end keywords for each block and has cleaner syntax for nested if/case, which many consider more writable than Perl's brace-heavy approach."},
+{year:2023,paper:"exam",ch:7,pts:1,multi:false,
+ q:"Consider <strong>selector expressions used in assignments</strong> when the <code>else</code> clause is left out. Select the most correct statement.",
+ opts:["Readability is improved.","Readability is reduced.","Reliability is improved.","The evaluation criteria are not affected."],
+ ans:[2],reason:"Without an else clause, it's unclear what value is assigned when no condition matches — undefined result reduces readability."},
+{year:2023,paper:"exam",ch:8,pts:1,multi:false,
+ q:"Consider <strong>counter-controlled loops in Ada and C</strong>, and select the most correct statement.",
+ opts:["Counter-controlled loops are more writable in Ada than in C.","Counter-controlled loops are less readable in Ada than in C.","Counter-controlled loops are more reliable in Ada than in C.","Counter-controlled loops have a higher cost of execution in Ada than in C."],
+ ans:[3],reason:"Ada's for-loop variable is implicitly declared and read-only inside the loop — prevents common C-style loop modification bugs."},
+{year:2023,paper:"exam",ch:9,pts:1,multi:false,
+ q:"Consider <strong>default values for subprogram parameters</strong>, and select the most correct statement.",
+ opts:["No way for a default to appear anywhere but the beginning of a parameter list.","No way for a default to appear anywhere but the end of a parameter list.","A default can appear anywhere if positional parameters are used.","A default can appear anywhere if keyword parameters are used."],
+ ans:[4],reason:"Keyword parameters let the caller explicitly name which arguments to pass — default parameters can be placed anywhere."},
+{year:2023,paper:"exam",ch:9,pts:1,multi:false,
+ q:"Consider a <strong>drawback associated with Lua</strong>, and select the most correct statement.",
+ opts:["Anonymous functions in Lua cannot be used after their definition.","It is easy for a programmer to unintentionally create a stack-dynamic variable in Lua.","It is easy for a programmer to unintentionally create a global variable in Lua.","Lua does not allow a function to receive a variable number of parameters."],
+ ans:[3],reason:"In Lua, any undeclared variable is automatically global — forgetting 'local' accidentally creates a global."},
+{year:2023,paper:"exam",ch:9,pts:1,multi:false,
+ q:"Consider <strong>pass-by-result subprogram parameters</strong>, and select the most correct statement.",
+ opts:["Pass-by-result can only copy a value to the caller.","Pass-by-result can only transfer an access path to the caller.","Pass-by-result can either copy a value or transfer an access path to the caller.","Pass-by-result can neither copy a value nor transfer an access path."],
+ ans:[3],reason:"Pass-by-result can be implemented with either a physical copy (value written back on return) or via an access path (pointer to the caller's actual parameter)."},
+{year:2023,paper:"exam",ch:12,pts:1,multi:false,
+ q:"Consider <strong>properties in C# classes</strong>, and select the most correct statement.",
+ opts:["Properties provide instance variables within a C# class.","Properties provide class variables within a C# class.","Properties provide a less writable alternative to getters/setters, from the user's perspective.","Properties provide a more writable alternative to getters/setters, from the user's perspective."],
+ ans:[4],reason:"C# properties allow assignment/access syntax (obj.Prop=val; x=obj.Prop) rather than verbose method calls — more writable from the user's perspective."},
+{year:2023,paper:"exam",ch:12,pts:1,multi:false,
+ q:"Consider the <strong>approach used by Java to hide ADT representation</strong> from users, and select the most correct statement.",
+ opts:["The interface is in a header file the user can see; the implementation is compiled to a class file.","The interface is not provided to the user; only the compiled class file is provided.","The interface is automatically generated as documentation (Javadoc); the implementation is compiled to a class file and only the class file is provided.","Java does not hide the representation of ADT objects from users."],
+ ans:[3],reason:"Javadoc generates API documentation from source comments; users see the documented interface but receive only the compiled bytecode."},
+{year:2023,paper:"exam",ch:12,pts:2,multi:true,
+ q:"Four classes: A (base), B and C inherit from A, D inherits from both B and C. An <strong>implicit name collision</strong> is possible. Select <strong>only</strong> the details that together result in an implicit (not explicit) collision.",
+ opts:["Defining a method named myMethod in class A.","Defining a method named myMethod in class B.","Defining a method named myMethod in class C.","Defining a method named myMethod in class D."],
+ ans:[1],reason:"If only A defines myMethod and B/C don't override it, D implicitly inherits two copies — no explicit redefinition required."},
+{year:2023,paper:"exam",ch:12,pts:2,multi:true,
+ q:"C++ has lower cost of execution than Smalltalk. Select <strong>only</strong> the factors that contribute to the <strong>lower cost of execution in C++</strong>.",
+ opts:["The approach C++ uses in relation to the exclusivity of classes.","The approach C++ uses to perform message binding.","The fact that C++ supports heap allocated objects.","The fact that subclasses are not necessarily subtypes in C++."],
+ ans:[1,2],reason:"C++ allows primitive types (avoiding object overhead) and uses static binding by default (avoiding vtable dispatch cost)."},
+
+/* ─── 2024 EXAM ─────────────────────────────────────────────────── */
+{year:2024,paper:"exam",ch:1,pts:1,multi:false,
+ q:"Select the statement that most correctly describes a likely <strong>trade-off when readability improves</strong>.",
+ opts:["The cost of execution becomes worse.","The cost of maintenance becomes worse.","The cost of implementation becomes worse.","Reliability becomes worse."],
+ ans:[1],reason:"More readable (higher-level, expressive) languages often add abstraction layers that increase execution overhead."},
+{year:2024,paper:"exam",ch:2,pts:1,multi:false,
+ q:"An additional criterion is <strong>generality</strong>. Select the programming language that has the <strong>best generality</strong>.",
+ opts:["Fortran I","ALGOL 60","SIMULA 67","PL/I"],
+ ans:[4],reason:"PL/I was explicitly designed to combine FORTRAN (scientific), COBOL (business), and ALGOL 60 (structured) — the most general-purpose of these options."},
+{year:2024,paper:"exam",ch:2,pts:1,multi:false,
+ q:"Consider <strong>Pascal and C</strong>, and select the most correct statement.",
+ opts:["Pascal is more readable than C.","Pascal is more writable than C.","Pascal is less reliable than C.","Pascal has a higher cost of maintenance than C."],
+ ans:[1],reason:"Pascal was designed specifically for teaching and clarity — structured programming, strict typing, and clean block structure make it more readable than C."},
+{year:2024,paper:"exam",ch:1,pts:1,multi:false,
+ q:"An additional criterion is <strong>portability</strong>. Select the most portable programming language.",
+ opts:["Fortran 90","C++","PL/I","JavaScript"],
+ ans:[4],reason:"JavaScript runs in any browser and via Node.js on any OS — designed around ubiquity and portability."},
+{year:2024,paper:"exam",ch:5,pts:1,multi:false,
+ q:"Select the option that most correctly describes the <strong>binding time</strong> of a standard 32-bit signed integer type to either sign-and-magnitude or two's complement representation.",
+ opts:["Language design time","Language implementation time","Compile time","Load time","Runtime"],
+ ans:[2],reason:"The decision to use two's complement is made when implementing the language on a particular platform — language implementation time."},
+{year:2024,paper:"exam",ch:5,pts:1,multi:false,
+ q:"Consider this C# code (inner block declares x on line 4; outer block declares x on line 6). Select the most correct statement.",
+ opts:["Does not compile because y is not initialised.","Does not compile because x on line 4 hides x on line 6.","Does not compile because x on line 6 hides x on line 4.","Compiles and runs successfully."],
+ ans:[4],reason:"x on line 4 is in an inner block that closes before line 6. After that block ends, declaring x again in the outer block is legal in C#."},
+{year:2024,paper:"exam",ch:6,pts:1,multi:false,
+ q:"Consider <strong>character string types</strong>, and select the most correct statement.",
+ opts:["In languages using only classes for strings, strings are always mutable.","In languages using only classes for strings, strings are always immutable.","Limited dynamic length strings have higher overall hardware cost than static length strings, and lower cost than dynamic length strings.","C supports character strings as a primitive type."],
+ ans:[3],reason:"Limited dynamic strings need a length field and some allocation overhead (more than static), but don't resize arbitrarily like full dynamic strings — they fall between the two."},
+{year:2024,paper:"exam",ch:6,pts:1,multi:false,
+ q:"Consider <strong>unions</strong>, and select the most correct statement.",
+ opts:["Unions are closely related to classes in OOP, but more limited in functionality.","Discriminated unions are more memory efficient than free unions.","Unions can be used as a mechanism for returning multiple values from a subprogram.","Unions are used when memory cost is of great concern."],
+ ans:[4],reason:"The primary motivation for unions is memory efficiency — overlaying multiple type representations in the same storage space."},
+{year:2024,paper:"exam",ch:15,pts:1,multi:false,
+ q:"Consider <strong>arithmetic operations in Scheme</strong>, and select the most correct statement.",
+ opts:["Order is unambiguously determined based on clear precedence levels and associativity rules.","Order is unambiguously determined based on function and parameter evaluation.","Order is unambiguously determined because all operators have the same precedence and associate left-to-right.","Order is ambiguous because function parameters are evaluated in no particular order."],
+ ans:[2],reason:"In Scheme, arithmetic is expressed as function calls. The nesting of function applications unambiguously determines evaluation order."},
+{year:2024,paper:"exam",ch:7,pts:1,multi:false,
+ q:"Consider <strong>expressions in Ada</strong>, and select the most correct statement.",
+ opts:["The lack of coercions makes Ada more readable.","The lack of coercions makes Ada less reliable.","The common use of coercions in Ada makes it more writable.","The common use of coercions in Ada makes it less reliable."],
+ ans:[1],reason:"With no implicit coercions, every type conversion is explicit and visible — making program behaviour clearer and more readable."},
+{year:2024,paper:"exam",ch:7,pts:1,multi:false,
+ q:"Consider this short-circuit loop: <code>while ((count > 0) and (result = (10.0 / count)))</code>. Select the most correct statement about errors.",
+ opts:["Produces an error regardless of short-circuit evaluation.","Produces an error if <code>and</code> IS short-circuit evaluated.","Produces an error if <code>and</code> is NOT short-circuit evaluated.","Produces no error regardless of short-circuit evaluation."],
+ ans:[3],reason:"When count=0, (count>0) is false. Without short-circuit, the right side (10.0/0) is still evaluated — division by zero. With short-circuit, the right side is skipped."},
+{year:2024,paper:"exam",ch:7,pts:1,multi:false,
+ q:"Consider <strong>unary assignment operators</strong>, and select the most correct statement.",
+ opts:["Reduce readability if overloaded to provide prefix and postfix versions.","Reduce writability if overloaded to provide prefix and postfix versions.","Reduce the execution cost of a programming language.","Are essential within a programming language."],
+ ans:[1],reason:"When ++ appears in both prefix (++i) and postfix (i++) forms, reading an expression requires knowing which form is used and its subtle timing — reducing readability."},
+{year:2024,paper:"exam",ch:8,pts:2,multi:true,
+ q:"Select <strong>only</strong> the statements that are true about <strong>counter-controlled loops</strong>.",
+ opts:["Counter-controlled loops are required to implement any flowchart-represented algorithm.","Counter-controlled loops in Python are more reliable than in C.","Counter-controlled loops in C are more readable than in Java.","Counter-controlled loops are not directly supported in purely functional programming languages."],
+ ans:[2,4],reason:"Python's range-based for loop prevents index manipulation errors (more reliable than C). Purely functional languages use recursion, not counter loops."},
+{year:2024,paper:"exam",ch:8,pts:2,multi:true,
+ q:"Select <strong>only</strong> the correct statements about <strong>disambiguating nested selection statements</strong>.",
+ opts:["Python's approach is less readable than Java's approach.","Python's approach is less reliable than Java's approach.","Ruby and Perl use very similar approaches, but Perl's approach is more writable.","Python and Ruby use very similar approaches, but Python's approach is more writable."],
+ ans:[2,3],reason:"Python's indentation is error-prone (mis-indent silently changes logic) — less reliable than Java's explicit braces. Perl's brace syntax is generally more familiar/writable than Ruby's end-keyword approach."},
+{year:2024,paper:"exam",ch:9,pts:1,multi:false,
+ q:"Consider <strong>subprograms defined outside a class definition</strong>, and select the most correct statement.",
+ opts:["Ruby subprograms outside a class are more writable than C++ subprograms outside a class.","Ruby subprograms outside a class are less writable than C++ subprograms outside a class.","Ruby subprograms outside a class are more orthogonal than C++ subprograms outside a class.","Ruby subprograms outside a class behave in exactly the same way as C++ subprograms outside a class."],
+ ans:[3],reason:"In Ruby, functions defined outside a class automatically become methods of the Object class — everything is a method, more orthogonal than C++'s standalone functions."},
+{year:2024,paper:"exam",ch:9,pts:1,multi:false,
+ q:"Consider <strong>procedures and functions</strong>, and select the most correct statement.",
+ opts:["A procedure can produce a result if all its parameters use pass-by-value semantics.","A procedure is guaranteed to produce no side effect if it produces a result.","A function is guaranteed to produce a side effect if it produces a result.","A procedure can more easily produce multiple results than a function can."],
+ ans:[4],reason:"A procedure can modify multiple reference parameters simultaneously — easier than a function which formally returns a single value."},
+{year:2024,paper:"exam",ch:9,pts:1,multi:false,
+ q:"Consider C# generic method <code>doSomething&lt;T&gt;</code> called with both <code>int</code> and <code>bool</code> arguments. Select the most correct statement.",
+ opts:["One version created at compile time, used with int and bool.","Two versions created at compile time, one for int and one for bool.","One version created at runtime, used with Object.","Two versions created at runtime, one for int and one for bool."],
+ ans:[4],reason:"C# uses reified generics — value types (int, bool) each get separate JIT-compiled versions at runtime."},
+{year:2024,paper:"exam",ch:12,pts:2,multi:true,
+ q:"Select <strong>only</strong> the C++ features that <strong>detract from ADT representation hiding</strong>.",
+ opts:["The existence of friend functions and friend classes.","The fact that C++ supports stand-alone functions not part of a class.","The fact that class and member function definitions must appear in the same file.","The fact that all class data members must appear in header files."],
+ ans:[1,4],reason:"Friend functions/classes can access private members directly (breaking encapsulation). Data members in header files expose implementation details to clients."},
+{year:2024,paper:"exam",ch:12,pts:1,multi:false,
+ q:"Consider <strong>ADTs in Ruby</strong>, and select the most correct statement.",
+ opts:["Instance and class variable names are more readable in Ruby than in Java.","Ruby supports multiple constructors, each implicitly called with the appropriate parameters.","It is impossible to implement multiple constructor functionality in Ruby.","The interface of a Ruby ADT is very unreliable."],
+ ans:[4],reason:"Ruby classes are dynamic — they can be reopened and modified at any time, making class interfaces unpredictable and unreliable."},
+{year:2024,paper:"exam",ch:12,pts:1,multi:false,
+ q:"Imagine a language where a subclass can inherit a public method and <strong>change its access to private or protected</strong>. Select the most correct statement.",
+ opts:["Dynamic binding is less efficient.","Dynamic binding is impossible.","Subclasses are subtypes.","Subclasses are not subtypes."],
+ ans:[4],reason:"A subtype must be substitutable for its parent (Liskov principle). Restricting access to inherited methods breaks that guarantee — subclasses cannot be subtypes."},
+{year:2024,paper:"exam",ch:12,pts:2,multi:true,
+ q:"Select <strong>only</strong> the approaches that make <strong>Smalltalk more orthogonal than Java</strong>.",
+ opts:["The difference in approach to the exclusivity of objects.","The difference in approach to dynamic and static binding.","The difference in approach to subclasses and subtypes.","The difference in approach to object deallocation."],
+ ans:[1,2],reason:"Smalltalk treats EVERYTHING as an object (no primitives) — more orthogonal exclusivity. Smalltalk always uses dynamic binding — more orthogonal binding (one consistent rule)."},
+{year:2024,paper:"exam",ch:12,pts:1,multi:false,
+ q:"Consider <strong>OOP in C++ and C#</strong>, and select the most correct statement.",
+ opts:["C++ provides worse support for multiple inheritance than C#.","C++ provides less writability in terms of nested classes than C#.","C++ uses a more orthogonal approach to OOP than C#.","C++ provides a more readable approach to dynamic message binding than C#."],
+ ans:[4],reason:"C# requires both 'virtual' in the parent and 'override' in the child — this explicit two-keyword declaration makes the intent clearer and more readable than C++'s approach."},
+
+/* ─── 2025 EXAM ─────────────────────────────────────────────────── */
+{year:2025,paper:"exam",ch:1,pts:1,multi:false,
+ q:"Consider the types of cost that can be associated with a programming language, and select the one that is <strong>most relevant to consider in a modern computing context</strong>.",
+ opts:["Cost of compiling programs","Cost of executing programs","Cost of reliability","Cost of the language implementation system"],
+ ans:[3],reason:"In modern computing hardware is cheap and fast. The dominant cost is now reliability — bugs and system failures are enormously expensive."},
+{year:2025,paper:"exam",ch:2,pts:1,multi:false,
+ q:"Select the programming language with the <strong>highest level of portability</strong>.",
+ opts:["Fortran I","PL/I","Swift","Java"],
+ ans:[4],reason:"Java compiles to platform-independent bytecode that runs on any JVM — 'write once, run anywhere' is its core portability goal."},
+{year:2025,paper:"exam",ch:1,pts:1,multi:false,
+ q:"Select the programming language that had the <strong>highest overall readability</strong>.",
+ opts:["C++","BASIC","Ada","C#"],
+ ans:[3],reason:"Ada was specifically designed for readability and reliability in safety-critical systems — strict typing, clear block structure, and no implicit coercions."},
+{year:2025,paper:"exam",ch:2,pts:1,multi:false,
+ q:"Select the programming language that <strong>focused the most on well-definedness</strong> of the original language design.",
+ opts:["Fortran I","ALGOL 68","C","C++"],
+ ans:[2],reason:"ALGOL 68 introduced the Van Wijngaarden grammar to give the language a rigorous, well-defined formal specification."},
+{year:2025,paper:"exam",ch:5,pts:1,multi:false,
+ q:"Consider <strong>accessing and modifying global variables in PHP, Python, and C</strong>, and select the most correct statement.",
+ opts:["PHP's approach is less writable than both Python and C.","PHP's approach is less reliable than both Python and C.","PHP's approach is less readable than both Python and C.","PHP's approach has a lower cost of execution than both Python and C."],
+ ans:[1],reason:"PHP requires explicit 'global $var' declaration inside every function, with $ prefix syntax — more verbose than Python and far more verbose than C's direct global access."},
+{year:2025,paper:"exam",ch:6,pts:1,multi:false,
+ q:"Fortran supports <strong>elemental array operations</strong>, not supported in most other high-level languages. Select the <strong>strong justification</strong> for their inclusion.",
+ opts:["Elemental array operations improve the orthogonality of Fortran.","Elemental array operations make sense because their purpose is unambiguous.","Elemental array operations make sense for the implementation method Fortran uses.","Elemental array operations make sense in the programming domain for which Fortran was designed."],
+ ans:[4],reason:"Fortran was designed for scientific/numerical computing — operations on entire arrays are ubiquitous in that domain."},
+{year:2025,paper:"exam",ch:6,pts:1,multi:false,
+ q:"Consider <strong>list comprehensions in Python</strong>, and select the most correct statement.",
+ opts:["List comprehensions improve the readability of list operations.","List comprehensions improve the writability of list operations.","List comprehensions improve the reliability of list operations.","List comprehensions improve the cost of training programmers."],
+ ans:[2],reason:"List comprehensions provide a concise, expressive syntax for building lists, directly improving writability."},
+{year:2025,paper:"exam",ch:7,pts:1,multi:false,
+ q:"Consider <strong>operator precedence and associativity in APL</strong>, and select the most correct statement.",
+ opts:["Operator precedence and associativity in APL is highly orthogonal.","Operator precedence and associativity in APL is very complex due to the large number of operators.","Operator precedence and associativity in APL introduces a high cost of execution.","Operator precedence and associativity in APL is unreliable."],
+ ans:[1],reason:"APL has one uniform rule: all operators have the same precedence and associate right-to-left — highly orthogonal."},
+{year:2025,paper:"exam",ch:12,pts:1,multi:false,
+ q:"Consider <strong>operators in Ruby</strong>, and select the most correct statement.",
+ opts:["Operators in Ruby are implemented in a way that is not very orthogonal.","Operators in Ruby are not very writable.","Operators in Ruby have a high cost of execution.","Operators in Ruby are very reliable."],
+ ans:[4],reason:"Ruby implements all operators as methods on objects — a consistent OOP model makes operators predictable and reliable."},
+{year:2025,paper:"exam",ch:7,pts:1,multi:false,
+ q:"Consider <strong>mixed mode arithmetic expressions in F# and C++</strong>, and select the most correct statement.",
+ opts:["Mixed mode arithmetic in F# is less readable than in C++.","Mixed mode arithmetic in F# is more writable than in C++.","Mixed mode arithmetic in F# has a higher execution cost than in C++.","Mixed mode arithmetic in F# is more reliable than in C++."],
+ ans:[4],reason:"F# requires explicit type conversions (no implicit coercions), meaning type errors are caught at compile time — more reliable than C++'s implicit coercions."},
+{year:2025,paper:"exam",ch:7,pts:1,multi:false,
+ q:"Consider this short-circuit loop reading a file: <code>while ((total &lt;= 100) or ((input = read()) != EOF))</code>. Select the statement describing a <strong>problem</strong>.",
+ opts:["If <code>or</code> is short-circuit evaluated a side effect will occur, which causes a problem.","If <code>or</code> is short-circuit evaluated a side effect will <strong>not</strong> occur, which causes a problem.","If <code>or</code> is <strong>not</strong> short-circuit evaluated a side effect will occur, which causes a problem.","If <code>or</code> is <strong>not</strong> short-circuit evaluated a side effect will not occur, which causes a problem."],
+ ans:[2],reason:"When total≤100 (left is true), short-circuit skips read() — the side effect of reading new input does NOT occur, so 'input' is stale."},
+{year:2025,paper:"exam",ch:7,pts:1,multi:false,
+ q:"Consider <strong>conditional targets</strong>, and select the most correct statement.",
+ opts:["Conditional targets reduce the writability of assignments.","Conditional targets increase the readability of assignments.","Conditional targets increase the cost of execution of assignments.","Conditional targets reduce the reliability of assignments."],
+ ans:[4],reason:"Conditional targets make it unclear which variable is being modified — the assignment target is ambiguous, reducing reliability."},
+{year:2025,paper:"exam",ch:7,pts:1,multi:false,
+ q:"Consider <strong>multiple-target multiple-source assignments in Ruby</strong>, and select the most correct statement.",
+ opts:["Make Ruby more writable.","Make Ruby more readable.","Make Ruby more reliable.","Decrease the cost of execution of Ruby."],
+ ans:[1],reason:"Ruby allows 'a, b = b, a' for swaps — significantly more concise and writable than using temporary variables."},
+{year:2025,paper:"exam",ch:8,pts:1,multi:false,
+ q:"Consider the method <strong>Python and Perl</strong> use to <strong>disambiguate nested selectors</strong>, and select the most correct statement.",
+ opts:["Python's approach is less writable than Perl's.","Python's approach is less readable than Perl's.","Python's approach can be less reliable than Perl's.","Python's approach has a higher cost of execution than Perl's."],
+ ans:[3],reason:"Python uses indentation — a mis-indent silently changes the nesting of an if statement without a syntax error, potentially less reliable than Perl's explicit braces."},
+{year:2025,paper:"exam",ch:8,pts:1,multi:false,
+ q:"You wish to assign a value to <code>second</code> depending on <code>first</code> using <strong>multiple-way selection</strong>. Select the language allowing this in the <strong>most writable</strong> way.",
+ opts:["C++","JavaScript","C#","Ruby"],
+ ans:[4],reason:"Ruby's case/when expression can match against any type, ranges, regex, and return a value directly — far more flexible and writable than C++'s switch."},
+{year:2025,paper:"exam",ch:8,pts:1,multi:false,
+ q:"Consider <strong>counter-controlled loops in C++</strong>, and select the most correct statement.",
+ opts:["Reliable because the loop body always executes a fixed number of times, clear from the three control expressions.","Reliable because it is possible to include the definition of the loop variable in the first control expression.","Unreliable because it is possible to branch into the loop body.","Unreliable because it is not possible to modify how many times the loop body executes once execution has entered the loop."],
+ ans:[2],reason:"Defining the loop variable inside the for statement scopes it to the loop — preventing accidental access or modification outside, which improves reliability."},
+{year:2025,paper:"exam",ch:8,pts:1,multi:false,
+ q:"Consider <strong>user-located loop control mechanisms in Java and C++</strong>, and select the most correct statement.",
+ opts:["Java has more writable user-located loop control mechanisms than C++.","Java has less writable user-located loop control mechanisms than C++.","User-located loop control mechanisms are equally writable in Java and C++.","Java has less reliable user-located loop control mechanisms than C++."],
+ ans:[1],reason:"Java supports labeled break and labeled continue (targeting specific outer loops in nested structures) — more writable than C++'s unlabeled break/continue."},
+{year:2025,paper:"exam",ch:9,pts:1,multi:false,
+ q:"Select the option that allows <strong>any</strong> actual parameter to be left out of a subprogram call regardless of the order formal parameters are listed.",
+ opts:["By using positional parameters.","By using keyword parameters.","It is impossible to allow any actual parameter to be left out regardless of order.","Subprograms always allow any actual parameter to be left out."],
+ ans:[2],reason:"Keyword parameters let the caller explicitly name which arguments to pass — any argument can be omitted as long as it has a default."},
+{year:2025,paper:"exam",ch:9,pts:1,multi:false,
+ q:"Consider <strong>subprograms in Ruby</strong>, and select the most correct statement.",
+ opts:["Ruby does not allow a subprogram to have a variable number of parameters.","Ruby allows variable parameters but all must have the same type stored in a fixed-type array.","Ruby allows variable parameters of any type because stored in an array of objects.","Ruby allows variable parameters of any type because the parameters are dynamically typed."],
+ ans:[4],reason:"Ruby is dynamically typed — a variable-length parameter list (*args) stores elements in an array where each can be any type."},
+{year:2025,paper:"exam",ch:9,pts:1,multi:false,
+ q:"This C++ code is illegal (two overloads of doSomething differing only in return type). Select the <strong>underlying reason</strong>.",
+ opts:["C++ does not support overloaded subprograms.","Variables of different types cannot be added.","C++ performs a large number of coercions.","C++ performs no coercions."],
+ ans:[3],reason:"C++ performs many implicit coercions — the compiler cannot determine which overload to use from context alone when overloads differ only in return type."},
+{year:2025,paper:"exam",ch:9,pts:1,multi:false,
+ q:"Consider this JavaScript code returning a closure from <code>doSomething(10, 20)</code>. Select the option that most correctly describes what <code>thing</code> is.",
+ opts:["The function function(y){return (a+b)-y;}","The function function(y){return (10+20)-y;}","A reference to the doSomething function.","An invalid function, because a value for y cannot be specified."],
+ ans:[2],reason:"doSomething returns a closure capturing a=10 and b=20 — 'thing' is effectively function(y){return 30-y;} with the captured values embedded."},
+{year:2025,paper:"exam",ch:9,pts:1,multi:false,
+ q:"Consider <strong>pass-by-result parameters</strong>, and select the most correct statement.",
+ opts:["Pass-by-result can be passed using a physical copy or an access path.","Can be passed using only a physical copy because an access path would create a functional side effect.","Can be passed using only a physical copy because the formal parameter is deallocated once the function terminates.","Can be passed using only an access path because a physical copy would take up additional memory.","Can be passed using only an access path because a physical copy would cause the calling function to work with an out-of-date copy."],
+ ans:[3],reason:"The formal parameter's storage is on the called function's stack, deallocated on return. Returning via access path is impossible — the memory is gone. Physical copy is the only option."},
+{year:2025,paper:"exam",ch:9,pts:1,multi:false,
+ q:"Consider <strong>multidimensional arrays as subprogram parameters in C and C#</strong>, and select the most correct statement.",
+ opts:["The approach in C is more writable than in C#.","The approach in C is more readable than in C#.","The approach in C is more reliable than in C#.","The approach in C is less orthogonal than in C#."],
+ ans:[4],reason:"In C, you must specify all dimensions except the first (e.g. int a[][5]) — the dimension is part of the type inconsistently. C# passes multidimensional arrays uniformly without specifying dimensions."},
+{year:2025,paper:"exam",ch:12,pts:2,multi:true,
+ q:"Four classes: A (base), B and C inherit from A, D inherits from both B and C. An <strong>implicit name collision</strong> is possible. Select <strong>only</strong> the details that result in an implicit (not explicit) collision.",
+ opts:["Defining a method named myMethod in class A.","Defining a method named myMethod in class B.","Defining a method named myMethod in class C.","Defining a method named myMethod in class D."],
+ ans:[1],reason:"If only A defines myMethod and B/C don't override it, D implicitly inherits two copies — collision without explicit redefinition."},
+{year:2025,paper:"exam",ch:12,pts:2,multi:true,
+ q:"You wish to implement a linked list. Select <strong>only</strong> the constructs that can be used to implement the <strong>linked list nodes</strong>.",
+ opts:["A struct in C#","A struct in C++","A class in C++","A union in C++"],
+ ans:[2,3],reason:"A C++ struct or class can hold data + next pointer. A C# struct is a value type (no self-referential pointer semantics). A C++ union holds only one member at a time — can't store both data AND next pointer simultaneously."},
+{year:2025,paper:"exam",ch:12,pts:1,multi:false,
+ q:"Consider <strong>Ruby</strong>, and select the most correct statement.",
+ opts:["Ruby has highly efficient primitive types.","Ruby has support for a programmer to explicitly allocate and deallocate heap memory for objects.","Ruby allows the programmer to choose between dynamic and static message binding.","Ruby classes have very unreliable message interfaces."],
+ ans:[4],reason:"Ruby's dynamic classes can be reopened and modified at any time — methods can be added, changed, or removed at runtime, making class interfaces unpredictable."},
+{year:2025,paper:"exam",ch:12,pts:1,multi:false,
+ q:"Consider <strong>Java and C++</strong>, and select the most correct statement.",
+ opts:["Java uses objects less exclusively than C++.","Java supports some benefits of multiple inheritance, while preventing name collisions.","Java supports some benefits of multiple inheritance, but does not prevent name collisions.","Java exclusively supports dynamic message binding, while C++ allows choosing between dynamic and static."],
+ ans:[4],reason:"In Java every method call is dynamically bound. In C++, the programmer must explicitly use 'virtual' to get dynamic binding; non-virtual methods are statically bound."},
+
+/* ─── 2024 ST1 ──────────────────────────────────────────────────── */
+{year:2024,paper:"st1",ch:1,pts:1,multi:false,
+ q:"Consider the following types of cost, and select the one that is <strong>most important to consider</strong> when evaluating the cost of a programming language.",
+ opts:["Cost of training programmers to use the language","Cost of reliability","Cost of compiling programs","Cost of executing programs"],
+ ans:[1],reason:"Training programmers is typically the dominant cost of any language adoption — it scales with team size and has long-term consequences."},
+{year:2024,paper:"st1",ch:1,pts:1,multi:false,
+ q:"Consider the following types of cost associated with a programming language, and select the one that is <strong>least important to consider in a modern context</strong>.",
+ opts:["Cost of training programmers to use the language","Cost of reliability","Cost of compiling programs","Cost of executing programs"],
+ ans:[3],reason:"Modern compilers are extremely fast and hardware is cheap — compilation cost is essentially negligible in contemporary development."},
+{year:2024,paper:"st1",ch:1,pts:1,multi:false,
+ q:"Select the programming language evaluation criterion that is <strong>most adversely affected</strong> by a language with a large number of basic constructs.",
+ opts:["Readability","Writability","Reliability","Cost"],
+ ans:[1],reason:"A large number of constructs increases the vocabulary a reader must know — directly hurting readability."},
+{year:2024,paper:"st1",ch:1,pts:2,multi:true,
+ q:"Select <strong>only</strong> the evaluation criteria that are <strong>improved by orthogonality</strong>.",
+ opts:["Readability","Writability","Reliability","Cost"],
+ ans:[1,2],reason:"Orthogonality improves readability (fewer special cases to remember) and writability (any combination of features works predictably)."},
+{year:2024,paper:"st1",ch:1,pts:2,multi:true,
+ q:"Consider a hypothetical language that is purely object-oriented (no primitive types, everything is an object). Select <strong>only</strong> the evaluation criteria that are <strong>improved by this design</strong>.",
+ opts:["Readability","Writability","Reliability","Cost"],
+ ans:[1,3],reason:"Pure OOP improves readability (consistent model) and reliability (no type confusion between primitives and objects)."},
+{year:2024,paper:"st1",ch:1,pts:1,multi:false,
+ q:"An additional evaluation criterion not heavily focused on in this course is <strong>well-definedness</strong>. Consider programming domains, and select the one that <strong>benefits the most</strong> from improved well-definedness.",
+ opts:["Business applications","Artificial intelligence","Systems programming","Web software"],
+ ans:[3],reason:"Systems programming (OS, embedded) requires precisely defined behaviour — ambiguity can cause catastrophic failures. Well-definedness is most critical there."},
+{year:2024,paper:"st1",ch:2,pts:1,multi:false,
+ q:"Select the influence that had the <strong>greatest impact</strong> on the design of the earliest programming languages for scientific applications.",
+ opts:["Computer architecture","Programmer efficiency becoming more important than machine efficiency","The move from process-oriented programming to data-oriented programming","The move to object-oriented programming"],
+ ans:[1],reason:"Early scientific languages (FORTRAN) were shaped primarily by the hardware they ran on (IBM 704) — computer architecture was the dominant influence."},
+{year:2024,paper:"st1",ch:2,pts:2,multi:true,
+ q:"Consider languages in which <strong>portability</strong> is very important. Select <strong>only</strong> the implementation methods well suited for these types of languages.",
+ opts:["Compilation","Pure interpretation","Hybrid implementation systems","No current implementation system is well suited for portability"],
+ ans:[2,3],reason:"Pure interpretation and hybrid systems both use platform-independent intermediate representations — they support portability. Compilation to native code is platform-specific."},
+{year:2024,paper:"st1",ch:2,pts:1,multi:false,
+ q:"Consider <strong>NetBeans and UNIX programming environments</strong>, and select the most correct statement.",
+ opts:["The NetBeans programming environment is less integrated than the UNIX programming environment.","The NetBeans programming environment is less user friendly for most programmers than the UNIX programming environment.","The NetBeans programming environment is less time consuming for most programmers to use than the UNIX programming environment.","The NetBeans programming environment is less visual than the UNIX programming environment."],
+ ans:[3],reason:"NetBeans is an IDE with visual tools and integrated debugging — less time consuming than UNIX's separate tools (editor, compiler, linker, debugger) for most programmers."},
+{year:2024,paper:"st1",ch:2,pts:1,multi:false,
+ q:"Compare <strong>Plankalkül and Fortran I</strong>. Select the most correct statement.",
+ opts:["Plankalkül was more writable than Fortran I.","Plankalkül was less readable than Fortran I.","Plankalkül had better support for data structures than Fortran I.","Plankalkül was more widely used than Fortran I."],
+ ans:[3],reason:"Plankalkül supported structured data types (records, arrays) that Fortran I lacked — it had better data structure support despite being older."},
+{year:2024,paper:"st1",ch:2,pts:2,multi:true,
+ q:"Pseudocode languages were quickly replaced by high-level languages like Fortran and COBOL. Select <strong>only</strong> the factors that contributed to this replacement.",
+ opts:["Some pseudocode languages were far less writable than high-level programming languages.","Some pseudocode language programs were expanded into machine code.","The computers that all pseudocode languages were designed to run on did not have hardware support for floating point calculations.","No pseudocode languages had any support for indexing arrays."],
+ ans:[1,2],reason:"Some pseudocode languages were less writable than alternatives (option 1 true). Pseudocode programs were expanded (interpreted) into machine code rather than compiled — high-level languages could be compiled faster (option 2 true)."},
+{year:2024,paper:"st1",ch:2,pts:2,multi:true,
+ q:"Fortran 90 was the first version to move away from Fortran's most important original design concern. Select <strong>only</strong> the statements that contributed to this change of focus in Fortran 90.",
+ opts:["Fortran 90 relaxed the fixed code format requirements of earlier versions.","Fortran 90 added support for a CASE statement.","Fortran 90 added support for recursion.","Fortran 90 added support for dynamic arrays."],
+ ans:[1,4],reason:"The original concern was machine efficiency — Fortran 90 moved toward programmer productivity by relaxing rigid format requirements (readability) and adding dynamic arrays (writability/flexibility)."},
+{year:2024,paper:"st1",ch:2,pts:2,multi:true,
+ q:"LISP was originally designed for artificial intelligence programming. Select <strong>only</strong> the factors that most directly contribute to the <strong>usefulness of LISP in this domain</strong>.",
+ opts:["LISP supports symbolic values.","LISP does not support variables.","LISP is based on lambda calculus.","LISP supports the representation and processing of lists."],
+ ans:[1,4],reason:"AI problems involve symbolic reasoning (option 1) and often deal with list-structured data (option 4) — these are the defining features that made LISP ideal for AI."},
+{year:2024,paper:"st1",ch:2,pts:1,multi:false,
+ q:"ALGOL 60 made several contributions to programming languages. Select the statement that most correctly describes a contribution made by ALGOL 60.",
+ opts:["ALGOL 60 had well-defined I/O operations.","ALGOL 60 demonstrated that a programming language could be designed well for a specific hardware platform.","ALGOL 60 was very well suited to describing and communicating algorithms.","ALGOL 60 was translatable to machine code."],
+ ans:[3],reason:"ALGOL 60's clean, readable syntax made it the standard notation for describing algorithms in academic papers — a lasting contribution to communication of algorithms."},
+{year:2024,paper:"st1",ch:2,pts:1,multi:false,
+ q:"Both PL/I and ALGOL 68 aimed to support general-purpose data structures, but ALGOL 68 used a better approach. Select the factor that most contributed to <strong>ALGOL 68's superiority</strong>.",
+ opts:["ALGOL 68 combined many more data structure-related constructs than PL/I.","ALGOL 68 was more orthogonal than PL/I.","ALGOL 68 had lower execution cost for data structures than PL/I.","ALGOL 68 supported data abstraction, while PL/I did not."],
+ ans:[2],reason:"ALGOL 68 was designed around orthogonality — a small set of primitives combined freely. This produced more general data structures than PL/I's ad-hoc collection of specific constructs."},
+{year:2024,paper:"st1",ch:1,pts:1,multi:false,
+ q:"Consider <strong>Pascal and C</strong>, and select the most correct statement.",
+ opts:["Pascal is more readable than C.","Pascal is more writable than C.","Pascal is more reliable than C.","Pascal has a lower cost of writing programs than C."],
+ ans:[1],reason:"Pascal was designed for teaching with clean block structure and strict typing — more readable than C."},
+{year:2024,paper:"st1",ch:1,pts:1,multi:false,
+ q:"Consider <strong>Java and C++</strong>, and select the most correct statement.",
+ opts:["Java is less reliable than C++.","Java is less readable than C++.","Java uses the concepts of OOP more consistently than C++.","Java is less portable than C++."],
+ ans:[3],reason:"Java is built from the ground up as an OOP language — everything is a class or interface. C++ mixed C and OOP, which is less consistent."},
+{year:2024,paper:"st1",ch:15,pts:1,multi:false,
+ q:"In Scheme, you apply a function to a parameter <code>(doSomething aValue)</code>. You want <code>doSomething</code> to <strong>change the value of <code>aValue</code></strong>. Select the most correct statement.",
+ opts:["You can achieve this by using a let within the definition of doSomething.","You can achieve this by using a define within the definition of doSomething.","You can achieve this by performing an arithmetic operation on aValue within doSomething.","It is impossible to achieve this in Scheme."],
+ ans:[4],reason:"Scheme is a purely functional language — function parameters are passed by value and variables are immutable once bound. You cannot modify the caller's binding from within a function."},
+{year:2024,paper:"st1",ch:15,pts:1,multi:false,
+ q:"Consider the <strong>addition operation in Scheme</strong>, and select the most correct statement.",
+ opts:["The addition operation is always implemented as an operator in Scheme.","The addition operation is always implemented as a function in Scheme.","The addition operation is implemented as either an operator or a function, depending on the interpreter.","The addition operation is implemented as a predicate in Scheme."],
+ ans:[2],reason:"In Scheme, '+' is a function — you apply it with (+ 2 3). There is no infix operator syntax; all operations are function calls."},
+{year:2024,paper:"st1",ch:15,pts:1,multi:false,
+ q:"You wish to <strong>perform the multiplication</strong> described in the list parameter <code>'(* 3 4)</code> passed to a function. Select the most correct statement.",
+ opts:["The multiplication is automatically performed before the list is passed.","You can achieve this by providing the name of the list parameter in parentheses within the function definition.","You can achieve this by applying the eval function to the list parameter within the function definition.","It is impossible to achieve this in Scheme."],
+ ans:[3],reason:"The eval function evaluates a list as if it were a Scheme expression — (eval '(* 3 4)) returns 12. This is the correct way to execute a quoted expression."},
+
+/* ─── 2025 ST1 ──────────────────────────────────────────────────── */
+{year:2025,paper:"st1",ch:1,pts:1,multi:false,
+ q:"Two languages A and B support primitive numeric types and functions. Language A allows functions to return only numeric types; B allows returning numeric types and functions. Select the most correct statement.",
+ opts:["A is more orthogonal than B because A supports a smaller set of constructs.","A is more orthogonal than B because returning functions makes no sense.","B is more orthogonal than A because B supports a larger set of constructs.","B is more orthogonal than A because B allows more legal return values than A."],
+ ans:[4],reason:"Orthogonality means features combine consistently without restrictions. B applies the same return-type rules to functions as to numbers — more orthogonal because functions and numbers are treated the same way."},
+{year:2025,paper:"st1",ch:8,pts:1,multi:false,
+ q:"Some languages use special words to mark the start and end of a compound statement. Select the option that most correctly describes a <strong>consequence</strong> of using special words to mark compound statements.",
+ opts:["Readability is decreased.","Writability is improved.","Writability is decreased.","Reliability is improved."],
+ ans:[4],reason:"Explicit begin/end markers clearly show block boundaries, reducing ambiguity and making it harder to accidentally misattribute statements — improving reliability."},
+{year:2025,paper:"st1",ch:5,pts:1,multi:false,
+ q:"Many languages support some kind of <strong>aliasing</strong>. Select the option that most correctly describes a <strong>consequence</strong> of including support for aliasing.",
+ opts:["Readability is improved.","Writability is improved.","Reliability is increased.","The overall cost of the programming language decreases."],
+ ans:[2],reason:"Aliasing lets a programmer use a shorter name for a complex path (e.g. a local name for a deeply nested variable) — directly improving writability."},
+{year:2025,paper:"st1",ch:6,pts:1,multi:false,
+ q:"Type checking is generally considered beneficial to reliability. Select the most correct statement about <strong>type checking</strong>.",
+ opts:["Type checking increases the cost of execution for a programming language.","Type checking increases the cost of reliability for a programming language.","Type checking increases the writability of a programming language, because it gives the programmer more flexibility.","Type checking has no impact on any of the programming language evaluation criteria."],
+ ans:[1],reason:"Type checking — whether static (compile time) or dynamic (runtime) — adds overhead to the execution pipeline. Static type checking has compile-time cost; dynamic has runtime cost."},
+{year:2025,paper:"st1",ch:1,pts:1,multi:false,
+ q:"Consider the programming domains, and select the one that a <strong>hybrid implementation system</strong> is most suitable for.",
+ opts:["Scientific applications","Business applications","Systems programming","Web software"],
+ ans:[4],reason:"Web software runs in browsers on any platform — hybrid systems (compile to bytecode + virtual machine) provide the portability web software requires."},
+{year:2025,paper:"st1",ch:15,pts:2,multi:true,
+ q:"Scheme has <strong>poor execution performance</strong>. Select <strong>only</strong> the factors that contribute to this poor performance.",
+ opts:["The implementation method that is most often used for Scheme.","The programming domain that Scheme was designed for.","The programming methodology that is most often used with Scheme.","Modern computer architecture."],
+ ans:[1,4],reason:"Scheme is typically interpreted (implementation method — slower than compilation). Modern computer architectures are optimized for imperative code with mutable state — functional programming with lists and closures doesn't map efficiently to hardware."},
+{year:2025,paper:"st1",ch:12,pts:1,multi:false,
+ q:"Select the programming language design influence that had its <strong>earliest impact on the design of Smalltalk</strong>.",
+ opts:["Computer architecture","Programmer efficiency becoming more important than machine efficiency","The move from process-oriented programming to data-oriented programming","The move to object-oriented programming"],
+ ans:[3],reason:"Smalltalk was designed around the concept of objects representing real-world entities — the move from process-oriented to data-oriented programming was its earliest and most fundamental influence."},
+{year:2025,paper:"st1",ch:2,pts:1,multi:false,
+ q:"Consider <strong>Fortran 90</strong>, and select the most correct statement.",
+ opts:["Fortran 90 was only focused on the execution speed of compiled program code.","Fortran 90 introduced language features that improved writability at the expense of the execution speed of compiled program code.","Fortran 90 introduced language features that reduced writability in order to improve execution speed.","Fortran 90 required code to be structured in a way that facilitated code execution from punch cards."],
+ ans:[2],reason:"Fortran 90 introduced modern features (free format, dynamic arrays, recursion) that improved writability — these features added overhead compared to the rigidly optimised earlier Fortran versions."},
+{year:2025,paper:"st1",ch:2,pts:1,multi:false,
+ q:"Consider the <strong>successes of ALGOL 60</strong>, and select the most correct statement.",
+ opts:["ALGOL 60 was successful as a programming language applicable to many different domains.","ALGOL 60 was completely successful as a machine-independent programming language.","ALGOL 60 served as a very readable standard for documenting algorithms.","ALGOL 60 had a formal syntax description that was widely accepted at the time."],
+ ans:[3],reason:"ALGOL 60's clean syntax made it the standard for describing algorithms in academic papers and textbooks — its greatest practical success."},
+{year:2025,paper:"st1",ch:2,pts:1,multi:false,
+ q:"Consider <strong>PL/I</strong>, and select the most correct statement.",
+ opts:["PL/I was intended for scientific applications.","PL/I aimed to be more well-defined than previous languages.","PL/I aimed to have better generality than previous languages.","PL/I aimed to have better portability than previous languages."],
+ ans:[3],reason:"PL/I was designed as a general-purpose language combining FORTRAN, COBOL, and ALGOL 60 features — improved generality was its primary design goal."},
+{year:2025,paper:"st1",ch:1,pts:1,multi:false,
+ q:"Consider <strong>APL</strong>, and select the most correct statement.",
+ opts:["APL demonstrates that there is not necessarily a tradeoff between readability and writability, because it has both good readability and good writability.","APL demonstrates that there is often a tradeoff between readability and writability, because APL has good readability and poor writability.","APL demonstrates that there is often a tradeoff between readability and writability, because APL has poor readability and good writability.","APL demonstrates that there is not necessarily a tradeoff between readability and writability, because it has both poor readability and poor writability."],
+ ans:[3],reason:"APL uses very concise, symbol-heavy notation — extremely powerful and writable for array operations, but notoriously unreadable. A classic example of the readability-writability tradeoff."},
+{year:2025,paper:"st1",ch:2,pts:2,multi:true,
+ q:"Select <strong>only</strong> the language features that were <strong>pioneered by Simula 67</strong>.",
+ opts:["Systems programming support","Coroutines","Classes and objects","Inheritance and polymorphism"],
+ ans:[2,3],reason:"Simula 67 pioneered coroutines (for simulation) and classes/objects (for modelling real-world entities). Inheritance and polymorphism in their full form came with later OOP languages."},
+{year:2025,paper:"st1",ch:2,pts:1,multi:false,
+ q:"Consider <strong>Delphi</strong>, and select the most correct statement.",
+ opts:["Delphi is an imperative programming language that was extended with support for OOP.","Delphi is a purely object-oriented programming language.","Delphi has no support for object-oriented programming.","Delphi is less reliable than C++."],
+ ans:[1],reason:"Delphi is based on Pascal (an imperative language) with OOP features added — it extended an existing imperative language rather than being designed as purely OOP from the start."},
+{year:2025,paper:"st1",ch:12,pts:1,multi:false,
+ q:"Consider <strong>Ruby</strong>, and select the most correct statement.",
+ opts:["Ruby is a compiled programming language.","Ruby is primarily an imperative language with optional support for OOP.","Ruby supports classes and objects, but does not support inheritance and polymorphism.","Ruby is unreliable because its classes and objects can have different structures at different times."],
+ ans:[4],reason:"Ruby's dynamic classes can be reopened and modified at runtime — class structure can change, making it potentially unreliable."},
+{year:2025,paper:"st1",ch:15,pts:2,multi:true,
+ q:"Select <strong>only</strong> the programming language features that improve the <strong>orthogonality of Scheme</strong>.",
+ opts:["The fact that only symbolic and numeric atoms are supported.","The fact that functions and lists are represented the same way.","The fact that functions can be used as parameters.","The fact that functional side effects are not allowed."],
+ ans:[2,3],reason:"Functions and lists use the same S-expression syntax (option 2 — uniform representation = orthogonal). Functions as first-class values (parameters, return values) apply the same rules to functions as to data (option 3 — consistent feature application = orthogonal)."},
+{year:2025,paper:"st1",ch:15,pts:2,multi:true,
+ q:"Consider: <code>(doSomething thing)</code>. Select <strong>only</strong> the options that describe what <code>thing</code> can be.",
+ opts:["A symbolic atom.","A name to which a value has been bound, and for which the binding can change at a later time.","A name to which a value has been bound, and for which the binding cannot change.","The name of a function."],
+ ans:[1,3,4],reason:"In Scheme, 'thing' can be a symbolic atom (quoted), a name bound via define (which creates a fixed binding in pure Scheme — bindings don't change), or a function name (functions are first-class values). Option 2 is wrong because Scheme variables (defined with define) cannot be rebound in pure functional Scheme."},
+{year:2025,paper:"st1",ch:15,pts:2,multi:true,
+ q:"One way referential transparency can break down is through <strong>functional side effects</strong>. Select <strong>only</strong> the options that describe a <strong>different way</strong> in which referential transparency could break down (not a functional side effect).",
+ opts:["When a variable is used in a function.","When a function returns no value.","When a function returns a random value.","When a function reads a user input, and returns this value."],
+ ans:[3,4],reason:"A function returning a random value (option 3) or reading user input (option 4) can return different results for the same arguments — violating referential transparency without a classic side effect."},
+{year:2025,paper:"st1",ch:15,pts:1,multi:false,
+ q:"Consider: <code>(eval '(+ 2 3))</code>. Select the option that most correctly explains what happens.",
+ opts:["The code fails to execute because eval is undefined.","The Scheme interpreter evaluates the list (+ 2 3) as if it is a function application, producing the result 5.","The function application (+ 2 3) is evaluated producing 5. The function eval prints out this result.","The function application (+ 2 3) is evaluated producing 5, converted to the list (5), and eval prints 5."],
+ ans:[2],reason:"eval takes a quoted list and evaluates it as Scheme code. (eval '(+ 2 3)) evaluates (+ 2 3) and returns 5 as a value — it does not print."},
+
+/* ─── 2024 ST2 ──────────────────────────────────────────────────── */
+{year:2024,paper:"st2",ch:16,pts:2,multi:false,
+ q:"You have Prolog facts: cat(X), dog(X), pet(X,Y). You wish to write a query that determines whether <code>peter</code> owns a pet that is a cat. Select the query that <strong>most efficiently</strong> determines an instantiation for the pet.",
+ opts:["?- cat(X), pet(X, peter).","?- pet(X, peter), cat(X).","?- cat(X). then ?- pet(X, peter).","?- pet(X, peter). then ?- cat(X)."],
+ ans:[1],reason:"Placing cat(X) first constrains X to cats before checking pet ownership — fewer pet(X,peter) checks needed than checking all pets first. Most efficient filtering order."},
+{year:2024,paper:"st2",ch:5,pts:1,multi:false,
+ q:"Consider the following programming languages, and select the one that is the <strong>most writable</strong> in terms of name length, in a real-world context.",
+ opts:["Fortran 95","C99","C++","Ada"],
+ ans:[2],reason:"C99 has no restriction on identifier length in practice (implementations support long names) and no special naming conventions — most writable for names."},
+{year:2024,paper:"st2",ch:5,pts:1,multi:false,
+ q:"Consider this hypothetical code that results in a <strong>compilation error on line 2</strong> when reassigning a variable to a different type. Select the kind of type binding most likely used.",
+ opts:["Explicit type declaration","Implicit type declaration without type inferencing","Implicit type declaration with type inferencing","Dynamic type binding"],
+ ans:[3],reason:"Type inferencing infers the type from the initial assignment — a compile error on reassignment with a different type means the type was locked in at the first assignment through inferencing."},
+{year:2024,paper:"st2",ch:5,pts:1,multi:false,
+ q:"Consider the categories of variables, and select the one that <strong>has no name</strong> associated with it.",
+ opts:["Static variables","Stack-dynamic variables","Explicit heap-dynamic variables","Implicit heap-dynamic variables"],
+ ans:[3],reason:"Explicit heap-dynamic variables are created via new/malloc and accessed through pointers — the variable itself (the allocated memory) has no name; only the pointer does."},
+{year:2024,paper:"st2",ch:6,pts:1,multi:false,
+ q:"Some languages support complex numbers as a primitive data type. Select the statement that <strong>most accurately describes an implication</strong> of such support.",
+ opts:["Computations using complex number types have a somewhat high cost of execution, because these computations are not directly supported by most hardware.","Computations using complex number types have a very low cost of execution, because these computations are directly supported by most hardware.","Support for complex number types greatly increases the readability of a programming language.","Support for complex number types greatly decreases the writability of a programming language."],
+ ans:[1],reason:"Complex number arithmetic is not directly supported by standard CPU hardware — it must be simulated in software, adding some execution overhead."},
+{year:2024,paper:"st2",ch:6,pts:1,multi:false,
+ q:"Select the statement that most accurately describes a potential <strong>drawback associated with Boolean data types</strong>.",
+ opts:["Operations on Boolean data types have a high execution cost.","Boolean data types are inefficient in terms of memory space.","Boolean data types have low readability in most modern programming languages.","Boolean data types are never considered to be ordinal."],
+ ans:[2],reason:"A Boolean value needs only 1 bit of information but is typically stored in a full byte or word — inefficient use of memory space."},
+{year:2024,paper:"st2",ch:7,pts:1,multi:false,
+ q:"Consider this enumeration: <code>enumeration month {jan, feb, mar}</code>. Assume other types can be coerced into enumeration types. Select the snippet that correctly represents an <strong>error</strong> that could occur due to this coercion.",
+ opts:["month firstMonth = feb; month secondMonth = mar; print(firstMonth + secondMonth)","month myMonth = 1","month myMonth = 4","print(jan)"],
+ ans:[3],reason:"The enumeration has only 3 values (jan=0/1, feb=1/2, mar=2/3). Assigning 4 to a month variable via coercion would create a value outside the valid range — an error."},
+{year:2024,paper:"st2",ch:6,pts:1,multi:false,
+ q:"Consider <strong>index range checking for arrays in Ada and Java</strong>, and select the most correct statement.",
+ opts:["Ada's index range checking is always less reliable than Java's.","Ada's index range checking can be more reliable than Java's.","Ada's index range checking is much less writable than Java's.","Ada's index range checking is much more writable than Java's."],
+ ans:[2],reason:"Ada allows index range checking to be enabled or disabled — when enabled, it can catch errors that Java's fixed bounds-checking might miss (Ada allows user-defined ranges)."},
+{year:2024,paper:"st2",ch:5,pts:1,multi:false,
+ q:"Consider a function using <code>integer myVar = 3; integer myArray[myVar]</code>. Select the statement most correctly describing the <strong>category of <code>myArray</code></strong>.",
+ opts:["Static","Fixed stack-dynamic","Stack-dynamic","Fixed heap-dynamic","Heap-dynamic"],
+ ans:[3],reason:"The size is determined at runtime (myVar's value), making it stack-dynamic — allocated on the stack but with size determined at elaboration time."},
+{year:2024,paper:"st2",ch:6,pts:2,multi:true,
+ q:"Assume you wish to simulate a <strong>heterogeneous array</strong> in a language that does not directly support them. Select <strong>only</strong> the approaches that will correctly simulate this functionality.",
+ opts:["Using a normal array in a statically typed language storing values of different primitive data types.","Using a normal array in a statically typed language storing instances of an Object class where all other classes inherit from Object.","Using two normal arrays in a statically typed language, where one stores keys and the other stores corresponding values.","Using a normal array in a dynamically typed programming language."],
+ ans:[2,4],reason:"A root Object class hierarchy allows mixed types polymorphically (option 2). A dynamically typed language has no fixed type per element (option 4). Both achieve heterogeneous storage."},
+{year:2024,paper:"st2",ch:6,pts:1,multi:false,
+ q:"Matrices in C do not support array slices. Select the statement that most correctly describes the <strong>reason</strong>.",
+ opts:["C implements matrices using arrays containing other arrays. Arrays have built-in slice operations, so matrices don't need them.","C implements matrices using arrays containing other arrays. It is easy to retrieve part of the matrix using standard array operations.","C implements matrices using rectangular arrays. Rectangular arrays cannot support slice operations.","C implements matrices using rectangular arrays. Rectangular arrays cannot represent matrices."],
+ ans:[2],reason:"C implements matrices as arrays of arrays (row pointers). Since you can access a row directly as a sub-array, slicing is achievable with standard array operations — but there's no built-in slice syntax."},
+{year:2024,paper:"st2",ch:6,pts:1,multi:false,
+ q:"Select the statement about the <strong>MOVE CORRESPONDING operation in COBOL</strong> that is most correct.",
+ opts:["MOVE CORRESPONDING is equivalent to an assignment between records in most modern imperative languages.","MOVE CORRESPONDING is useful because it concatenates two records.","MOVE CORRESPONDING is useful because it extracts sub-records within another record.","MOVE CORRESPONDING is useful because it copies only relevant data between two records, which is a common operation in COBOL's domain."],
+ ans:[4],reason:"MOVE CORRESPONDING copies fields with matching names between two records — a concise way to transfer relevant data between similar record structures in business (COBOL's domain)."},
+{year:2024,paper:"st2",ch:7,pts:1,multi:false,
+ q:"Select the statement about <strong>list comprehensions</strong> that is most correct.",
+ opts:["Support for list comprehensions greatly increases the writability of lists and list operations.","Support for list comprehensions greatly increases the readability of lists and list operations.","Support for list comprehensions greatly increases the orthogonality of lists and list operations.","Support for list comprehensions greatly decreases the amount of memory space occupied by lists."],
+ ans:[1],reason:"List comprehensions allow building new lists from existing ones with a concise, declarative syntax — directly improving writability."},
+{year:2024,paper:"st2",ch:6,pts:1,multi:false,
+ q:"Some languages implicitly dereference all pointers. Select the statement that is most correct.",
+ opts:["Implicitly dereferenced pointers are more reliable than explicitly dereferenced pointers.","Implicitly dereferenced pointers prevent pointers from being used for indirect addressing.","Implicitly dereferenced pointers prevent pointers from being used for dynamic storage management.","Implicitly dereferenced pointers disallow pointer arithmetic."],
+ ans:[4],reason:"If pointers are always implicitly dereferenced, you can't do 'ptr + 1' to advance a pointer — pointer arithmetic is impossible."},
+
+/* ─── 2025 ST2 ──────────────────────────────────────────────────── */
+{year:2025,paper:"st2",ch:16,pts:1,multi:false,
+ q:"Consider: <code>tail([], []). tail([H|T], T).</code> This implementation causes a Prolog interpreter to raise a warning. Select the most correct statement.",
+ opts:["The warning can be avoided by replacing H with _, although the tail proposition will not work correctly for certain queries.","The warning can be avoided by replacing H with _, although the tail proposition will be less efficient.","The warning can be avoided by replacing H with _, although the tail proposition will be less reliable.","The warning can be avoided without changing how the tail proposition works by replacing H with _."],
+ ans:[4],reason:"H is an unused variable — replacing it with the anonymous variable _ removes the unused-variable warning without changing the tail rule's behaviour."},
+{year:2025,paper:"st2",ch:16,pts:1,multi:false,
+ q:"Consider: <code>primeGreaterThanOneMillion(X) :- prime(X), X > 1000000.</code> Select the most correct statement.",
+ opts:["The proposition will execute more efficiently if rewritten as: primeGreaterThanOneMillion(X) :- X > 1000000, prime(X).","The proposition will execute less efficiently if rewritten as: primeGreaterThanOneMillion(X) :- X > 1000000, prime(X).","The proposition will not work correctly unless rewritten as: primeGreaterThanOneMillion(X) :- X > 1000000, prime(X).","The proposition cannot be successfully implemented, due to a deficiency of Prolog."],
+ ans:[1],reason:"When X is already instantiated, testing X > 1000000 first eliminates non-million values before the expensive primality check — more efficient ordering."},
+{year:2025,paper:"st2",ch:16,pts:1,multi:false,
+ q:"You wish to write a Prolog proposition ensuring two variables X and Y <strong>do not represent the same thing</strong>. Select the most rigorous and correct way.",
+ opts:["X and Y are always different because X and Y represent two distinct atoms.","X and Y are always different because X and Y represent two distinct variables.","By defining a proposition called unequal(X, Y) for every pair of atoms that are not the same.","By using the proposition not(X = Y)."],
+ ans:[4],reason:"not(X = Y) succeeds exactly when X and Y cannot be unified as the same value — the rigorous Prolog way to test inequality."},
+{year:2025,paper:"st2",ch:5,pts:1,multi:false,
+ q:"Consider the programming languages, and select the one that is the <strong>least reliable</strong> in terms of name length.",
+ opts:["Fortran","C99","C++","C#"],
+ ans:[1],reason:"Early Fortran limited identifier names to 6 characters, forcing cryptic abbreviations that are difficult to distinguish from each other — least reliable for naming."},
+{year:2025,paper:"st2",ch:1,pts:1,multi:false,
+ q:"Consider <strong>variable names in Perl and Java</strong>, and select the most correct statement.",
+ opts:["Variable names in Perl have a higher cost of maintenance than variable names in Java.","Variable names in Perl are more writable than variable names in Java.","Variable names in Perl are more readable than variable names in Java.","Variable names in Perl are less reliable than variable names in Java."],
+ ans:[1],reason:"Perl's sigils ($, @, %) add naming conventions that can be confusing and harder to maintain than Java's straightforward identifier rules."},
+{year:2025,paper:"st2",ch:5,pts:1,multi:false,
+ q:"Select the time at which a name is bound to a <strong>stack-dynamic variable</strong>.",
+ opts:["Language design time","Language implementation time","Compile time","Load time","Runtime"],
+ ans:[5],reason:"A stack-dynamic variable is allocated when its declaration is elaborated during program execution — runtime."},
+{year:2025,paper:"st2",ch:5,pts:1,multi:false,
+ q:"In Fortran I, a variable whose name starts with I, J, K, L, M, or N is automatically an integer variable. Select the option that most correctly describes the kind of <strong>type binding</strong>.",
+ opts:["Explicit type declaration","Implicit type declaration without type inferencing","Implicit type declaration with type inferencing","Dynamic type binding"],
+ ans:[2],reason:"Fortran's first-letter rule is implicit declaration (no explicit type statement) without inferring from an assigned value — purely based on the name."},
+{year:2025,paper:"st2",ch:5,pts:1,multi:false,
+ q:"Consider a program where calling f() three times produces output 10, 15, 20. Select the option correctly describing the <strong>category of <code>myValue</code></strong> according to lifetime.",
+ opts:["Static variable","Stack-dynamic variable","Explicit heap-dynamic variable","Implicit heap-dynamic variable"],
+ ans:[1],reason:"The value persists across multiple calls to f() and retains its modified value — this is characteristic of a static variable (lifetime spans the entire program)."},
+{year:2025,paper:"st2",ch:5,pts:1,multi:false,
+ q:"Assume a language uses <strong>dynamic type binding</strong>. Select the option that most correctly describes the category of variables according to lifetime.",
+ opts:["Static variables","Stack-dynamic variables","Explicit heap-dynamic variables","Implicit heap-dynamic variables"],
+ ans:[4],reason:"Dynamic type binding requires variables to be allocated and reallocated as types change at runtime — this is the behaviour of implicit heap-dynamic variables."},
+{year:2025,paper:"st2",ch:6,pts:1,multi:false,
+ q:"Some languages support a primitive data type representing a <strong>complex number</strong>. Select the most correct statement.",
+ opts:["Support for a primitive complex number type improves the writability of a programming language.","Support for a primitive complex number type improves the readability of a programming language.","Support for a primitive complex number type improves the execution cost of a programming language.","Support for a primitive complex number type improves the reliability of a programming language."],
+ ans:[1],reason:"A primitive complex type lets programmers write complex arithmetic naturally (c1 + c2) rather than managing real/imaginary parts explicitly — directly improving writability."},
+{year:2025,paper:"st2",ch:6,pts:1,multi:false,
+ q:"Consider the <strong>String and StringBuffer classes in Java</strong>, and select the most correct statement.",
+ opts:["A String object is less readable than a StringBuffer object.","A String object is less writable than a StringBuffer object.","A String object is less reliable than a StringBuffer object.","A String object has a lower cost of execution than a StringBuffer object."],
+ ans:[4],reason:"String is immutable — read operations don't need synchronization or copying overhead. StringBuffer is mutable and supports modification, which adds overhead. String is cheaper for read-only use."},
+{year:2025,paper:"st2",ch:6,pts:2,multi:true,
+ q:"Consider a program using <code>constant integer LENGTH = 3; integer myArray[LENGTH]</code>. Assume the array's length cannot be changed after being set. Select <strong>only</strong> the options that could possibly correctly describe the <strong>category of <code>myArray</code></strong>.",
+ opts:["Static","Fixed stack-dynamic","Stack-dynamic","Fixed heap-dynamic","Heap-dynamic"],
+ ans:[1,2],reason:"With a compile-time constant length the array could be static (stored in fixed memory for the program's life) or fixed stack-dynamic (allocated on the stack with fixed size on entry to the subprogram)."},
+{year:2025,paper:"st2",ch:6,pts:1,multi:false,
+ q:"Assume you wish to simulate the functionality of an <strong>associative array</strong> in a language that doesn't directly support them. Select the one option that will correctly simulate this.",
+ opts:["Using a normal array in a statically typed language storing values of different primitive data types.","Using a normal array in a statically typed language storing instances of an Object class.","Using a normal array in a statically typed language, where the array stores a key and a value at each subscript.","Using two normal arrays in a statically typed language, where one stores keys and the other stores corresponding values."],
+ ans:[4],reason:"Parallel arrays of keys and values can simulate associative lookup — search the key array for a match, then use the same index in the value array."},
+{year:2025,paper:"st2",ch:6,pts:1,multi:false,
+ q:"Consider <strong>records in COBOL and Ada</strong>, and select the most correct statement.",
+ opts:["References to record fields in COBOL are less writable than references to record fields in Ada.","Records in COBOL have a lower cost of maintenance than records in Ada.","Records in COBOL are less orthogonal than records in Ada.","Records in COBOL are more orthogonal than records in Ada."],
+ ans:[3],reason:"COBOL records have special operations (MOVE CORRESPONDING, etc.) that don't generalize to other types — less orthogonal than Ada's more uniform record treatment."},
+{year:2025,paper:"st2",ch:6,pts:1,multi:false,
+ q:"Consider <strong>unions</strong>, and select the most correct statement.",
+ opts:["Free unions have a lower cost of maintenance than discriminated unions.","Free unions are more orthogonal than discriminated unions.","Free unions are less writable than discriminated unions.","Free unions are more effective at saving memory than discriminated unions."],
+ ans:[4],reason:"Free unions have no discriminant tag, so they use slightly less memory than discriminated unions which must store the type indicator — more effective at raw memory savings."},
+{year:2025,paper:"st2",ch:12,pts:1,multi:false,
+ q:"Consider <strong>pointers and references in C++, Java, and C#</strong>, and select the most correct statement.",
+ opts:["Pointers and references have the most reliable support in Java.","Pointers and references have the most reliable support in C#.","Pointers and references have the least writable support in C#.","Pointers and references have the least writable support in C++."],
+ ans:[1],reason:"Java uses only references (no raw pointers, no pointer arithmetic, no void pointers) — the reference model is the safest and most reliable of the three."},
+{year:2025,paper:"st2",ch:6,pts:2,multi:true,
+ q:"C++ is not considered to be strongly typed. Select <strong>only</strong> the language features that contribute to C++ not being strongly typed.",
+ opts:["Explicit type declarations","Void pointers","Casting a base class pointer to a derived class pointer","Casting a derived class pointer to a base class pointer"],
+ ans:[2,3],reason:"Void pointers can hold any type without type information (option 2). Downcasting from base to derived class is unsafe and unchecked — the actual runtime type might not match (option 3). Both weaken type checking."},
+{year:2025,paper:"st2",ch:6,pts:1,multi:false,
+ q:"Consider <strong>name type equivalence and structure type equivalence</strong>, and select the most correct statement.",
+ opts:["Name type equivalence has a lower cost of execution than structure type equivalence.","Name type equivalence is more writable than structure type equivalence.","Name type equivalence is less readable than structure type equivalence.","Name type equivalence is less reliable than structure type equivalence."],
+ ans:[1],reason:"Checking if two names are identical is O(1) — much cheaper than recursively comparing the full type structure. Name equivalence has lower execution cost."}
+];
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATE & RENDERING
+═══════════════════════════════════════════════════════════════════ */
+let filterCh = 'all', filterYr = 'all', filterPaper = 'all', sortMode = 'default', searchText = '';
+
+function applyFilters() {
+  let data = ALL_MCQS.filter(q => {
+    if (filterCh !== 'all' && q.ch !== +filterCh) return false;
+    if (filterYr !== 'all' && q.year !== +filterYr) return false;
+    if (filterPaper !== 'all' && q.paper !== filterPaper) return false;
+    if (searchText) {
+      const hay = (q.q + ' ' + q.opts.join(' ')).toLowerCase();
+      if (!hay.includes(searchText.toLowerCase())) return false;
+    }
+    return true;
+  });
+
+  if (sortMode === 'chapter')  data.sort((a,b) => a.ch - b.ch || a.year - b.year);
+  else if (sortMode === 'year') data.sort((a,b) => a.year - b.year || a.ch - b.ch);
+  else if (sortMode === 'points') data.sort((a,b) => b.pts - a.pts || a.year - b.year);
+  else data.sort((a,b) => a.year - b.year || a.ch - b.ch);
+
+  render(data);
+}
+
+const PAPER_LABELS = {exam:'Exam', st1:'ST1', st2:'ST2'};
+const CH_LABELS = {1:'Preliminaries',2:'Evolution',5:'Names & Bindings',6:'Data Types',7:'Expressions',8:'Control Structures',9:'Subprograms',12:'OOP Support',15:'Functional',16:'Logic'};
+const letters = 'ABCDEFGHIJ';
+
+function render(data) {
+  const list = document.getElementById('mcq-list');
+  const stats = document.getElementById('mcq-stats');
+  stats.textContent = `Showing ${data.length} of ${ALL_MCQS.length} questions`;
+
+  if (data.length === 0) {
+    list.innerHTML = '<div class="no-results">No questions match your filters.</div>';
+    return;
+  }
+
+  list.innerHTML = '';
+  data.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'mcq-card';
+
+    const paperBadgeClass = q.paper === 'exam' ? 'badge-exam' : q.paper === 'st1' ? 'badge-st1' : 'badge-st2';
+
+    card.innerHTML = `
+      <div class="mcq-card-header">
+        <div class="mcq-card-meta">
+          <span class="mcq-badge badge-year">${q.year}</span>
+          <span class="mcq-badge ${paperBadgeClass}">${PAPER_LABELS[q.paper]}</span>
+          <span class="mcq-badge badge-ch">Ch ${q.ch} · ${CH_LABELS[q.ch]}</span>
+          ${q.pts > 1 ? `<span class="mcq-badge badge-multi">${q.pts} pts${q.multi?' · Penalised':''}</span>` : ''}
+        </div>
+      </div>
+      <div class="mcq-question-text">${q.q}</div>
+      <div class="mcq-options" id="opts-${qi}">
+        ${q.opts.map((o,i) => `<button class="mcq-opt" data-qi="${qi}" data-idx="${i+1}"><span class="opt-letter">${letters[i]}.</span><span>${o}</span></button>`).join('')}
+      </div>
+      <div class="mcq-feedback" id="fb-${qi}"></div>
+    `;
+
+    list.appendChild(card);
+
+    const selected = new Set();
+    const btns = card.querySelectorAll('.mcq-opt');
+    const fb = card.querySelector('.mcq-feedback');
+
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = +btn.dataset.idx;
+        if (!q.multi) {
+          btns.forEach(b => b.classList.remove('correct','wrong'));
+          selected.clear();
+          selected.add(idx);
+          const ok = q.ans.includes(idx);
+          btn.classList.add(ok ? 'correct' : 'wrong');
+          if (!ok) q.ans.forEach(a => btns[a-1].classList.add('correct'));
+          fb.innerHTML = (ok ? '<strong>✓ Correct.</strong> ' : '<strong>✗ Incorrect.</strong> ') + escHtml(q.reason);
+          fb.className = 'mcq-feedback show';
+        } else {
+          selected.has(idx) ? selected.delete(idx) : selected.add(idx);
+          btns.forEach(b => b.classList.remove('correct','wrong'));
+          selected.forEach(s => btns[s-1].classList.add(q.ans.includes(s) ? 'correct' : 'wrong'));
+          q.ans.forEach(a => btns[a-1].classList.add('correct'));
+          fb.innerHTML = '<strong>Multi-select.</strong> ' + escHtml(q.reason);
+          fb.className = 'mcq-feedback show';
+        }
+      });
+    });
+  });
+}
+
+function escHtml(s) { return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   PILL FILTERS
+═══════════════════════════════════════════════════════════════════ */
+document.querySelectorAll('#ch-pills .filter-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('#ch-pills .filter-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    filterCh = pill.dataset.ch;
+    applyFilters();
+  });
+});
+
+document.querySelectorAll('#yr-pills .filter-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('#yr-pills .filter-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    filterYr = pill.dataset.yr;
+    applyFilters();
+  });
+});
+
+document.querySelectorAll('#paper-pills .filter-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('#paper-pills .filter-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    filterPaper = pill.dataset.paper;
+    applyFilters();
+  });
+});
+
+document.getElementById('sort-sel').addEventListener('change', e => {
+  sortMode = e.target.value;
+  applyFilters();
+});
+
+let searchTimer;
+document.getElementById('mcq-search').addEventListener('input', e => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    searchText = e.target.value.trim();
+    applyFilters();
+  }, 200);
+});
+
+/* Initial render */
+applyFilters();
+</script>
+</body>
+</html>

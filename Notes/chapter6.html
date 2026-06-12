@@ -1,0 +1,663 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 6 — Data Types</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+
+  <button class="menu-toggle" aria-label="Open menu">☰</button>
+  <div class="sidebar-overlay"></div>
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="course-label">COS 333 · Concepts of PL</span>
+      <h1>Programming Language Concepts</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Overview</span>
+      <a href="index.html"><span class="nav-chapter">00</span> Home &amp; Topics</a>
+
+      <span class="nav-section-label">Chapters</span>
+      <a href="chapter1.html"><span class="nav-chapter">01</span> Preliminaries</a>
+      <a href="chapter2.html"><span class="nav-chapter">02</span> Evolution of PLs</a>
+      <a href="chapter5.html"><span class="nav-chapter">05</span> Names, Bindings &amp; Scopes</a>
+      <a href="chapter6.html" class="active"><span class="nav-chapter">06</span> Data Types</a>
+      <a href="chapter7.html"><span class="nav-chapter">07</span> Expressions &amp; Assignments</a>
+      <a href="chapter8.html"><span class="nav-chapter">08</span> Control Structures</a>
+      <a href="chapter9.html"><span class="nav-chapter">09</span> Subprograms</a>
+      <a href="chapter12.html"><span class="nav-chapter">12</span> OOP Support</a>
+      <a href="chapter15.html"><span class="nav-chapter">15</span> Functional Programming</a>
+      <a href="chapter16.html"><span class="nav-chapter">16</span> Logic Programming</a>
+
+      <span class="nav-section-label">Practical</span>
+      <a href="prolog-practical.html"><span class="nav-chapter">P3</span> Prolog in Practice</a>
+      <a href="prolog-list-patterns.html"><span class="nav-chapter">P4</span> List Patterns</a>
+      <a href="scheme-practical.html"><span class="nav-chapter">P5</span> Scheme in Practice</a>
+
+      <span class="nav-section-label">Assessment</span>
+      <a href="past-papers.html"><span class="nav-chapter">PP</span> Past Papers</a>
+      <a href="mcq.html"><span class="nav-chapter">MC</span> MCQ Bank</a>
+    </nav>
+
+    <div class="sidebar-toc">
+      <span class="sidebar-toc-title">On this page</span>
+      <a href="#primitive">Primitive Types</a>
+      <a href="#strings">String Types</a>
+      <a href="#arrays">Array Types</a>
+      <a href="#associative">Associative Arrays</a>
+      <a href="#records">Record Types</a>
+      <a href="#tuples">Tuple Types</a>
+      <a href="#list-types">List Types</a>
+      <a href="#unions">Union Types</a>
+      <a href="#pointers">Pointers &amp; References</a>
+      <a href="#type-checking">Type Checking</a>
+      <a href="#strong-typing">Strong Typing</a>
+      <a href="#equivalence">Type Equivalence</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle">
+        <span class="toggle-icon">☾</span>
+        <span class="toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <main class="main">
+    <div class="reading-progress"><div class="reading-progress-bar"></div></div>
+
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span>›</span> Chapter 6
+    </div>
+
+    <header class="page-header">
+      <span class="chapter-tag">Chapter 6</span>
+      <h1>Data Types</h1>
+      <p class="subtitle">
+        What data types are, how they're designed across languages, and the
+        trade-offs between type safety, flexibility, and performance.
+      </p>
+      <div class="topic-pills">
+        <span class="pill">Primitive Types</span>
+        <span class="pill">Arrays</span>
+        <span class="pill">Records</span>
+        <span class="pill">Unions</span>
+        <span class="pill">Pointers</span>
+        <span class="pill">Type Checking</span>
+        <span class="pill">Strong Typing</span>
+        <span class="pill">Coercion</span>
+      </div>
+    </header>
+
+    <article class="article">
+
+      <dl class="definition">
+        <dt>Data Type</dt>
+        <dd>A collection of data values with a range of values, a way to store them in memory, and a set of predefined operations on those values.</dd>
+      </dl>
+
+      <!-- ─── PRIMITIVE TYPES ──────────────────────── -->
+      <h2 id="primitive">Primitive Data Types</h2>
+      <p>Primitive types are not defined in terms of other types. Some are direct hardware reflections; others require a little non-hardware support.</p>
+
+      <div class="collapsible open">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">TYPE</span><span class="ch-title">Integer</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>May be as many as 8 different sizes. Java's signed integers:</p>
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Type</th><th>Size</th><th>Range</th></tr></thead>
+              <tbody>
+                <tr><td>byte</td><td>8-bit</td><td>−128 to 127</td></tr>
+                <tr><td>short</td><td>16-bit</td><td>−32,768 to 32,767</td></tr>
+                <tr><td>int</td><td>32-bit</td><td>~−2.1B to 2.1B</td></tr>
+                <tr><td>long</td><td>64-bit</td><td>~−9.2Q to 9.2Q</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">TYPE</span><span class="ch-title">Floating Point</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>Models real numbers as approximations. Scientific languages offer at least <code>float</code> and <code>double</code>. Most use <strong>IEEE 754</strong>.</p>
+          <ul>
+            <li><strong>Precision</strong>: Accuracy of the fractional part</li>
+            <li><strong>Range</strong>: Min/max representable value</li>
+          </ul>
+          <div class="callout warning">
+            <div class="callout-label">⚠ Important</div>
+            <p>Floating point values are <em>approximations</em>. <code>0.1 + 0.2 ≠ 0.3</code> in most languages due to binary representation.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">TYPE</span><span class="ch-title">Decimal</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>Stores a fixed number of decimal digits using Binary Coded Decimal (BCD). Used in COBOL; C# provides a <code>decimal</code> type.</p>
+          <div class="compare-grid">
+            <div class="compare-card">
+              <div class="cc-label advantage">✓ Advantage</div>
+              <ul><li>Exact decimal arithmetic — essential for financial computations</li></ul>
+            </div>
+            <div class="compare-card">
+              <div class="cc-label disadvantage">✗ Disadvantages</div>
+              <ul><li>Wastes memory (BCD is inefficient)</li><li>Limited range</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">TYPE</span><span class="ch-title">Boolean &amp; Character</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p><strong>Boolean</strong>: Two-element range (true/false). Could be a single bit but addressing limitations mean bytes are usually used. Improves readability over using ints.</p>
+          <p><strong>Character</strong>: Stored as numeric codings:</p>
+          <ul>
+            <li><strong>ASCII</strong>: 7-bit, 128 characters</li>
+            <li><strong>Unicode UCS-2</strong>: 16-bit, most natural languages</li>
+            <li><strong>Unicode UCS-4 / UTF-32</strong>: 32-bit, used in Java and C#</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ─── STRING TYPES ────────────────────────── -->
+      <h2 id="strings">Character String Types</h2>
+
+      <p>Design questions: Is a string a <em>primitive</em> type or just a special array? Is its length static or dynamic?</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>Language</th><th>Approach</th><th>Length Model</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>C, C++</td><td>Not a primitive; use <code>char</code> arrays + library</td><td>Limited dynamic (null terminator)</td></tr>
+            <tr><td>Fortran, Python</td><td>Primitive type</td><td>Static / Dynamic</td></tr>
+            <tr><td>Java</td><td><code>String</code> class (primitive-like); <code>StringBuffer</code> mutable</td><td>Static length (immutable)</td></tr>
+            <tr><td>Perl, JavaScript</td><td>Primitive-like</td><td>Fully dynamic</td></tr>
+            <tr><td>COBOL</td><td>Fixed-length strings</td><td>Static</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ─── ARRAY TYPES ──────────────────────────── -->
+      <h2 id="arrays">Array Types</h2>
+
+      <dl class="definition">
+        <dt>Array</dt>
+        <dd>An aggregate of homogeneous data elements where individual elements are identified by their position relative to the first element. Indexing is a mapping: indices → elements.</dd>
+      </dl>
+
+      <h3>Array Subscript Binding Categories</h3>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>Category</th><th>Range Binding</th><th>Storage Binding</th><th>Example</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Static</td><td>Static</td><td>Static</td><td>C/C++ <code>static</code> array</td></tr>
+            <tr><td>Fixed stack-dynamic</td><td>Static</td><td>At declaration elaboration</td><td>Normal C local array</td></tr>
+            <tr><td>Stack-dynamic</td><td>Dynamic (fixed after bind)</td><td>Dynamic</td><td>Ada arrays</td></tr>
+            <tr><td>Fixed heap-dynamic</td><td>Dynamic (fixed after bind)</td><td>Heap, explicit</td><td>C++ <code>new int[n]</code></td></tr>
+            <tr><td>Heap-dynamic</td><td>Dynamic (can change)</td><td>Heap, grows/shrinks</td><td>Python list, JS array</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Index Range Checking</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Language</th><th>Range Check?</th></tr></thead>
+          <tbody>
+            <tr><td>C, C++, Perl, Fortran</td><td>❌ No range checking — undefined behavior on out-of-bounds</td></tr>
+            <tr><td>Java, ML, C#</td><td>✅ Runtime range checking — throws exception</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pre><code><span class="cm">// C++ — fixed heap-dynamic array</span>
+<span class="kw">int</span>* p = <span class="kw">new int</span>[size];   <span class="cm">// size known at runtime</span>
+<span class="cm">// ... use p ...</span>
+<span class="kw">delete</span>[] p;               <span class="cm">// must manually free</span>
+
+<span class="cm">// Java — all arrays are fixed heap-dynamic</span>
+<span class="kw">int</span>[] arr = <span class="kw">new int</span>[size]; <span class="cm">// range checked at access</span></code></pre>
+
+      <h3>Rectangular vs Jagged Arrays</h3>
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label advantage">Rectangular Array</div>
+          <ul>
+            <li>All rows same length</li>
+            <li>True 2D structure</li>
+            <li>Used in Fortran, Ada</li>
+            <li>C#, F# support via <code>int[,]</code></li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label disadvantage">Jagged (Ragged) Array</div>
+          <ul>
+            <li>Rows can have varying lengths</li>
+            <li>Array of arrays</li>
+            <li>C, C++, Java use this model</li>
+            <li>More flexible but less cache-friendly</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ─── RECORDS ──────────────────────────────── -->
+      <h3>Aggregate Array Operations</h3>
+      <p>
+        Some languages support operations on entire arrays rather than only element-by-element access.
+        This is a major writability improvement over manually writing loops for every transformation.
+      </p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Language</th><th>Support</th><th>Why it matters</th></tr></thead>
+          <tbody>
+            <tr><td>APL</td><td>Rich built-in array algebra</td><td>The classic high-power array language</td></tr>
+            <tr><td>Python</td><td><code>+</code>, <code>in</code>, <code>==</code>, <code>is</code></td><td>Assignment changes references, not contents</td></tr>
+            <tr><td>Java</td><td><code>clone()</code></td><td>Copies contents; plain assignment only copies the reference</td></tr>
+            <tr><td>Fortran 95</td><td>Elemental operations like <code>C = A + B</code></td><td>Corresponding elements are combined as a unit</td></tr>
+            <tr><td>F#</td><td><code>Array.append</code>, <code>Array.copy</code></td><td>Library-level aggregate support</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Slices</h3>
+      <p>
+        A <strong>slice</strong> extracts part of an array as a unit. It is a referencing mechanism, not a distinct type.
+      </p>
+
+      <pre><code><span class="cm"># Python slices</span>
+vector = [3, 6, 9, 12, 15, 18, 21]
+vector[3:6]      <span class="cm"># [12, 15, 18]</span>
+vector[0:7:2]    <span class="cm"># [3, 9, 15, 21]</span>
+
+<span class="cm"># Ruby slices</span>
+list.slice(2, 2)
+list.slice(1..3)</code></pre>
+
+      <div class="callout key">
+        <div class="callout-label">Why Slices Matter</div>
+        <p>
+          Slices make sub-array operations much more readable and are one of the biggest usability improvements over early fixed-array models.
+        </p>
+      </div>
+
+      <h2 id="associative">Associative Arrays</h2>
+      <p>
+        An <strong>associative array</strong> is an unordered collection of key-value pairs where user-defined keys replace numeric subscripts.
+      </p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Language</th><th>Name</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Perl</td><td>Hash</td><td><code>exists</code>, <code>delete</code>, <code>keys</code>, <code>values</code>, <code>each</code></td></tr>
+            <tr><td>Python</td><td>Dictionary</td><td>Maps keys to object references</td></tr>
+            <tr><td>Ruby</td><td>Hash</td><td>Keys can be arbitrary objects</td></tr>
+            <tr><td>PHP</td><td>Unified array</td><td>One structure behaves as both indexed and associative</td></tr>
+            <tr><td>Lua</td><td>Table</td><td>Can act as an array, associative array, or record</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pre><code><span class="cm"># Python dictionary</span>
+salaries = {"Gary": 75000, "Perry": 57000}
+salaries["Perry"] = 58850
+
+<span class="cm"># Perl hash</span>
+%salaries = ("Gary" =&gt; 75000, "Perry" =&gt; 57000);
+$salaries{"Perry"} = 58850;</code></pre>
+
+      <h2 id="records">Record Types</h2>
+
+      <dl class="definition">
+        <dt>Record</dt>
+        <dd>A possibly heterogeneous aggregate of data elements (called <strong>fields</strong>), each identified by name.</dd>
+      </dl>
+
+      <pre><code><span class="cm">-- Ada record example</span>
+<span class="kw">type</span> Employee_Record_Type <span class="kw">is record</span>
+    First_Name : String(1..20);
+    Last_Name  : String(1..20);
+    Hourly_Rate: Float;
+<span class="kw">end record</span>;
+
+<span class="cm">-- Field access via dot notation</span>
+Employee_Record.Hourly_Rate := 25.50;</code></pre>
+
+      <div class="callout note">
+        <div class="callout-label">📝 COBOL Elliptical References</div>
+        <p>
+          COBOL allows <strong>elliptical references</strong> — you can omit record names if the field name is unambiguous. So <code>FIRST</code>, <code>FIRST OF EMPLOYEE-NAME</code>, and <code>FIRST OF EMPLOYEE-RECORD</code> can all be equivalent.
+          Other languages require fully qualified references: <code>record.subrecord.field</code>.
+        </p>
+      </div>
+
+      <!-- ─── UNIONS ───────────────────────────────── -->
+      <h2 id="tuples">Tuple Types</h2>
+      <p>
+        A <strong>tuple</strong> is similar to a record, except its components are not named.
+        Tuples are widely used to return multiple values from a function.
+      </p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Language</th><th>Tuple Style</th><th>Key Property</th></tr></thead>
+          <tbody>
+            <tr><td>Python</td><td><code>(3, 5.8, "apple")</code></td><td>Immutable; indexed from 0</td></tr>
+            <tr><td>ML</td><td><code>(3, 5.8, "apple")</code></td><td>At least two elements; selectors like <code>#1</code></td></tr>
+            <tr><td>F#</td><td><code>let tup = (3, 5.8, "apple")</code></td><td>Usually unpacked with pattern matching</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pre><code><span class="cm"># Python tuple unpacking</span>
+point = (4, 9)
+x, y = point
+
+<span class="cm">// F# multiple assignment from a tuple</span>
+let a, b, c = tup</code></pre>
+
+      <h2 id="list-types">List Types</h2>
+      <p>
+        "List" means different things in different languages, so it is worth separating functional lists from dynamic array-like lists.
+      </p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Language Family</th><th>Model</th><th>Important Trait</th></tr></thead>
+          <tbody>
+            <tr><td>Lisp / Scheme</td><td>Linked list</td><td>Immutable; core operations are <code>CAR</code>, <code>CDR</code>, <code>CONS</code>, <code>LIST</code></td></tr>
+            <tr><td>ML / F#</td><td>Functional list</td><td>Homogeneous; prepend with <code>::</code></td></tr>
+            <tr><td>Python</td><td>Dynamic array-like list</td><td>Mutable and used as the language's main general sequence type</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout note">
+        <div class="callout-label">List Comprehensions</div>
+        <p>
+          Python and F# support comprehension-style construction, which greatly improves writability by combining iteration, filtering, and construction into one expression.
+        </p>
+      </div>
+
+      <pre><code><span class="cm"># Python list comprehension</span>
+[x ** 2 for x in range(12) if x % 3 == 0]   <span class="cm"># [0, 9, 36, 81]</span></code></pre>
+
+      <h2 id="unions">Union Types</h2>
+
+      <dl class="definition">
+        <dt>Union</dt>
+        <dd>A type whose variables can store values of <em>different types</em> at different execution times. Only one value is held at a time; all members share the same memory location.</dd>
+      </dl>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label disadvantage">Free Unions (C, C++, Fortran)</div>
+          <ul>
+            <li>No type checking support</li>
+            <li>Programmer must track current type</li>
+            <li>Accessing wrong field = garbage, no error</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label advantage">Discriminated Unions (ML, Haskell, F#)</div>
+          <ul>
+            <li>Include a <strong>discriminant/tag</strong> field indicating current type</li>
+            <li>Accessing wrong field raises a runtime error</li>
+            <li>Type-safe</li>
+          </ul>
+        </div>
+      </div>
+
+      <pre><code><span class="cm">// C — free union (unsafe)</span>
+<span class="kw">union</span> flexType {
+    <span class="kw">int</span>   intEl;
+    <span class="kw">float</span> floatEl;
+};
+<span class="kw">union</span> flexType u1;
+u1.intEl = 12;
+<span class="kw">float</span> x = u1.floatEl;  <span class="cm">// LEGAL — but reads garbage!</span></code></pre>
+
+      <!-- ─── POINTERS ──────────────────────────────── -->
+      <h2 id="pointers">Pointer and Reference Types</h2>
+
+      <dl class="definition">
+        <dt>Pointer</dt>
+        <dd>A variable that holds a memory address. The value <code>nil</code>/<code>null</code>/<code>nullptr</code> means it doesn't refer to any cell. Used for indirect addressing and/or dynamic heap management.</dd>
+      </dl>
+
+      <h3>Pointer Operations</h3>
+      <pre><code><span class="cm">// C++ pointer operations</span>
+<span class="kw">int</span> val = 42;
+<span class="kw">int</span>* p = &amp;val;   <span class="cm">// ASSIGNMENT: p holds address of val</span>
+<span class="kw">int</span>  j = *p;    <span class="cm">// DEREFERENCING: j gets the value at p</span></code></pre>
+
+      <h3>The Two Pointer Problems</h3>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Dangling Pointers</div>
+        <p>
+          A pointer to a <strong>deallocated</strong> heap variable. The memory has been freed, but the pointer still holds the old address. Accessing it causes undefined behavior — one of the most dangerous bugs in C/C++.
+        </p>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Memory Leakage (Lost Heap Variables)</div>
+        <p>
+          An allocated heap variable with no pointer to it. The programmer allocated memory, then overwrote the pointer without freeing it. The memory can never be freed — the program gradually consumes more RAM.
+        </p>
+      </div>
+
+      <pre><code><span class="cm">// Memory leak example</span>
+<span class="kw">int</span>* p = <span class="kw">new int</span>(5);  <span class="cm">// allocate</span>
+p = <span class="kw">new int</span>(10);      <span class="cm">// overwrite p — first allocation is now LEAKED</span></code></pre>
+
+      <h3>References</h3>
+      <p>C++ references are like pointers but safer — they don't work with raw memory addresses and must be initialized on declaration.</p>
+
+      <pre><code><span class="cm">// C++ reference</span>
+<span class="kw">int</span> v = 10;
+<span class="kw">int</span>&amp; ref = v;    <span class="cm">// ref IS v — any change to ref changes v</span>
+ref = 20;         <span class="cm">// v is now 20</span>
+
+<span class="cm">// Used as pass-by-reference parameter</span>
+<span class="kw">void</span> increment(<span class="kw">int</span>&amp; p) { p++; }
+increment(v);     <span class="cm">// v becomes 21</span></code></pre>
+
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Language</th><th>Pointer/Reference Model</th></tr></thead>
+          <tbody>
+            <tr><td>C, C++</td><td>Full pointer arithmetic; <code>void*</code>; explicit <code>new</code>/<code>delete</code></td></tr>
+            <tr><td>Java</td><td>References only (no raw pointers); GC handles deallocation; only for objects (not primitives)</td></tr>
+            <tr><td>C#</td><td>References like Java, plus C++ style pointers in <code>unsafe</code> blocks</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ─── TYPE CHECKING ────────────────────────── -->
+      <h2 id="type-checking">Type Checking</h2>
+
+      <dl class="definition">
+        <dt>Type Checking</dt>
+        <dd>Ensuring that the operands of an operator are compatible types. A <strong>compatible type</strong> is either legal for the operator, or can be implicitly converted (<strong>coercion</strong>) to a legal type.</dd>
+      </dl>
+
+      <div class="callout note">
+        <div class="callout-label">📝 Generalized Operators &amp; Operands</div>
+        <p>
+          For type-checking purposes, subprogram calls and assignments count too:
+          <code>f(1.2)</code> — operator is <code>f</code>, operand is <code>1.2</code>.
+          <code>a = 43</code> — operator is <code>=</code>, operands are <code>a</code> and <code>43</code>.
+        </p>
+      </div>
+
+      <!-- ─── STRONG TYPING ────────────────────────── -->
+      <h2 id="strong-typing">Strong Typing</h2>
+
+      <dl class="definition">
+        <dt>Strongly Typed Language</dt>
+        <dd>One in which <em>all</em> type errors are always detected. Note: "strength" is usually comparative — "Language A is more strongly typed than B."</dd>
+      </dl>
+
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Language</th><th>Strength</th><th>Reason</th></tr></thead>
+          <tbody>
+            <tr><td>C, C++</td><td>Not strongly typed</td><td>Parameter type checking can be avoided; unions are not type-checked</td></tr>
+            <tr><td>Java, C#</td><td>Mostly strongly typed</td><td>Implicit type errors are always detected; explicit casting can still cause errors (e.g., casting <code>Person</code> to <code>Student</code>)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Coercion and Reliability</h3>
+      <p>
+        <strong>Coercion</strong> — implicit type conversion — can <em>weaken</em> typing. When a compiler silently converts types, it may mask accidental errors.
+      </p>
+
+      <pre><code><span class="cm">// Suppose b and d are both int, and x is float</span>
+<span class="kw">float</span> result = a + d;   <span class="cm">// intended: a + b</span>
+                          <span class="cm">// compiler coerces int d to float — no error!</span>
+                          <span class="cm">// the typo goes undetected</span></code></pre>
+
+      <div class="callout key">
+        <div class="callout-label">🔑 Key Point</div>
+        <p>
+          C++ has <em>many</em> coercions → less reliable. Java has about <em>half</em> of C++'s assignment coercions → more reliable. Ada has very <em>few</em> implicit coercions → most reliable.
+        </p>
+      </div>
+
+      <!-- ─── TYPE EQUIVALENCE ──────────────────────── -->
+      <h2 id="equivalence">Type Equivalence</h2>
+      <p>Defines when values of two types can be used interchangeably without coercion.</p>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label advantage">Name Equivalence</div>
+          <ul>
+            <li>Two variables are type-equivalent <em>only if</em> they have the same type name</li>
+            <li>Easy to implement</li>
+            <li>More restrictive — subprogram args must exactly match parameter types</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label disadvantage">Structure Equivalence</div>
+          <ul>
+            <li>Two types are equivalent if they have <em>identical structures</em></li>
+            <li>More flexible — two separately declared types with same structure are compatible</li>
+            <li>Harder to implement; can be too permissive</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ─── QUIZ ──────────────────────────────────── -->
+      <h2>Self-Check Quiz</h2>
+
+      <div class="quiz">
+        <div class="quiz-header">
+          <span>📝 Check your understanding</span>
+        </div>
+        <div class="quiz-body">
+          <p class="quiz-question">You have a pointer <code>p</code> that was valid, but the memory it points to has been freed with <code>delete</code>. What is this called?</p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Memory leakage is when allocated memory has no pointer to it — the memory is lost (not the pointer).">
+              <span class="opt-key">A</span> Memory leakage
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Null dereference is accessing a null pointer. Here the pointer has a value — it just points to freed memory.">
+              <span class="opt-key">B</span> Null pointer dereference
+            </li>
+            <li class="quiz-option" data-correct="true"
+                data-feedback="✓ Correct! A dangling pointer points to memory that has already been deallocated. Accessing it causes undefined behavior.">
+              <span class="opt-key">C</span> Dangling pointer
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="A discriminant is the tag field in a discriminated union — unrelated to pointer lifetimes.">
+              <span class="opt-key">D</span> Discriminant mismatch
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="quiz">
+        <div class="quiz-header">
+          <span>📝 Check your understanding</span>
+        </div>
+        <div class="quiz-body">
+          <p class="quiz-question">C and C++ are considered <em>not</em> strongly typed. What is the PRIMARY reason given in your notes?</p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="false"
+                data-feedback="C does have integer types like short, int, long — not the main issue here.">
+              <span class="opt-key">A</span> They don't have integer types
+            </li>
+            <li class="quiz-option" data-correct="true"
+                data-feedback="✓ Correct! Two reasons: (1) parameter type checking can be bypassed in pre-C99, and (2) unions are not type-checked — a value of the wrong type can be retrieved without error.">
+              <span class="opt-key">B</span> Parameter type checking can be avoided, and unions are not type-checked
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="C/C++ do support explicit casting, but that's a feature found in many languages and isn't the primary reason for being not strongly typed.">
+              <span class="opt-key">C</span> They support explicit casting
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="C/C++ do have static type binding — variable types are fixed at compile time.">
+              <span class="opt-key">D</span> They use dynamic type binding
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">↺ Reset</button>
+        </div>
+      </div>
+
+      <!-- ─── SUMMARY ──────────────────────────────── -->
+      <div class="summary-box">
+        <h2>Chapter 6 Summary</h2>
+        <ul>
+          <li><strong>Primitive types</strong>: Integer, float, complex, decimal, boolean, character. Design choices reflect hardware constraints and application needs.</li>
+          <li><strong>Arrays</strong>: 5 categories of subscript/storage binding from static to heap-dynamic. Java uses fixed heap-dynamic; Python/JS use heap-dynamic. Slices and aggregate operations improve writability.</li>
+          <li><strong>Associative arrays</strong>: Key-value collections used in Perl hashes, Python dictionaries, Ruby hashes, PHP arrays, and Lua tables.</li>
+          <li><strong>Tuples and lists</strong>: Tuples package fixed multiple values; list models differ sharply between functional languages and Python-style dynamic lists.</li>
+          <li><strong>Unions</strong>: Free unions (C) are unsafe; discriminated unions (ML/F#) include a tag that enables type checking.</li>
+          <li><strong>Pointers</strong>: Enable heap access but introduce dangling pointer and memory leak problems. Java avoids this with garbage collection and references only.</li>
+          <li><strong>Strong typing</strong>: Always detecting type errors. C/C++ are not; Java/C# are mostly. Coercion weakens type safety.</li>
+          <li><strong>Type equivalence</strong>: Name equivalence is restrictive but simple; structure equivalence is flexible but harder to implement.</li>
+        </ul>
+      </div>
+
+    </article>
+  </main>
+</div>
+<script src="study-notes.js"></script>
+</body>
+</html>

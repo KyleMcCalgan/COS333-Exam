@@ -1,0 +1,532 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 9 — Subprograms</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+
+  <button class="menu-toggle" aria-label="Open menu">☰</button>
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="course-label">COS 333 · Concepts of PL</span>
+      <h1>Programming Language Concepts</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Overview</span>
+      <a href="index.html"><span class="nav-chapter">00</span> Home &amp; Topics</a>
+
+      <span class="nav-section-label">Chapters</span>
+      <a href="chapter1.html"><span class="nav-chapter">01</span> Preliminaries</a>
+      <a href="chapter2.html"><span class="nav-chapter">02</span> Evolution of PLs</a>
+      <a href="chapter5.html"><span class="nav-chapter">05</span> Names, Bindings &amp; Scopes</a>
+      <a href="chapter6.html"><span class="nav-chapter">06</span> Data Types</a>
+      <a href="chapter7.html"><span class="nav-chapter">07</span> Expressions &amp; Assignments</a>
+      <a href="chapter8.html"><span class="nav-chapter">08</span> Control Structures</a>
+      <a href="chapter9.html" class="active"><span class="nav-chapter">09</span> Subprograms</a>
+      <a href="chapter12.html"><span class="nav-chapter">12</span> OOP Support</a>
+      <a href="chapter15.html"><span class="nav-chapter">15</span> Functional Programming</a>
+      <a href="chapter16.html"><span class="nav-chapter">16</span> Logic Programming</a>
+
+      <span class="nav-section-label">Practical</span>
+      <a href="prolog-practical.html"><span class="nav-chapter">P3</span> Prolog in Practice</a>
+      <a href="prolog-list-patterns.html"><span class="nav-chapter">P4</span> List Patterns</a>
+      <a href="scheme-practical.html"><span class="nav-chapter">P5</span> Scheme in Practice</a>
+
+      <span class="nav-section-label">Assessment</span>
+      <a href="past-papers.html"><span class="nav-chapter">PP</span> Past Papers</a>
+      <a href="mcq.html"><span class="nav-chapter">MC</span> MCQ Bank</a>
+    </nav>
+
+    <div class="sidebar-toc">
+      <span class="sidebar-toc-title">On this page</span>
+      <a href="#fundamentals">Fundamentals</a>
+      <a href="#design">Design Issues</a>
+      <a href="#local">Local Environments</a>
+      <a href="#param-passing">Parameter Passing</a>
+      <a href="#pass-by-value">Pass-by-Value</a>
+      <a href="#pass-by-ref">Pass-by-Reference</a>
+      <a href="#pass-by-vr">Pass-by-Value-Result</a>
+      <a href="#pass-by-name">Pass-by-Name</a>
+      <a href="#subprog-params">Subprogram Parameters</a>
+      <a href="#overloaded">Overloaded Subprograms</a>
+      <a href="#generic">Generic Subprograms</a>
+      <a href="#generics-cpp">Generics — C++</a>
+      <a href="#generics-java">Generics — Java</a>
+      <a href="#generics-cs">Generics — C#</a>
+      <a href="#closures">Closures</a>
+      <a href="#coroutines">Coroutines</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle">
+        <span class="toggle-icon">☾</span>
+        <span class="toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="reading-progress"><div class="reading-progress-bar"></div></div>
+
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span>›</span> Chapter 9
+    </div>
+
+    <header class="page-header">
+      <span class="chapter-tag">Chapter 9</span>
+      <h1>Subprograms</h1>
+      <p class="subtitle">
+        Subprograms are the fundamental abstraction mechanism in imperative languages.
+        How parameters are passed, how closures capture scope, and how generics enable
+        type-safe polymorphism are among the most exam-relevant topics in this course.
+      </p>
+      <div class="topic-pills">
+        <span class="pill">Parameter Passing</span>
+        <span class="pill">Pass-by-Value</span>
+        <span class="pill">Pass-by-Reference</span>
+        <span class="pill">Pass-by-Name</span>
+        <span class="pill">Closures</span>
+        <span class="pill">Generics</span>
+        <span class="pill">Coroutines</span>
+        <span class="pill">Overloading</span>
+      </div>
+    </header>
+
+    <article class="article">
+
+      <h2 id="fundamentals">Fundamentals of Subprograms</h2>
+
+      <div class="definition">
+        <dt>Subprogram</dt>
+        <dd>A named block of code that can be called (invoked) from other parts of the program. Provides <strong>process abstraction</strong> — hiding the implementation of an operation behind a name and interface.</dd>
+      </div>
+
+      <p>Each subprogram call activates a new <strong>activation</strong> of that subprogram. Key properties:</p>
+      <ul>
+        <li>A subprogram has a single <strong>entry point</strong> (the beginning of its code).</li>
+        <li>The calling program is <strong>suspended</strong> during execution of the called subprogram.</li>
+        <li>Control always returns to the caller when the subprogram finishes.</li>
+      </ul>
+
+      <h3>Procedures vs Functions</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th></th><th>Procedure</th><th>Function</th></tr></thead>
+          <tbody>
+            <tr><td>Return value</td><td>No (or implicit)</td><td>Yes — returns a single value</td></tr>
+            <tr><td>Called as</td><td>Statement</td><td>Part of an expression</td></tr>
+            <tr><td>Examples</td><td>Ada procedure, C void function</td><td>C function, Java method, Python def</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>In C and Java, all subprograms are syntactically functions (even those that return void). Ada distinguishes procedures from functions.</p>
+
+      <h3>Formal vs Actual Parameters</h3>
+      <div class="definition">
+        <dt>Formal Parameters</dt>
+        <dd>The parameter names listed in the <em>subprogram definition</em> (also called the <em>header</em>). These are local variables within the subprogram.</dd>
+      </div>
+      <div class="definition">
+        <dt>Actual Parameters</dt>
+        <dd>The values or variables provided by the <em>caller</em> at the call site. Actual parameters are bound to formal parameters by a parameter-passing mechanism.</dd>
+      </div>
+
+      <pre><code>/* C — formal parameters are 'x' and 'y'; actual parameters at call site are 'a' and 'b' */
+int add(int x, int y) { return x + y; }  /* x, y: formal parameters */
+int result = add(a, b);                  /* a, b: actual parameters */</code></pre>
+
+      <h3>Positional vs Keyword Parameters</h3>
+      <ul>
+        <li><strong>Positional</strong>: actual parameters are associated with formal parameters by their position. Most common.</li>
+        <li><strong>Keyword</strong>: actual parameters are associated by name. Supported in Ada, Python, most modern languages. Allows any order and improves readability at the call site.</li>
+      </ul>
+      <pre><code class="language-python"># Python — keyword arguments
+def greet(name, greeting="Hello"):
+    print(f"{greeting}, {name}!")
+
+greet(greeting="Hi", name="Alice")  # keyword args, any order</code></pre>
+
+      <h2 id="design">Design Issues for Subprograms</h2>
+      <ul>
+        <li>What parameter-passing method(s) are provided?</li>
+        <li>Are parameter types checked?</li>
+        <li>Can subprograms be passed as parameters or returned as values?</li>
+        <li>Can subprograms be overloaded?</li>
+        <li>Can subprograms be generic?</li>
+      </ul>
+
+      <h2 id="local">Local Referencing Environments</h2>
+      <p>Local variables of a subprogram are created when the subprogram is called and destroyed when it returns — they are <strong>stack-dynamic</strong> by default in most languages. This allows recursion: each call gets its own copy of local variables.</p>
+      <p>Some languages allow <strong>static local variables</strong> (e.g., <code>static</code> in C): the variable retains its value between calls but is local to the subprogram in scope. Useful for persistent state, but makes the function stateful and not referentially transparent.</p>
+
+      <h2 id="param-passing">Parameter-Passing Methods</h2>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Exam Focus — Very Important</div>
+        <p>Parameter passing methods are high-frequency exam material. For each method, understand: what is copied/shared, whether the caller's variable is changed, and which languages use it.</p>
+      </div>
+
+      <p>The key question is: when a subprogram is called, what is the connection between the <em>actual parameter</em> in the caller and the <em>formal parameter</em> in the subprogram?</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>Method</th><th>What happens</th><th>Caller's variable changed?</th><th>Languages</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Pass-by-value</td><td>Copy of value is passed</td><td>No</td><td>C (default), Java (primitives), Pascal (default)</td></tr>
+            <tr><td>Pass-by-reference</td><td>Address of actual is passed; formal is an alias</td><td>Yes</td><td>C++ (&amp;), Pascal (var), Ada (in out)</td></tr>
+            <tr><td>Pass-by-value-result</td><td>Copy in; copy back on return</td><td>Yes (at return)</td><td>Ada (in out, copy semantics), older FORTRAN</td></tr>
+            <tr><td>Pass-by-name</td><td>Actual expression substituted textually</td><td>Depends</td><td>ALGOL 60</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="pass-by-value">Pass-by-Value</h2>
+      <p>The value of the actual parameter is <em>copied</em> into the formal parameter. The subprogram works on its local copy; modifications do not affect the actual parameter.</p>
+      <pre><code>/* C — pass-by-value: x is a copy of a */
+void double_it(int x) {
+    x = x * 2;  /* modifies only local copy */
+}
+
+int a = 5;
+double_it(a);
+/* a is still 5 — pass-by-value did not change it */</code></pre>
+      <p><strong>Advantage</strong>: safe — callee cannot accidentally corrupt caller's data.<br>
+      <strong>Disadvantage</strong>: inefficient for large objects (entire value is copied). Also, the callee cannot return more than one value through parameters.</p>
+      <p>In Java, <strong>primitives</strong> are pass-by-value. <strong>Objects</strong> are pass-by-value of the <em>reference</em> (the reference is copied, not the object) — this means the callee can modify the object's fields but cannot redirect the caller's reference to point elsewhere.</p>
+
+      <h2 id="pass-by-ref">Pass-by-Reference</h2>
+      <p>The <em>address</em> (reference) of the actual parameter is passed. The formal parameter becomes an <strong>alias</strong> for the actual parameter — they refer to the same memory location. Any modification of the formal parameter changes the actual parameter.</p>
+      <pre><code>/* C++ — pass-by-reference using & */
+void double_it(int &x) {
+    x = x * 2;  /* modifies the actual parameter */
+}
+
+int a = 5;
+double_it(a);
+/* a is now 10 */</code></pre>
+      <p><strong>Advantage</strong>: efficient for large objects (only address is passed); callee can return values through parameters.<br>
+      <strong>Disadvantage</strong>: aliasing — the actual variable can be inadvertently modified. Reduces reliability; makes programs harder to reason about.</p>
+
+      <h2 id="pass-by-vr">Pass-by-Value-Result (Copy-in / Copy-out)</h2>
+      <p>A two-phase mechanism:</p>
+      <ol>
+        <li><strong>On call</strong>: the value of the actual parameter is copied into the formal parameter (like pass-by-value).</li>
+        <li><strong>On return</strong>: the final value of the formal parameter is copied back into the actual parameter.</li>
+      </ol>
+      <pre><code>/* Ada conceptual example — in out parameter with value-result semantics */
+procedure Increment(X : in out Integer) is
+begin
+    X := X + 1;
+end;
+
+A := 5;
+Increment(A);
+-- A is now 6</code></pre>
+      <p><strong>Difference from pass-by-reference</strong>: with value-result, updates to the formal parameter are not immediately visible through other aliases. Changes are only committed on return. With pass-by-reference, changes are immediately visible everywhere.</p>
+      <p>This distinction matters when the actual parameter is aliased (accessible through two different names). The two methods can produce different results in such cases.</p>
+
+      <h2 id="pass-by-name">Pass-by-Name</h2>
+      <p>Used in ALGOL 60. The <strong>actual parameter text</strong> is substituted for every occurrence of the formal parameter in the subprogram body. The actual parameter expression is evaluated every time the formal parameter is used, in the environment of the <em>caller</em>.</p>
+      <pre><code>/* ALGOL 60 conceptual: pass-by-name */
+procedure swap(a, b):
+    begin
+        temp := a;
+        a := b;
+        b := temp;
+    end
+
+swap(i, arr[i])
+/* substitutes as:
+   temp := i;
+   i := arr[i];      ← now i has changed!
+   arr[i] := temp;  ← uses NEW value of i — assigns to wrong element! */</code></pre>
+      <p>Pass-by-name can be surprising and error-prone (see the classic "swap with indexed variable" problem above). It was abandoned in practical languages after ALGOL 60 due to its unpredictable behaviour. However, it is interesting theoretically because it achieves "lazy evaluation" — the actual parameter is not evaluated until it is needed.</p>
+
+      <h2 id="subprog-params">Parameters That Are Subprograms</h2>
+      <p>Some languages allow subprograms to be passed as parameters to other subprograms. This requires the language to support <strong>higher-order functions</strong> or at least function pointers.</p>
+      <ul>
+        <li><strong>C</strong>: function pointers can be passed as parameters.</li>
+        <li><strong>C++, Java, C#</strong>: lambda expressions / functional interfaces allow passing anonymous functions.</li>
+        <li><strong>Python, Ruby, JavaScript</strong>: functions are first-class objects, passed naturally.</li>
+      </ul>
+      <p>The <strong>referencing environment</strong> of the passed subprogram matters: should it use the environment where it was <em>defined</em> (static scoping — as in most languages) or where it was <em>called</em> (dynamic scoping)?</p>
+
+      <h2 id="overloaded">Overloaded Subprograms</h2>
+
+      <div class="definition">
+        <dt>Overloaded Subprogram</dt>
+        <dd>A subprogram that has the same name as another subprogram in the same scope, but with a different <strong>protocol</strong> (different number, type, or order of parameters). The compiler chooses the correct version at compile time based on the types of the actual parameters.</dd>
+      </div>
+
+      <pre><code class="language-java">// Java — method overloading
+void print(int n)    { System.out.println("int: " + n); }
+void print(double d) { System.out.println("double: " + d); }
+void print(String s) { System.out.println("string: " + s); }
+
+print(42);       // calls print(int)
+print(3.14);     // calls print(double)
+print("hello");  // calls print(String)</code></pre>
+
+      <p>Overloading improves writability: the caller uses a single, intuitive name regardless of the parameter type. Resolution is at <strong>compile time</strong> in statically typed languages.</p>
+      <p>C++ adds complexity: when multiple overloads match (via implicit conversions), the compiler applies a set of disambiguation rules.</p>
+
+      <h2 id="generic">Generic Subprograms</h2>
+
+      <div class="definition">
+        <dt>Generic Subprogram</dt>
+        <dd>A subprogram that is parameterised by <strong>type</strong>. A single generic definition can work with many different types while still being statically type-checked. Also called <em>parametric polymorphism</em> or <em>templates</em>.</dd>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Exam Focus — Know C++, Java, C# differences</div>
+        <p>The exam specifically asks about the differences between generics in C++, Java, and C#. Know the mechanism and key limitations of each.</p>
+      </div>
+
+      <h2 id="generics-cpp">Generics in C++ — Templates</h2>
+      <p>C++ uses <strong>templates</strong>. The compiler <em>instantiates</em> a separate version of the function or class for each type it is used with. This is compile-time code generation.</p>
+      <pre><code class="language-cpp">// C++ template function
+template &lt;typename T&gt;
+T max(T a, T b) {
+    return (a &gt; b) ? a : b;
+}
+
+max(3, 7);        // T = int  — compiler generates int version
+max(3.14, 2.71);  // T = double — compiler generates double version</code></pre>
+
+      <p><strong>Constraint</strong>: in original C++, there was no way to express <em>type constraints</em> — any type parameter could be used, and errors were only caught when the instantiation failed (often with cryptic error messages). C++20 introduces <strong>Concepts</strong> to address this.</p>
+      <p><strong>Advantage</strong>: maximum performance — each instantiation is fully specialised, no runtime overhead.<br>
+      <strong>Disadvantage</strong>: can lead to code bloat (separate compiled version for each type); complex error messages.</p>
+
+      <h2 id="generics-java">Generics in Java — Type Erasure</h2>
+      <p>Java generics use <strong>type erasure</strong>. The generic type parameter exists at compile time for type checking, but is erased at runtime — only a single compiled version of the bytecode exists (parameterised by <code>Object</code>).</p>
+      <pre><code class="language-java">// Java generic method
+public &lt;T extends Comparable&lt;T&gt;&gt; T max(T a, T b) {
+    return a.compareTo(b) &gt; 0 ? a : b;
+}
+
+Integer x = max(3, 7);        // T = Integer
+String  s = max("apple", "banana");  // T = String</code></pre>
+
+      <p><strong>Type constraints</strong>: Java uses bounded type parameters (<code>T extends SomeClass</code> or <code>T extends Interface</code>) to restrict which types can be used. This is more expressive than raw C++ templates (which had no constraint syntax).</p>
+      <p><strong>Limitation</strong>: due to type erasure, you cannot use type parameters in certain ways at runtime (e.g., cannot write <code>new T()</code> or <code>T[10]</code>). Cannot use primitive types as type parameters — must use wrappers (<code>Integer</code>, not <code>int</code>).</p>
+      <p><strong>Wildcards</strong>: Java has a unique feature — wildcard type parameters (<code>?</code>), which allow flexible use of generic types in method signatures.</p>
+
+      <h2 id="generics-cs">Generics in C# — Reified Generics</h2>
+      <p>C# uses <strong>reified generics</strong> (also called first-class generics). Unlike Java's type erasure, C# preserves full type information at runtime. Each instantiation is a distinct type at the CLR level.</p>
+      <pre><code class="language-csharp">// C# generic method with constraint
+public T Max&lt;T&gt;(T a, T b) where T : IComparable&lt;T&gt; {
+    return a.CompareTo(b) &gt; 0 ? a : b;
+}
+
+Max&lt;int&gt;(3, 7);
+Max&lt;string&gt;("apple", "banana");</code></pre>
+
+      <p><strong>Constraints</strong>: C# uses <code>where T : constraint</code> syntax. Constraints can specify that T must implement an interface, must be a class or struct, must have a parameterless constructor (<code>new()</code>), etc. This is more expressive than Java's bounded wildcards.</p>
+      <p><strong>Reification advantages</strong>: Can use <code>new T()</code> (if constrained with <code>new()</code>). Works with value types (no boxing). Runtime type checks work correctly. Reflection on generic types is possible.</p>
+      <p><strong>C# allows</strong> generic classes, interfaces, delegates, and events — not just methods.</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>Feature</th><th>C++ Templates</th><th>Java Generics</th><th>C# Generics</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Mechanism</td><td>Compile-time code generation (instantiation)</td><td>Type erasure</td><td>Reified (runtime types)</td></tr>
+            <tr><td>Runtime type info</td><td>Yes (via RTTI)</td><td>No (erased)</td><td>Yes (full)</td></tr>
+            <tr><td>Primitive types</td><td>Yes</td><td>No (use wrappers)</td><td>Yes</td></tr>
+            <tr><td>Type constraints</td><td>C++20 Concepts; duck typing before</td><td>Bounded wildcards (extends/super)</td><td>where clause (rich)</td></tr>
+            <tr><td>Code size</td><td>One compiled version per type (code bloat)</td><td>Single compiled version</td><td>One version per value type; shared for reference types</td></tr>
+            <tr><td>new T()</td><td>Yes</td><td>No</td><td>Yes (with new() constraint)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="closures">Closures</h2>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Exam Focus — Section 9.12 — Very Important</div>
+        <p>You must be able to understand JavaScript code involving closures, and provide the output of examples similar to the MakeAdder function. Understand how closures capture their environment.</p>
+      </div>
+
+      <div class="definition">
+        <dt>Closure</dt>
+        <dd>A subprogram and the <strong>referencing environment</strong> in which it was defined, treated as a single unit. The closure "closes over" (captures) the variables from its defining scope, even after that scope has exited. When a nested function refers to a variable in an outer scope, that variable must be kept alive as part of the closure.</dd>
+      </div>
+
+      <h3>The MakeAdder Example (JavaScript)</h3>
+      <pre><code class="language-javascript">function makeAdder(x) {
+    // Returns a new function that adds x to its argument
+    return function(y) {
+        return x + y;  // 'x' is captured from the outer scope
+    };
+}
+
+var add5  = makeAdder(5);   // x = 5 captured in closure
+var add10 = makeAdder(10);  // x = 10 captured in a different closure
+
+console.log(add5(3));   // 8   (5 + 3)
+console.log(add10(3));  // 13  (10 + 3)
+console.log(add5(7));   // 12  (5 + 7)
+</code></pre>
+
+      <p>Key points:</p>
+      <ul>
+        <li><code>makeAdder</code> returns an inner function. When <code>makeAdder(5)</code> is called, it creates a closure that captures <code>x = 5</code>.</li>
+        <li>After <code>makeAdder</code> returns, its activation record is gone — but <code>x</code> is kept alive by the closure.</li>
+        <li><code>add5</code> and <code>add10</code> are independent closures, each with their own captured <code>x</code>.</li>
+        <li>Calling <code>add5(3)</code> evaluates <code>x + y</code> = <code>5 + 3</code> = <code>8</code>.</li>
+      </ul>
+
+      <h3>Closures in Python</h3>
+      <pre><code class="language-python">def make_adder(x):
+    def adder(y):
+        return x + y  # x captured from enclosing scope
+    return adder
+
+add3 = make_adder(3)
+print(add3(10))  # 13
+print(add3(20))  # 23</code></pre>
+
+      <h3>Closures sharing mutable state</h3>
+      <pre><code class="language-javascript">function makeCounter() {
+    var count = 0;           // captured mutable variable
+    return {
+        increment: function() { count += 1; },
+        value:     function() { return count; }
+    };
+}
+
+var c = makeCounter();
+c.increment();
+c.increment();
+console.log(c.value());  // 2 — both functions share the same 'count'
+</code></pre>
+      <p>Both returned functions close over the <em>same</em> <code>count</code> variable. Mutations are shared. This is a powerful pattern for encapsulating private state.</p>
+
+      <h3>Implementation requirement</h3>
+      <p>Closures require that free variables (captured variables) be stored on the <strong>heap</strong>, not the stack, because they must outlive the activating call. This is why closures are not trivially available in C (no heap allocation for stack frames by default). In languages like Python, JavaScript, Java 8+, and C#, the runtime handles this automatically.</p>
+
+      <h2 id="coroutines">Coroutines</h2>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Exam — Be able to provide output from pseudocode</div>
+        <p>The exam may show pseudocode involving coroutines and ask you to trace the output. Understand the execution model: two (or more) routines take turns executing, control switches explicitly.</p>
+      </div>
+
+      <div class="definition">
+        <dt>Coroutine</dt>
+        <dd>A subprogram that has multiple entry points and that maintains its state between invocations. Unlike normal subprograms (which always start at the beginning), a coroutine resumes from where it last suspended. Control is passed back and forth between coroutines using a <strong>resume</strong> operation; there is no caller/callee hierarchy — they are symmetric.</dd>
+      </div>
+
+      <h3>Key differences from normal subprograms</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th></th><th>Normal Subprogram</th><th>Coroutine</th></tr></thead>
+          <tbody>
+            <tr><td>Entry points</td><td>One (always starts at beginning)</td><td>Multiple (resumes from last yield point)</td></tr>
+            <tr><td>State between calls</td><td>Lost (local variables re-created)</td><td>Preserved (execution state maintained)</td></tr>
+            <tr><td>Caller-callee</td><td>Asymmetric hierarchy</td><td>Symmetric — either can resume the other</td></tr>
+            <tr><td>Concurrency</td><td>Not inherent</td><td>Cooperative concurrency (not preemptive)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Pseudocode example (tracing)</h3>
+      <pre><code>/* Pseudocode — two coroutines taking turns */
+coroutine A:
+    print "A1"
+    resume B
+    print "A2"
+    resume B
+    print "A3"
+
+coroutine B:
+    print "B1"
+    resume A
+    print "B2"
+    resume A
+
+/* Execution trace starting with A: */
+-- A starts
+A1
+-- A resumes B
+B1
+-- B resumes A (B suspends, A continues from after "resume B")
+A2
+-- A resumes B (A suspends, B continues from after "resume A")
+B2
+-- B resumes A (B suspends, A continues from after "resume B")
+A3
+-- A finishes</code></pre>
+
+      <p>Output: <code>A1 B1 A2 B2 A3</code></p>
+
+      <h3>Real-world use</h3>
+      <ul>
+        <li><strong>Generators</strong> in Python (<code>yield</code>), JavaScript (<code>function*</code>), and C# (<code>yield return</code>) are restricted coroutines that produce a sequence of values lazily.</li>
+        <li><strong>async/await</strong> in Python, C#, JavaScript is built on coroutine-like execution.</li>
+        <li>SIMULA 67 was one of the first languages with coroutines. Lua has first-class coroutines.</li>
+      </ul>
+
+      <div class="quiz">
+        <div class="quiz-header"><span>Quick Check</span></div>
+        <div class="quiz-body">
+          <p class="quiz-question">Consider this JavaScript code:<br><br>
+          <code>function outer(n) {<br>&nbsp;&nbsp;return function(x) { return n * x; };<br>}<br>var triple = outer(3);<br>console.log(triple(4));</code><br><br>
+          What is printed?</p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="true"
+                data-feedback="outer(3) returns a closure that captures n=3. Calling triple(4) evaluates n*x = 3*4 = 12.">
+              <span class="opt-key">A</span> 12
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="7 would be 3+4, but the function multiplies n*x, not adds.">
+              <span class="opt-key">B</span> 7
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="4 is just the argument passed to triple, not the return value.">
+              <span class="opt-key">C</span> 4
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="n is captured by the closure and remains accessible — no error occurs.">
+              <span class="opt-key">D</span> ReferenceError — n is not defined
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">Try again</button>
+        </div>
+      </div>
+
+      <div class="summary-box">
+        <h2>Chapter 9 Summary</h2>
+        <ul>
+          <li><strong>Formal vs actual parameters</strong>: formal parameters are in the definition; actual parameters are at the call site.</li>
+          <li><strong>Pass-by-value</strong>: copy of value passed; caller's variable not modified. Used in C (default), Java (primitives).</li>
+          <li><strong>Pass-by-reference</strong>: address passed; formal is alias for actual; caller's variable can be modified. C++ (&amp;), Pascal (var).</li>
+          <li><strong>Pass-by-value-result</strong>: copy in, copy back on return. Different from pass-by-reference when aliasing exists.</li>
+          <li><strong>Pass-by-name</strong>: ALGOL 60; actual expression substituted textually; evaluated in caller's environment; error-prone.</li>
+          <li><strong>Overloading</strong>: same name, different protocols. Resolved at compile time.</li>
+          <li><strong>C++ templates</strong>: compile-time instantiation; one version per type; no constraints until C++20.</li>
+          <li><strong>Java generics</strong>: type erasure; single bytecode; no primitives; bounded wildcards for constraints.</li>
+          <li><strong>C# generics</strong>: reified; runtime type info preserved; rich where constraints; works with value types.</li>
+          <li><strong>Closures</strong>: subprogram + captured environment. Captured variables live on the heap. MakeAdder pattern.</li>
+          <li><strong>Coroutines</strong>: symmetric, multiple entry points, state preserved between calls. Execution alternates via resume.</li>
+        </ul>
+      </div>
+
+    </article>
+  </main>
+</div>
+<script src="study-notes.js"></script>
+</body>
+</html>

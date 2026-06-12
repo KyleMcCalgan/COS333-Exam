@@ -1,0 +1,728 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 16 — Logic Programming &amp; Prolog</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+
+  <button class="menu-toggle" aria-label="Open menu">☰</button>
+  <div class="sidebar-overlay"></div>
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="course-label">COS 333 · Concepts of PL</span>
+      <h1>Programming Language Concepts</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Overview</span>
+      <a href="index.html"><span class="nav-chapter">00</span> Home &amp; Topics</a>
+
+      <span class="nav-section-label">Chapters</span>
+      <a href="chapter1.html"><span class="nav-chapter">01</span> Preliminaries</a>
+      <a href="chapter2.html"><span class="nav-chapter">02</span> Evolution of PLs</a>
+      <a href="chapter5.html"><span class="nav-chapter">05</span> Names, Bindings &amp; Scopes</a>
+      <a href="chapter6.html"><span class="nav-chapter">06</span> Data Types</a>
+      <a href="chapter7.html"><span class="nav-chapter">07</span> Expressions &amp; Assignments</a>
+      <a href="chapter8.html"><span class="nav-chapter">08</span> Control Structures</a>
+      <a href="chapter9.html"><span class="nav-chapter">09</span> Subprograms</a>
+      <a href="chapter12.html"><span class="nav-chapter">12</span> OOP Support</a>
+      <a href="chapter15.html"><span class="nav-chapter">15</span> Functional Programming</a>
+      <a href="chapter16.html" class="active"><span class="nav-chapter">16</span> Logic Programming</a>
+
+      <span class="nav-section-label">Practical</span>
+      <a href="prolog-practical.html"><span class="nav-chapter">P3</span> Prolog in Practice</a>
+      <a href="prolog-list-patterns.html"><span class="nav-chapter">P4</span> List Patterns</a>
+      <a href="scheme-practical.html"><span class="nav-chapter">P5</span> Scheme in Practice</a>
+
+      <span class="nav-section-label">Assessment</span>
+      <a href="past-papers.html"><span class="nav-chapter">PP</span> Past Papers</a>
+      <a href="mcq.html"><span class="nav-chapter">MC</span> MCQ Bank</a>
+    </nav>
+
+    <div class="sidebar-toc">
+      <span class="sidebar-toc-title">On this page</span>
+      <a href="#predicate">Predicate Calculus</a>
+      <a href="#horn">Horn Clauses</a>
+      <a href="#prolog-intro">Prolog Overview</a>
+      <a href="#terms">Terms &amp; Statements</a>
+      <a href="#inferencing">Inferencing Process</a>
+      <a href="#theorem-proving">Theorem Proving</a>
+      <a href="#arithmetic">Arithmetic</a>
+      <a href="#lists">List Structures</a>
+      <a href="#deficiencies">Deficiencies</a>
+      <a href="#applications">Applications</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle">
+        <span class="toggle-icon">☾</span>
+        <span class="toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <main class="main">
+    <div class="reading-progress"><div class="reading-progress-bar"></div></div>
+
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span>›</span> Chapter 16
+    </div>
+
+    <header class="page-header">
+      <span class="chapter-tag">Chapter 16</span>
+      <h1>Logic Programming</h1>
+      <p class="subtitle">
+        Declarative programming through symbolic logic. Programs describe <em>what</em>
+        is true, not <em>how</em> to compute it. Prolog uses Horn clauses,
+        unification, and backward chaining to answer queries.
+      </p>
+      <div class="topic-pills">
+        <span class="pill">Predicate Calculus</span>
+        <span class="pill">Horn Clauses</span>
+        <span class="pill">Prolog</span>
+        <span class="pill">Unification</span>
+        <span class="pill">Backtracking</span>
+        <span class="pill">List Processing</span>
+        <span class="pill">Declarative</span>
+      </div>
+    </header>
+
+    <article class="article">
+
+      <div class="callout key">
+        <div class="callout-label">🔑 Central Distinction</div>
+        <p>
+          Logic programming is <strong>declarative</strong>, not procedural. You specify the <em>form of results</em>, not the steps to produce them. The language's inference engine figures out how.
+        </p>
+      </div>
+
+      <!-- ─── PREDICATE CALCULUS ──────────────────── -->
+      <h2 id="predicate">Predicate Calculus</h2>
+
+      <dl class="definition">
+        <dt>Proposition</dt>
+        <dd>A logical statement that may or may not be true. Consists of one or more objects and the relationships among them.</dd>
+      </dl>
+
+      <p>
+        <strong>First-order predicate calculus</strong> is the form of symbolic logic used for logic programming. It serves three needs:
+        (1) express propositions, (2) express relationships between propositions,
+        (3) describe how new propositions can be inferred from others.
+      </p>
+
+      <h3>Atomic Propositions</h3>
+      <p>An atomic proposition has two parts: a <strong>functor</strong> (the relationship name) and an <strong>ordered list of parameters</strong>.</p>
+
+      <pre><code><span class="cm">% Atomic proposition examples (Prolog syntax)</span>
+student(jon)             <span class="cm">% "jon is a student"</span>
+like(seth, osx)          <span class="cm">% "seth likes osx"</span>
+like(nick, windows)
+like(jim, linux)</code></pre>
+
+      <h3>Compound Propositions</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>Operator</th><th>Symbol</th><th>Meaning</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Negation</td><td>¬</td><td>not a</td></tr>
+            <tr><td>Conjunction</td><td>∧</td><td>a and b</td></tr>
+            <tr><td>Disjunction</td><td>∨</td><td>a or b</td></tr>
+            <tr><td>Equivalence</td><td>≡</td><td>a is equivalent to b</td></tr>
+            <tr><td>Implication →</td><td>⇒</td><td>a implies b</td></tr>
+            <tr><td>Implication ←</td><td>⇐</td><td>b implies a (used in Prolog as <code>:-</code>)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Forms of a Proposition</h3>
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label advantage">Fact</div>
+          <ul>
+            <li>The proposition is <em>assumed to be true</em></li>
+            <li>Example: <code>student(jon)</code> — "Jon is a student (unconditionally)"</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label disadvantage">Query</div>
+          <ul>
+            <li>The truth of the proposition is <em>to be determined</em></li>
+            <li>Example: "Can you prove that Jon is a student?"</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ─── HORN CLAUSES ─────────────────────────── -->
+      <h2 id="horn">Horn Clauses</h2>
+
+      <dl class="definition">
+        <dt>Horn Clause</dt>
+        <dd>A restricted form of proposition with at most one positive literal. Used because they can represent most useful propositions and support efficient inference.</dd>
+      </dl>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label advantage">Headed Horn Clause (Rule)</div>
+          <ul>
+            <li>One consequent (left/head) and a conjunction of antecedents (right)</li>
+            <li>States relationships / derives new facts</li>
+            <li>Prolog syntax: <code>head :- body</code></li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label disadvantage">Headless Horn Clause (Fact)</div>
+          <ul>
+            <li>No head — just an unconditional fact</li>
+            <li>States something that is always true</li>
+            <li>Prolog syntax: <code>fact(args).</code></li>
+          </ul>
+        </div>
+      </div>
+
+      <pre><code><span class="cm">% Rule (headed Horn clause)</span>
+likes(bob, trout) :- likes(bob, fish), fish(trout).
+<span class="cm">% "Bob likes trout IF bob likes fish AND trout is a fish"</span>
+
+<span class="cm">% Fact (headless Horn clause)</span>
+father(bob, jake).
+<span class="cm">% "Bob is Jake's father" (unconditionally true)</span></code></pre>
+
+      <!-- ─── PROLOG OVERVIEW ──────────────────────── -->
+      <h2 id="prolog-intro">Prolog Overview</h2>
+
+      <p>Prolog development started in the early 1970s at two institutions simultaneously:</p>
+      <ul>
+        <li><strong>University of Aix-Marseille</strong>: Colmerauer &amp; Roussel — focused on natural language processing</li>
+        <li><strong>University of Edinburgh</strong>: Robert Kowalski — focused on automated theorem proving</li>
+      </ul>
+      <p>We use <strong>Edinburgh syntax</strong>. Two main dialects exist; Edinburgh is the most common.</p>
+
+      <div class="callout key">
+        <div class="callout-label">🔑 Declarative Semantics</div>
+        <p>
+          Each Prolog statement has a simple, context-independent meaning. This is why logic programming semantics is <em>simpler</em> than imperative language semantics — a statement means the same thing regardless of where it appears in the program.
+        </p>
+      </div>
+
+      <!-- ─── TERMS & STATEMENTS ──────────────────── -->
+      <h2 id="terms">Prolog Terms &amp; Statements</h2>
+
+      <h3>Terms</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Term Type</th><th>Description</th><th>Examples</th></tr></thead>
+          <tbody>
+            <tr><td>Constant (integer)</td><td>Numeric literal</td><td><code>42</code>, <code>-7</code></td></tr>
+            <tr><td>Atom</td><td>Lowercase-start string, or quoted string</td><td><code>joe</code>, <code>'Some Atom'</code></td></tr>
+            <tr><td>Variable</td><td>Uppercase-start string; bound during resolution</td><td><code>X</code>, <code>MyVar</code></td></tr>
+            <tr><td>Structure</td><td>Atomic proposition — functor + params</td><td><code>parent(X, Y)</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Variable Instantiation</div>
+        <p>
+          Prolog variables are <strong>not</strong> like imperative language variables. <strong>Instantiation</strong> — binding a variable to a value — only happens during the resolution process. A variable can be instantiated to a specific value, then <em>uninstantiated again</em> on backtracking.
+        </p>
+      </div>
+
+      <h3>Fact Statements</h3>
+      <p>Headless Horn clauses — unconditional truths that form the knowledge base.</p>
+      <pre><code>female(shelley).
+female(anna).
+male(bill).
+father(bill, jake).
+father(bill, shelley).</code></pre>
+
+      <h3>Rule Statements</h3>
+      <p>Headed Horn clauses. Head (consequent) on left; body (antecedent) on right. Commas in body mean AND.</p>
+      <pre><code><span class="cm">% Specific rule (atoms only)</span>
+ancestor(mary, shelley) :- mother(mary, shelley).
+
+<span class="cm">% General rules (variables — universal scope)</span>
+parent(X, Y) :- mother(X, Y).
+parent(X, Y) :- father(X, Y).
+grandparent(X, Z) :- parent(X, Y), parent(Y, Z).
+
+<span class="cm">% Sibling rule</span>
+sibling(X, Y) :- mother(M, X), mother(M, Y),
+                 father(F, X), father(F, Y).</code></pre>
+
+      <h3>Goal Statements</h3>
+      <p>Queries — propositions Prolog must try to prove. The <code>?-</code> is the query prompt.</p>
+      <pre><code>?- man(fred).             <span class="cm">% simple fact check</span>
+?- parent(X, mike).       <span class="cm">% find all X such that X is Mike's parent</span>
+?- parent(X, mike), male(X).  <span class="cm">% conjunctive goal (two subgoals)</span></code></pre>
+
+      <!-- ─── INFERENCING ──────────────────────────── -->
+      <h2 id="inferencing">Prolog Inferencing Process</h2>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label disadvantage">Bottom-up (Forward Chaining)</div>
+          <ul>
+            <li>Start from facts, derive new facts, until goal is reached</li>
+            <li>Works well with large sets of relevant facts</li>
+            <li>Prolog does <em>NOT</em> use this</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label advantage">Top-down (Backward Chaining) ← Prolog</div>
+          <ul>
+            <li>Start from the goal, find rules that derive it, recurse into their conditions</li>
+            <li>Works well with small sets of relevant facts</li>
+            <li><strong>Prolog uses this approach</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Subgoal Search Strategy</h3>
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label disadvantage">Breadth-first</div>
+          <ul>
+            <li>Work on all subgoals in parallel</li>
+            <li>Uses more memory</li>
+            <li>Prolog does NOT use this</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label advantage">Depth-first ← Prolog</div>
+          <ul>
+            <li>Prove first subgoal completely, then second, etc.</li>
+            <li>Fewer computational resources</li>
+            <li><strong>Prolog uses this approach</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Unification &amp; Backtracking</h3>
+
+      <dl class="definition">
+        <dt>Unification</dt>
+        <dd>The process of finding values for variables in propositions that allow a matching process to succeed. A variable is <strong>instantiated</strong> to a tentative value. If matching fails, <strong>backtracking</strong> occurs and a different value is tried.</dd>
+      </dl>
+
+      <h2 id="theorem-proving">Theorem Proving</h2>
+      <p>
+        Resolution is not only a query mechanism; it is also a formal theorem-proving technique.
+      </p>
+
+      <div class="definition">
+        <dt>Refutation Complete</dt>
+        <dd>If a contradiction exists in the propositions under consideration, resolution can detect it. That is why it supports proof by contradiction.</dd>
+      </div>
+
+      <ol>
+        <li>Start with the known hypotheses.</li>
+        <li>Negate the theorem you want to prove.</li>
+        <li>Add that negated theorem to the hypotheses.</li>
+        <li>Use resolution to derive a contradiction.</li>
+      </ol>
+
+      <div class="callout key">
+        <div class="callout-label">Proof Pattern</div>
+        <p>
+          If assuming the theorem is false creates an inconsistency, the original theorem must be true.
+        </p>
+      </div>
+
+      <h3>Tracing Model</h3>
+      <p>Prolog has a built-in trace mechanism with 4 events:</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Event</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>Call</td><td>Beginning of an attempt to satisfy a goal</td></tr>
+            <tr><td>Exit</td><td>Goal has been successfully satisfied</td></tr>
+            <tr><td>Redo</td><td>Backtracking — revisiting a previous goal</td></tr>
+            <tr><td>Fail</td><td>Goal cannot be satisfied</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="collapsible open">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">EXAMPLE</span><span class="ch-title">Full Trace Walkthrough</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <pre><code>likes(jake, chocolate).
+likes(jake, apricots).
+likes(darcie, licorice).
+likes(darcie, apricots).
+
+?- likes(jake, X), likes(darcie, X).
+
+<span class="cm">% Execution trace:</span>
+(1) Call:  likes(jake, _0)?          <span class="cm">% try to satisfy first subgoal</span>
+(1) Exit:  likes(jake, chocolate)    <span class="cm">% X = chocolate</span>
+(2) Call:  likes(darcie, chocolate)? <span class="cm">% try second subgoal</span>
+(2) Fail:  likes(darcie, chocolate)  <span class="cm">% darcie doesn't like chocolate</span>
+    Redo:  likes(jake, _0)?          <span class="cm">% backtrack — try next value for X</span>
+(1) Exit:  likes(jake, apricots)     <span class="cm">% X = apricots</span>
+(3) Call:  likes(darcie, apricots)?
+(3) Exit:  likes(darcie, apricots)   <span class="cm">% success!</span>
+
+X = apricots</code></pre>
+          <div class="callout note">
+            <div class="callout-label">📝 Subgoal Order Matters</div>
+            <p>
+              Placing more restrictive subgoals first reduces unnecessary backtracking and improves efficiency.
+              The order of facts and rules in the file also affects which solution is found first.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── ARITHMETIC ──────────────────────────── -->
+      <h2 id="arithmetic">Simple Arithmetic</h2>
+
+      <p>
+        The <strong><code>is</code> operator</strong>: evaluates an arithmetic expression on the right side and unifies the result with the variable on the left.
+      </p>
+
+      <pre><code>A is B / 17 + C.   <span class="cm">% B and C must already be instantiated; A must not be</span></code></pre>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ is ≠ Assignment</div>
+        <p>
+          <code>is</code> is <strong>not</strong> assignment. You cannot write <code>Sum is Sum + Number.</code> because <code>Sum</code> is already instantiated on the left.
+          Prolog variables are bound once per resolution path, not reassignable.
+        </p>
+      </div>
+
+      <pre><code>speed(ford, 100).   speed(chevy, 105).
+time(ford, 20).     time(chevy, 21).
+
+distance(X, Y) :- speed(X, Speed),
+                  time(X, Time),
+                  Y is Speed * Time.
+
+?- distance(chevy, X).
+<span class="cm">% Speed = 105, Time = 21 → X = 2205</span></code></pre>
+
+      <!-- ─── LISTS ─────────────────────────────────── -->
+      <h2 id="lists">List Structures</h2>
+
+      <p>Lists are the second fundamental data structure in Prolog. A list is a sequence of any elements — atoms, structures, or other lists.</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Notation</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><code>[apple, prune, grape]</code></td><td>Simple list of atoms</td></tr>
+            <tr><td><code>[]</code></td><td>Empty list</td></tr>
+            <tr><td><code>[X]</code></td><td>List with one element X</td></tr>
+            <tr><td><code>[X | Y]</code></td><td>List with head X and tail Y (Y is a list)</td></tr>
+            <tr><td><code>[X1, X2 | Y]</code></td><td>First two elements X1 and X2, remainder is Y</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout note">
+        <div class="callout-label">📝 Writing List Predicates — Rules of Thumb</div>
+        <ul>
+          <li>No "returns" — the result is always a parameter</li>
+          <li>Base case and recursive case are <em>separate statements</em></li>
+          <li>Put the base case <em>first</em> — Prolog matches top to bottom</li>
+          <li>Use <code>_</code> (anonymous variable) when you don't care about a value</li>
+        </ul>
+      </div>
+
+      <div class="collapsible open">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">PREDICATE</span><span class="ch-title">member/2 — Test list membership</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p><strong>Strategy</strong>: X is a member if it's the head, OR if it's a member of the tail.</p>
+          <pre><code>member(Element, [Element | _]).         <span class="cm">% base: element IS the head</span>
+member(Element, [_ | Lis]) :-           <span class="cm">% recursive: check the tail</span>
+    member(Element, Lis).
+
+<span class="cm">% Usage</span>
+?- member(a, [b, a, c]).   <span class="cm">% true</span>
+?- member(X, [a, b, c]).   <span class="cm">% X = a ; X = b ; X = c</span></code></pre>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">PREDICATE</span><span class="ch-title">append/3 — Concatenate two lists</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p><strong>Strategy</strong>: Appending an empty list yields the second list unchanged. Otherwise, prepend the head of the first list to the result of appending the tail.</p>
+          <pre><code>append([], Lis, Lis).                             <span class="cm">% base case</span>
+append([Head | Lis_1], Lis_2, [Head | Lis_3]) :-  <span class="cm">% recursive case</span>
+    append(Lis_1, Lis_2, Lis_3).
+
+<span class="cm">% Works in multiple directions!</span>
+?- append([a, b], [c, d], X).           <span class="cm">% X = [a,b,c,d]</span>
+?- append([a, b], X, [a, b, c, d]).     <span class="cm">% X = [c,d]</span>
+?- append(X, [c, d], [a, b, c, d]).     <span class="cm">% X = [a,b]</span></code></pre>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">PREDICATE</span><span class="ch-title">reverse/2 — Reverse a list</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p><strong>Strategy</strong>: Reverse the tail, then append the head to the end of that reversed tail.</p>
+          <pre><code>reverse([], []).                             <span class="cm">% base case</span>
+reverse([Head | Tail], List) :-              <span class="cm">% recursive case</span>
+    reverse(Tail, Result),
+    append(Result, [Head], List).
+
+?- reverse([a, b, c], X).   <span class="cm">% X = [c,b,a]</span>
+?- reverse(X, [a, b, c]).   <span class="cm">% X = [c,b,a]</span></code></pre>
+        </div>
+      </div>
+
+      <!-- ─── DEFICIENCIES ─────────────────────────── -->
+      <h2 id="deficiencies">Deficiencies of Prolog</h2>
+
+      <div class="collapsible open">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">ISSUE 1</span><span class="ch-title">Resolution Order Control</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>
+            Prolog always matches facts/rules top-to-bottom and subgoals left-to-right.
+            The programmer can influence efficiency by ordering rules (more likely to succeed = higher) and subgoals (more restrictive = earlier).
+            But there's no explicit control flow — you can't say "try rule B before rule A."
+          </p>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">ISSUE 2</span><span class="ch-title">The Closed-World Assumption</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>
+            Prolog can only prove things using known facts and rules. If it answers <strong>false</strong>,
+            that means it <em>cannot prove it</em> — not that it is actually false.
+          </p>
+          <div class="callout warning">
+            <div class="callout-label">⚠ False ≠ Actually False</div>
+            <p>
+              A query returns "false" if the required facts are simply absent from the database —
+              even if the statement would be true in the real world. This is a fundamental epistemological limitation.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">ISSUE 3</span><span class="ch-title">The Negation Problem</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>Consider this sibling rule that produces wrong results:</p>
+          <pre><code>sibling(X, Y) :- parent(M, X), parent(M, Y).
+?- sibling(X, Y).
+X = jake, Y = jake.    <span class="cm">% jake is his own sibling?!</span></code></pre>
+          <p>Fix attempt using <code>not</code>:</p>
+          <pre><code>sibling(X, Y) :- parent(M, X), parent(M, Y), not(X=Y).</code></pre>
+          <div class="callout warning">
+            <div class="callout-label">⚠ not ≠ Logical Negation</div>
+            <p>
+              Prolog's <code>not</code> succeeds when its argument <em>fails to be proven</em>.
+              <code>not(X=Y)</code> means "there is no fact proving X equals Y" — it does NOT mean X and Y are truly unequal.
+              Establishing true inequality for all atom pairs would require an impractical number of facts.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">ISSUE 4</span><span class="ch-title">Intrinsic Limitations</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p>Some tasks can be specified in Prolog but are horribly inefficient. The sorting example:</p>
+          <pre><code>sort(Old, New) :- permute(Old, New), sorted(New).
+sorted([]).
+sorted([X]).
+sorted([X, Y | List]) :- X =&lt; Y, sorted([Y | List]).</code></pre>
+          <p>
+            This "sorts" by trying all permutations until one is sorted — effectively brute-force, O(n!) work.
+            A real sort algorithm requires procedural control that Prolog makes awkward to express.
+          </p>
+        </div>
+      </div>
+
+      <!-- ─── QUIZ ──────────────────────────────────── -->
+      <h2>Self-Check Quiz</h2>
+
+      <div class="quiz">
+        <div class="quiz-header">
+          <span>📝 Check your understanding</span>
+        </div>
+        <div class="quiz-body">
+          <p class="quiz-question">What search strategy does Prolog use for subgoals, and what approach does it use to find proofs (resolution direction)?</p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Breadth-first forward chaining works on all subgoals in parallel and builds up from facts — Prolog does neither.">
+              <span class="opt-key">A</span> Breadth-first search + forward chaining
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Breadth-first is not used because it requires too many resources. Prolog does use backward chaining, but with depth-first search.">
+              <span class="opt-key">B</span> Breadth-first search + backward chaining
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="Depth-first is correct! But forward chaining starts from facts — Prolog starts from the goal (backward chaining).">
+              <span class="opt-key">C</span> Depth-first search + forward chaining
+            </li>
+            <li class="quiz-option" data-correct="true"
+                data-feedback="✓ Correct! Prolog uses depth-first search (fully proves first subgoal before moving to second) combined with backward chaining (starts from the goal, works toward facts).">
+              <span class="opt-key">D</span> Depth-first search + backward chaining
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="quiz">
+        <div class="quiz-header">
+          <span>📝 Check your understanding</span>
+        </div>
+        <div class="quiz-body">
+          <p class="quiz-question">Given <code>member(Element, [Element | _]).</code> — what does the underscore <code>_</code> represent?</p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="false"
+                data-feedback="The underscore does not mean empty list. The empty list is written as [].">
+              <span class="opt-key">A</span> The empty list
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="The underscore is a variable placeholder, not a wildcard for multiple elements in the pattern.">
+              <span class="opt-key">B</span> Any number of elements (like * in regex)
+            </li>
+            <li class="quiz-option" data-correct="true"
+                data-feedback="✓ Correct! The anonymous variable _ means 'this will be unified with something, but I don't care what it is and won't use it.' Here, it matches the tail of the list.">
+              <span class="opt-key">C</span> An anonymous variable — matched but ignored
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="The underscore is not a comment. Comments in Prolog use %.">
+              <span class="opt-key">D</span> A comment indicating unused code
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="quiz">
+        <div class="quiz-header">
+          <span>📝 Check your understanding</span>
+        </div>
+        <div class="quiz-body">
+          <p class="quiz-question">Prolog's <code>not(X=Y)</code> in the sibling rule. Why doesn't this truly mean "X is not equal to Y"?</p>
+          <ul class="quiz-options">
+            <li class="quiz-option" data-correct="false"
+                data-feedback="not is a valid Prolog operator — it does work, just not in the way you'd want for true logical negation.">
+              <span class="opt-key">A</span> Prolog doesn't support negation at all
+            </li>
+            <li class="quiz-option" data-correct="true"
+                data-feedback="✓ Correct! Prolog's not succeeds when its argument fails to be proven. So not(X=Y) means 'Prolog cannot prove X and Y are the same atom' — not that they are actually different. Without explicit inequality facts, two distinct atoms can still 'seem' equal to Prolog.">
+              <span class="opt-key">B</span> <code>not</code> succeeds when its argument fails to be proven — not when it's actually false
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="The issue is not a syntax problem — it's a fundamental semantic issue with how not works in Prolog.">
+              <span class="opt-key">C</span> It's a syntax error in Edinburgh Prolog
+            </li>
+            <li class="quiz-option" data-correct="false"
+                data-feedback="It could be used with backtracking, but the semantic issue remains regardless of backtracking.">
+              <span class="opt-key">D</span> Backtracking doesn't work with not
+            </li>
+          </ul>
+          <div class="quiz-feedback"></div>
+          <button class="quiz-reset">↺ Reset</button>
+        </div>
+      </div>
+
+      <!-- ─── SUMMARY ──────────────────────────────── -->
+      <h2 id="applications">Applications of Logic Programming</h2>
+      <p>
+        Logic programming is especially strong in domains where stored relationships and inference matter more than low-level execution speed.
+      </p>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label advantage">Relational Databases</div>
+          <ul>
+            <li>Facts model stored data; rules model relationships between tables</li>
+            <li>Queries are naturally nonprocedural</li>
+            <li>Deductive capabilities go beyond ordinary static storage</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label disadvantage">Trade-off</div>
+          <ul>
+            <li>Inferencing is slower than direct optimized table lookup</li>
+            <li>Expressiveness comes with performance cost</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="compare-grid">
+        <div class="compare-card">
+          <div class="cc-label advantage">Expert Systems</div>
+          <ul>
+            <li>Rules + facts fit the knowledge-base model directly</li>
+            <li>Trace support can explain conclusions</li>
+            <li>New facts and rules can simulate learning</li>
+          </ul>
+        </div>
+        <div class="compare-card">
+          <div class="cc-label advantage">Natural-Language Processing</div>
+          <ul>
+            <li>Grammar rules align well with logic rules</li>
+            <li>Backward chaining can assist parsing</li>
+            <li>Clausal forms help model sentence meaning</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="summary-box">
+        <h2>Chapter 16 Summary</h2>
+        <ul>
+          <li><strong>Logic programming is declarative</strong>: Specify what is true, not how to compute it. The inference engine handles the how.</li>
+          <li><strong>Horn clauses</strong>: Facts (headless) and rules (headed). Facts are unconditional truths; rules are conditional derivations. Prolog uses Horn clause syntax.</li>
+          <li><strong>Prolog basics</strong>: Atoms start lowercase; variables start uppercase. Three statement types: facts, rules, goals.</li>
+          <li><strong>Resolution</strong>: Backward chaining (goal → facts) + depth-first search + backtracking when subgoals fail.</li>
+          <li><strong>Theorem proving</strong>: Negate the target theorem, add it to the hypotheses, and derive a contradiction through resolution.</li>
+          <li><strong>Unification</strong>: Matching variables to values. Instantiation is temporary — backtracking un-does it.</li>
+          <li><strong>List processing</strong>: Uses <code>[Head | Tail]</code> pattern. member, append, reverse follow a base-case + recursive-case structure.</li>
+          <li><strong>Key deficiencies</strong>: Closed-world assumption (false ≠ actually false), negation as failure (not logical NOT), and brute-force inefficiency for some tasks.</li>
+          <li><strong>Best-fit applications</strong>: deductive databases, expert systems, and natural-language processing.</li>
+        </ul>
+      </div>
+
+    </article>
+  </main>
+</div>
+<script src="study-notes.js"></script>
+</body>
+</html>

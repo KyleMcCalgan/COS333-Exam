@@ -1,0 +1,378 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chapter 2 — Evolution of Programming Languages</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+
+  <button class="menu-toggle" aria-label="Open menu">☰</button>
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="course-label">COS 333 · Concepts of PL</span>
+      <h1>Programming Language Concepts</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Overview</span>
+      <a href="index.html"><span class="nav-chapter">00</span> Home &amp; Topics</a>
+
+      <span class="nav-section-label">Chapters</span>
+      <a href="chapter1.html"><span class="nav-chapter">01</span> Preliminaries</a>
+      <a href="chapter2.html" class="active"><span class="nav-chapter">02</span> Evolution of PLs</a>
+      <a href="chapter5.html"><span class="nav-chapter">05</span> Names, Bindings &amp; Scopes</a>
+      <a href="chapter6.html"><span class="nav-chapter">06</span> Data Types</a>
+      <a href="chapter7.html"><span class="nav-chapter">07</span> Expressions &amp; Assignments</a>
+      <a href="chapter8.html"><span class="nav-chapter">08</span> Control Structures</a>
+      <a href="chapter9.html"><span class="nav-chapter">09</span> Subprograms</a>
+      <a href="chapter12.html"><span class="nav-chapter">12</span> OOP Support</a>
+      <a href="chapter15.html"><span class="nav-chapter">15</span> Functional Programming</a>
+      <a href="chapter16.html"><span class="nav-chapter">16</span> Logic Programming</a>
+
+      <span class="nav-section-label">Practical</span>
+      <a href="prolog-practical.html"><span class="nav-chapter">P3</span> Prolog in Practice</a>
+      <a href="prolog-list-patterns.html"><span class="nav-chapter">P4</span> List Patterns</a>
+      <a href="scheme-practical.html"><span class="nav-chapter">P5</span> Scheme in Practice</a>
+
+      <span class="nav-section-label">Assessment</span>
+      <a href="past-papers.html"><span class="nav-chapter">PP</span> Past Papers</a>
+      <a href="mcq.html"><span class="nav-chapter">MC</span> MCQ Bank</a>
+    </nav>
+
+    <div class="sidebar-toc">
+      <span class="sidebar-toc-title">On this page</span>
+      <a href="#what-to-know">What to Know</a>
+      <a href="#plankalkul">Plankalkül</a>
+      <a href="#fortran">FORTRAN</a>
+      <a href="#lisp">LISP</a>
+      <a href="#cobol">COBOL</a>
+      <a href="#algol">ALGOL 60</a>
+      <a href="#pl1">PL/I</a>
+      <a href="#simula">SIMULA 67</a>
+      <a href="#algol68">ALGOL 68</a>
+      <a href="#pascal">Pascal</a>
+      <a href="#c">C</a>
+      <a href="#prolog">Prolog</a>
+      <a href="#ada">Ada</a>
+      <a href="#smalltalk">Smalltalk</a>
+      <a href="#cpp">C++</a>
+      <a href="#java">Java</a>
+      <a href="#modern">Modern Languages</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle">
+        <span class="toggle-icon">☾</span>
+        <span class="toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="reading-progress"><div class="reading-progress-bar"></div></div>
+
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span>›</span> Chapter 2
+    </div>
+
+    <header class="page-header">
+      <span class="chapter-tag">Chapter 2</span>
+      <h1>Evolution of Programming Languages</h1>
+      <p class="subtitle">
+        The history of programming languages is not arbitrary — each language was shaped by the problems of its time,
+        the hardware available, and the software engineering practices in vogue.
+      </p>
+      <div class="topic-pills">
+        <span class="pill">FORTRAN</span>
+        <span class="pill">LISP</span>
+        <span class="pill">COBOL</span>
+        <span class="pill">ALGOL</span>
+        <span class="pill">Pascal</span>
+        <span class="pill">C</span>
+        <span class="pill">Ada</span>
+        <span class="pill">Smalltalk</span>
+        <span class="pill">C++</span>
+        <span class="pill">Java</span>
+      </div>
+    </header>
+
+    <article class="article">
+
+      <h2 id="what-to-know">What You Need to Know for Each Language</h2>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠ Exam Framework</div>
+        <p>For each language in this chapter, you must be able to answer three questions:</p>
+        <ol>
+          <li><strong>What was the environment?</strong> (intended users, application area, software engineering approach of the time, computer characteristics)</li>
+          <li><strong>How did the environment shape the language?</strong></li>
+          <li><strong>What is the language's main contribution?</strong></li>
+        </ol>
+        <p>You do NOT need to know specific version numbers, exact dates, developers' names, or model numbers of computers.</p>
+      </div>
+
+      <h2 id="plankalkul">Plankalkül (Zuse, ~1945)</h2>
+      <div class="definition">
+        <dt>Environment</dt>
+        <dd>Designed in isolation during WWII Germany, with no working computer to run it on. Intended for engineering calculations.</dd>
+      </div>
+      <div class="definition">
+        <dt>Contribution</dt>
+        <dd>The first high-level programming language ever designed, though it was never implemented at the time. Included assignment, loops, subroutines, and even something like floating-point numbers and arrays — remarkable given it predated all other HLLs. Largely unknown to the Western computing community until rediscovered decades later.</dd>
+      </div>
+
+      <h2 id="fortran">FORTRAN (FORmula TRANslation, 1957)</h2>
+      <div class="definition">
+        <dt>Environment</dt>
+        <dd>Scientific computing on large mainframes. Users were scientists and engineers who valued numerical computation. Computers were expensive and slow; efficiency was paramount. The dominant concern was: could a compiled high-level language produce code as efficient as hand-written assembly? No high-level language had been proven practical before FORTRAN.</dd>
+      </div>
+      <div class="definition">
+        <dt>Effect of environment on language</dt>
+        <dd>Designed for efficiency above all else. Arrays and floating-point operations were built-in primitives. The language had few safety features (no type checking, no bounds checking) because any overhead was unacceptable to its users.</dd>
+      </div>
+      <div class="definition">
+        <dt>Main contribution</dt>
+        <dd>The <strong>first successfully implemented, widely used high-level language</strong>. Proved that compiled code could be efficient enough for scientific work. Established that programming languages could be practical — a foundational moment in computing. Introduced the concept of a compiler as a practical tool.</dd>
+      </div>
+
+      <h2 id="lisp">LISP (LISt Processing, 1959)</h2>
+      <div class="definition">
+        <dt>Environment</dt>
+        <dd>Artificial intelligence research at MIT. AI required manipulating symbolic expressions, not just numbers. Researchers needed flexibility to represent and process knowledge structures dynamically.</dd>
+      </div>
+      <div class="definition">
+        <dt>Effect of environment on language</dt>
+        <dd>Designed around <em>linked lists</em> as the primary data structure, since AI problems involve symbolic structures of variable and unpredictable shape. Dynamic memory allocation (garbage collection) was essential because the size of data structures could not be predicted at compile time. Programs are data — code and data have the same form (S-expressions).</dd>
+      </div>
+      <div class="definition">
+        <dt>Main contribution</dt>
+        <dd><strong>First functional programming language.</strong> Introduced garbage collection, dynamic typing, recursive functions as a natural programming style, and treating code as data. These ideas are foundational to functional and dynamic languages today (Scheme, Clojure, Python's lambda, JavaScript's first-class functions).</dd>
+      </div>
+
+      <h2 id="cobol">COBOL (COmmon Business-Oriented Language, 1960)</h2>
+      <div class="definition">
+        <dt>Environment</dt>
+        <dd>Business data processing (payroll, inventory, accounting). Intended users included non-programmer managers who needed to read and verify program logic. Required decimal arithmetic (not binary floating point), file processing, and report generation. The US Department of Defense wanted a common language that businesses could use across different computer vendors.</dd>
+      </div>
+      <div class="definition">
+        <dt>Effect of environment on language</dt>
+        <dd>Designed for <em>readability by non-programmers</em>: verbose English-like syntax (e.g., <code>MULTIPLY PRICE BY QUANTITY GIVING TOTAL</code>). Required separate DATA DIVISION to declare all data structures. Hierarchy records for nested data (predecessor of structs/records). Strong support for file I/O and formatted reports.</dd>
+      </div>
+      <div class="definition">
+        <dt>Main contribution</dt>
+        <dd>First language designed with <strong>readability as the primary criterion</strong>, not efficiency. Introduced the concept of hierarchical records (nested structured data). Demonstrated that languages could be designed for non-specialist users. Still processes a large fraction of the world's financial transactions today.</dd>
+      </div>
+
+      <h2 id="algol">ALGOL 60 (ALGOrithmic Language, 1960)</h2>
+      <div class="definition">
+        <dt>Environment</dt>
+        <dd>Designed by an international committee of computer scientists to be a universal language for publishing algorithms and for scientific computation. Intended to improve on FORTRAN by being cleaner and more mathematically sound.</dd>
+      </div>
+      <div class="definition">
+        <dt>Effect of environment on language</dt>
+        <dd>Academic and committee-designed, so it prioritised elegance and conceptual clarity. Block structure emerged naturally as a way to scope variables. Recursive procedures were supported because the language was designed for describing algorithms, and recursion is a natural algorithmic tool.</dd>
+      </div>
+      <div class="definition">
+        <dt>Main contribution</dt>
+        <dd>Introduced <strong>block structure</strong> (nested scopes), <strong>recursive subprograms</strong>, and the concept of <strong>formal syntax description</strong> (Backus-Naur Form, BNF). Hugely influential on almost all subsequent imperative languages (Pascal, C, Java are all "ALGOL-like"). Introduced pass-by-name parameter passing. Never widely used in practice (no I/O, poor compiler support) but enormously influential on language design.</dd>
+      </div>
+
+      <h2 id="pl1">PL/I (1965)</h2>
+      <div class="definition">
+        <dt>Environment</dt>
+        <dd>IBM designed PL/I to replace both FORTRAN (scientific) and COBOL (business) with a single language. The intent was to eliminate the need for separate scientific and business languages.</dd>
+      </div>
+      <div class="definition">
+        <dt>Effect of environment on language</dt>
+        <dd>Tried to include everything from both worlds — the result was an enormous, complex language with many overlapping features. Almost every design decision from both predecessors was included.</dd>
+      </div>
+      <div class="definition">
+        <dt>Main contribution</dt>
+        <dd>First language to include <strong>exception handling</strong> (though crude). First to allow <strong>concurrency</strong> primitives. Demonstrated the danger of trying to do everything: a large, complex language that is difficult to learn, compile, and use correctly. A cautionary tale in language design (too little orthogonality, too much complexity).</dd>
+      </div>
+
+      <h2 id="simula">SIMULA 67</h2>
+      <div class="definition">
+        <dt>Environment</dt>
+        <dd>Developed in Norway for simulation of discrete-event systems (e.g., queuing systems, networks). Programmers needed to model real-world entities with their own state and behaviour running concurrently.</dd>
+      </div>
+      <div class="definition">
+        <dt>Effect of environment on language</dt>
+        <dd>Naturally led to the concept of objects: each simulated entity had its own data (state) and procedures (behaviour). Co-routines were included for concurrent simulation. Classes were introduced as a way to describe the type of a simulated entity.</dd>
+      </div>
+      <div class="definition">
+        <dt>Main contribution</dt>
+        <dd>Invented the concept of <strong>classes</strong> and <strong>objects</strong> — the foundation of object-oriented programming. Introduced <strong>inheritance</strong> (subclasses). Every OOP language (Smalltalk, C++, Java, Python) traces its heritage to SIMULA 67. This is one of the most influential language innovations in history.</dd>
+      </div>
+
+      <h2 id="algol68">ALGOL 68</h2>
+      <div class="definition">
+        <dt>Environment</dt>
+        <dd>Successor to ALGOL 60, designed by committee to be a complete, rigorous, and orthogonal language.</dd>
+      </div>
+      <div class="definition">
+        <dt>Contribution</dt>
+        <dd>Extreme orthogonality: any construct could appear in any context. This consistency made the language conceptually elegant but very hard to learn and implement. Contributed the idea of <em>user-defined data types</em> and influenced Pascal and C. Largely unused in practice but highly influential on type theory.</dd>
+      </div>
+
+      <h2 id="pascal">Pascal (1971)</h2>
+      <div class="definition">
+        <dt>Environment</dt>
+        <dd>Designed for <strong>teaching structured programming</strong>. The goal was a small, clean language that could be easily learned and would encourage good programming habits (no goto, structured control flow). Computers were still relatively expensive; Pascal had to be implementable on small machines.</dd>
+      </div>
+      <div class="definition">
+        <dt>Effect of environment on language</dt>
+        <dd>Small and consistent; strongly typed; encouraged structured programming idioms. Strict type system prevented many common errors (e.g., no implicit conversions between numeric types). Limited I/O and file handling (designed for teaching, not production systems).</dd>
+      </div>
+      <div class="definition">
+        <dt>Main contribution</dt>
+        <dd>Enormously successful as a <strong>teaching language</strong>. Demonstrated that a small, clean, strongly-typed language was practical. Directly influenced Modula-2, Ada, and Delphi. Popularised structured programming among students and educators worldwide through the 1970s and 1980s.</dd>
+      </div>
+
+      <h2 id="c">C (1972)</h2>
+      <div class="definition">
+        <dt>Environment</dt>
+        <dd>Systems programming language designed to write the UNIX operating system. Users were expert programmers needing direct hardware access. Required portability (UNIX had to run on multiple machines), efficiency (close to assembly speed), and low-level memory control.</dd>
+      </div>
+      <div class="definition">
+        <dt>Effect of environment on language</dt>
+        <dd>Deliberately low-level: pointers, manual memory management, bitwise operations, direct memory access. Weak type checking (by design) to allow flexible casting and pointer manipulation. Compact and expressive for systems-level code. Portability was achieved through a thin hardware abstraction layer.</dd>
+      </div>
+      <div class="definition">
+        <dt>Main contribution</dt>
+        <dd>The dominant <strong>systems programming language</strong> — the language that UNIX and most operating system kernels, embedded systems, and interpreters are written in. Influenced almost every later language (C++, Java, C#, Python, JavaScript all borrowed syntax). Demonstrated that a high-level language can be efficient enough to replace assembly for systems work.</dd>
+      </div>
+
+      <h2 id="prolog">Prolog (1972)</h2>
+      <div class="definition">
+        <dt>Environment</dt>
+        <dd>AI research, especially natural language processing and theorem proving. Needed a language to express logical relationships and prove conclusions from facts, without specifying how the computation should proceed.</dd>
+      </div>
+      <div class="definition">
+        <dt>Contribution</dt>
+        <dd><strong>First logic programming language</strong>. Programs are facts and rules; the interpreter uses backward chaining with backtracking to answer queries. See Chapter 16 for full details.</dd>
+      </div>
+
+      <h2 id="ada">Ada (1983)</h2>
+      <div class="definition">
+        <dt>Environment</dt>
+        <dd>The US Department of Defense (DoD) needed a single language for all its embedded and real-time systems (weapons, aircraft, ships). Hundreds of different languages were in use, causing enormous maintenance costs. The software crisis of the 1970s had shown that large software systems were unreliable and expensive. The DoD needed a language that supported: large-scale software engineering, strong reliability, real-time systems, and concurrency.</dd>
+      </div>
+      <div class="definition">
+        <dt>Effect of environment on language</dt>
+        <dd>Very large and complex language with strong reliability features: strict strong typing, exception handling, built-in concurrency (tasks), packages for encapsulation, generics. Reliability was more important than writability or simplicity — the DoD was paying for reliability with maintenance cost of learned complexity.</dd>
+      </div>
+      <div class="definition">
+        <dt>Main contribution</dt>
+        <dd>Pioneered <strong>packages</strong> (encapsulation / data abstraction), <strong>generics</strong>, <strong>concurrent programming</strong> (tasking model), and strong exception handling in a compiled, strongly-typed language. Ada95 later added OOP. Widely used in aerospace, defense, and safety-critical systems to this day.</dd>
+      </div>
+
+      <h2 id="smalltalk">Smalltalk (1972–1980)</h2>
+      <div class="definition">
+        <dt>Environment</dt>
+        <dd>Research at Xerox PARC aimed at creating an educational computing environment. The goal was to make computing accessible to children and non-experts through a graphical, interactive system. Influenced by SIMULA's objects and LISP's dynamic nature.</dd>
+      </div>
+      <div class="definition">
+        <dt>Effect of environment on language</dt>
+        <dd>Everything is an object — including integers, classes, and even methods. Computation happens entirely through <em>message passing</em>. Dynamic typing allows flexibility. The system is self-describing and supports dynamic modification.</dd>
+      </div>
+      <div class="definition">
+        <dt>Main contribution</dt>
+        <dd>The first <strong>purely object-oriented language</strong>. Introduced the graphical user interface (GUI) paradigm. Defined the vocabulary of OOP: objects, messages, classes, inheritance, encapsulation, polymorphism. Directly influenced every OOP language that followed, including Java, Python, Ruby, and Objective-C.</dd>
+      </div>
+
+      <h2 id="cpp">C++ (1985)</h2>
+      <div class="definition">
+        <dt>Environment</dt>
+        <dd>Systems and applications programming. C programmers needed OOP features but could not afford to leave C's efficiency and existing codebases behind. There was enormous pressure to add OOP to C without breaking existing C code.</dd>
+      </div>
+      <div class="definition">
+        <dt>Effect of environment on language</dt>
+        <dd>Designed as a superset of C: all valid C programs are valid C++ programs (approximately). OOP features (classes, inheritance, virtual functions) were added on top of C's procedural foundation. No garbage collection — manual memory management preserved C's performance characteristics. Templates added for generic programming.</dd>
+      </div>
+      <div class="definition">
+        <dt>Main contribution</dt>
+        <dd>Brought OOP to the mainstream of systems and applications programming. Demonstrated that OOP and efficiency are compatible. Introduced <strong>templates</strong> (a powerful form of generic programming) and destructors for RAII. Its enormous success (and complexity) drove interest in cleaner OOP alternatives (Java, C#).</dd>
+      </div>
+
+      <h2 id="java">Java (1995)</h2>
+      <div class="definition">
+        <dt>Environment</dt>
+        <dd>The internet era. Software needed to run on any platform without recompilation (write once, run anywhere). Security was a major concern since code could be downloaded from the internet and executed. The complexity and unsafety of C++ (memory management, pointer arithmetic) were seen as liabilities for large-scale software development.</dd>
+      </div>
+      <div class="definition">
+        <dt>Effect of environment on language</dt>
+        <dd>Compiled to bytecode (JVM), not native code, so the same binary runs on any platform with a JVM. Garbage collection removed manual memory management. No pointer arithmetic for safety. Strong static type system. Built-in support for threading. Applets allowed code to run inside web browsers.</dd>
+      </div>
+      <div class="definition">
+        <dt>Main contribution</dt>
+        <dd><strong>Platform independence</strong> through the JVM. Popularised garbage-collected OOP for mainstream development. Brought strong type safety and exception handling to a widely-used language. Enormously influential on C# and subsequent JVM languages. Made OOP the dominant paradigm in enterprise software development.</dd>
+      </div>
+
+      <h2 id="modern">Perl, JavaScript, Python, Ruby</h2>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">Scripting</span><span class="ch-title">Perl (1987)</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p><strong>Environment:</strong> Text processing and system administration on Unix. Needed string manipulation, file handling, and regular expressions in a more convenient form than shell scripting.</p>
+          <p><strong>Contribution:</strong> Powerful text processing with built-in regular expressions. Pragmatic "there's more than one way to do it" philosophy. Influenced PHP and modern scripting languages. Proved that scripting languages could be powerful general-purpose tools.</p>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">Web</span><span class="ch-title">JavaScript (1995)</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p><strong>Environment:</strong> Web browsers needed a scripting language for client-side interactivity. Designed in ten days under time pressure to ship with Netscape Navigator.</p>
+          <p><strong>Contribution:</strong> The language of the web browser — every major website depends on it. Dynamic typing, prototype-based OOP, first-class functions and closures. Despite its rushed origins, became one of the most widely used languages. Node.js extended it to server-side programming.</p>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <button class="collapsible-header">
+          <span><span class="ch-badge">General</span><span class="ch-title">Python (1991)</span></span>
+          <span class="collapsible-arrow">▾</span>
+        </button>
+        <div class="collapsible-body">
+          <p><strong>Environment:</strong> Designed to be readable, clean, and easy to learn. Intended as a teaching language and rapid-development tool. Emphasis on code readability as a primary value.</p>
+          <p><strong>Contribution:</strong> Made readability a core design principle (significant indentation). Multi-paradigm (OOP + functional). Became the dominant language for data science, machine learning, scripting, and introductory programming education.</p>
+        </div>
+      </div>
+
+      <div class="summary-box">
+        <h2>Chapter 2 Summary — Key Contributions at a Glance</h2>
+        <ul>
+          <li><strong>Plankalkül</strong>: First HLL ever designed (never implemented until later).</li>
+          <li><strong>FORTRAN</strong>: First successful compiled HLL; proved compilers can produce efficient code.</li>
+          <li><strong>LISP</strong>: First functional language; garbage collection; code-as-data.</li>
+          <li><strong>COBOL</strong>: First language prioritising readability; hierarchical records; business data.</li>
+          <li><strong>ALGOL 60</strong>: Block structure; recursion; BNF syntax description; ancestor of C/Java.</li>
+          <li><strong>PL/I</strong>: First exception handling; cautionary tale of over-complexity.</li>
+          <li><strong>SIMULA 67</strong>: Invented classes, objects, and inheritance — OOP origins.</li>
+          <li><strong>Pascal</strong>: Teaching language; small, clean, strongly typed; structured programming.</li>
+          <li><strong>C</strong>: Systems programming; efficiency + portability; ancestor of most modern syntax.</li>
+          <li><strong>Prolog</strong>: First logic programming language; backward chaining; AI focus.</li>
+          <li><strong>Ada</strong>: Packages, generics, concurrency, exception handling; DoD reliability focus.</li>
+          <li><strong>Smalltalk</strong>: Pure OOP; message passing; GUI pioneer; defined OOP vocabulary.</li>
+          <li><strong>C++</strong>: OOP + C compatibility; templates; demonstrated OOP and efficiency coexist.</li>
+          <li><strong>Java</strong>: Platform independence (JVM); garbage collection; safe OOP for the internet era.</li>
+        </ul>
+      </div>
+
+    </article>
+  </main>
+</div>
+<script src="study-notes.js"></script>
+</body>
+</html>

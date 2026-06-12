@@ -1,0 +1,234 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prolog List Patterns</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+  <style>
+    /* h1 from the markdown file — global CSS doesn't style bare h1 */
+    #md-content h1 {
+      font-family: var(--font-display);
+      font-size: var(--fs-4xl);
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+      margin-bottom: var(--sp-5);
+      padding-bottom: var(--sp-4);
+      border-bottom: 2px solid var(--accent);
+    }
+    /* Spacing above first h2 after the title */
+    #md-content h2:first-of-type { margin-top: var(--sp-8); }
+
+    .md-loading { color: var(--text-muted); font-style: italic; }
+    .md-error   { color: #e87870; }
+
+    /* Let highlight.js own the token colours; keep our pre background */
+    #md-content pre code.hljs {
+      background: transparent;
+      padding: 0;
+      font-size: var(--fs-sm);
+      line-height: 1.7;
+    }
+
+    /* ── Collapsible headings ───────────────────────────────── */
+
+    /* Foldable headings become flex rows so the arrow sits at the right edge */
+    #md-content h2.md-foldable,
+    #md-content h3.md-foldable {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      /* Extend the hit-target to the full content width */
+      margin-left: calc(var(--content-pad) * -0.25);
+      padding-left: calc(var(--content-pad) * 0.25);
+      border-radius: var(--radius);
+      transition: color var(--transition), background var(--transition);
+    }
+
+    #md-content h2.md-foldable:hover,
+    #md-content h3.md-foldable:hover {
+      color: var(--accent);
+      background: var(--bg-hover);
+    }
+
+    /* Touch devices: show a brief highlight on tap instead of hover */
+    #md-content h2.md-foldable:active,
+    #md-content h3.md-foldable:active {
+      background: var(--bg-hover);
+      color: var(--accent);
+    }
+
+    .md-fold-arrow {
+      flex-shrink: 0;
+      font-size: 0.75em;
+      margin-left: var(--sp-3);
+      /* Always fully visible — hover is unreliable on touch */
+      opacity: 0.6;
+      transition: transform 0.2s ease;
+    }
+
+    .md-fold-arrow.collapsed { transform: rotate(-90deg); }
+
+    .md-section {
+      overflow: hidden;
+      transition: height 0.25s ease;
+    }
+
+    /* Bump top padding so content clears the hamburger on mobile */
+    @media (max-width: 900px) {
+      .article { padding-top: calc(var(--sp-12) + var(--sp-8)); }
+    }
+  </style>
+</head>
+<body>
+<div class="reading-progress">
+  <div class="reading-progress-bar"></div>
+</div>
+<div class="layout">
+
+  <!-- Mobile controls -->
+  <button class="menu-toggle" aria-label="Open menu">☰</button>
+  <div class="sidebar-overlay"></div>
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="course-label">COS 333 · Concepts of PL</span>
+      <h1>Programming Language Concepts</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Overview</span>
+      <a href="index.html"><span class="nav-chapter">00</span> Home &amp; Topics</a>
+
+      <span class="nav-section-label">Chapters</span>
+      <a href="chapter1.html"><span class="nav-chapter">01</span> Preliminaries</a>
+      <a href="chapter2.html"><span class="nav-chapter">02</span> Evolution of PLs</a>
+      <a href="chapter5.html"><span class="nav-chapter">05</span> Names, Bindings &amp; Scopes</a>
+      <a href="chapter6.html"><span class="nav-chapter">06</span> Data Types</a>
+      <a href="chapter7.html"><span class="nav-chapter">07</span> Expressions &amp; Assignments</a>
+      <a href="chapter8.html"><span class="nav-chapter">08</span> Control Structures</a>
+      <a href="chapter9.html"><span class="nav-chapter">09</span> Subprograms</a>
+      <a href="chapter12.html"><span class="nav-chapter">12</span> OOP Support</a>
+      <a href="chapter15.html"><span class="nav-chapter">15</span> Functional Programming</a>
+      <a href="chapter16.html"><span class="nav-chapter">16</span> Logic Programming</a>
+
+      <span class="nav-section-label">Practical</span>
+      <a href="prolog-practical.html">
+        <span class="nav-chapter">P3</span> Prolog in Practice
+      </a>
+      <a href="prolog-list-patterns.html" class="active">
+        <span class="nav-chapter">P4</span> List Patterns
+      </a>
+      <a href="scheme-practical.html"><span class="nav-chapter">P5</span> Scheme in Practice</a>
+
+      <span class="nav-section-label">Assessment</span>
+      <a href="past-papers.html"><span class="nav-chapter">PP</span> Past Papers</a>
+      <a href="mcq.html"><span class="nav-chapter">MC</span> MCQ Bank</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle">
+        <span class="toggle-icon">☾</span>
+        <span class="toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <main class="main">
+    <article class="article">
+      <div id="md-content">
+        <p class="md-loading">Loading…</p>
+      </div>
+    </article>
+  </main>
+
+</div>
+
+<script src="study-notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  fetch('prolog_list_patterns%20(1).md')
+    .then(r => {
+      if (!r.ok) throw new Error(r.status);
+      return r.text();
+    })
+    .then(md => {
+      document.getElementById('md-content').innerHTML = marked.parse(md);
+      hljs.highlightAll();
+      makeFoldable();
+    })
+    .catch(err => {
+      document.getElementById('md-content').innerHTML =
+        '<p class="md-error">Could not load markdown file (' + err.message + '). ' +
+        'Serve this folder via a local server (e.g. VS Code Live Server) — ' +
+        'fetch() is blocked on the file:// protocol.</p>';
+    });
+
+  function makeFoldable() {
+    const container = document.getElementById('md-content');
+    const headings  = [...container.querySelectorAll('h2, h3')];
+
+    headings.forEach(heading => {
+      const level = parseInt(heading.tagName[1]);
+
+      // Collect every sibling after this heading until the next
+      // heading of same or higher level (lower number = higher level)
+      const body = [];
+      let el = heading.nextElementSibling;
+      while (el) {
+        const elLevel = el.matches('h1,h2,h3,h4,h5,h6')
+          ? parseInt(el.tagName[1]) : Infinity;
+        if (elLevel <= level) break;
+        body.push(el);
+        el = el.nextElementSibling;
+      }
+
+      if (!body.length) return;
+
+      // Wrap collected siblings in a section div
+      const section = document.createElement('div');
+      section.className = 'md-section';
+      heading.after(section);
+      body.forEach(n => section.appendChild(n));
+
+      // Measure natural height once so CSS transition works
+      section.style.height = section.scrollHeight + 'px';
+
+      // Mark heading as foldable (triggers flex layout + hover styles)
+      heading.classList.add('md-foldable');
+
+      // Add the fold arrow (flex pushes it to the right edge)
+      const arrow = document.createElement('span');
+      arrow.className = 'md-fold-arrow';
+      arrow.setAttribute('aria-hidden', 'true');
+      arrow.textContent = '▾';
+      heading.appendChild(arrow);
+
+      heading.addEventListener('click', () => {
+        const isOpen = section.style.height !== '0px';
+        if (isOpen) {
+          // Collapse: lock height first so transition fires from a px value
+          section.style.height = section.scrollHeight + 'px';
+          requestAnimationFrame(() => { section.style.height = '0px'; });
+          arrow.classList.add('collapsed');
+        } else {
+          section.style.height = section.scrollHeight + 'px';
+          arrow.classList.remove('collapsed');
+          // Remove fixed height after transition so content can reflow freely
+          section.addEventListener('transitionend', () => {
+            if (section.style.height !== '0px') section.style.height = '';
+          }, { once: true });
+        }
+      });
+    });
+  }
+</script>
+</body>
+</html>
