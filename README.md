@@ -18,3 +18,5 @@ Interactive study notes for the COS 333 exam at the University of Pretoria.
 ## Stack
 
 Plain HTML, CSS, and vanilla JavaScript — no build step, no dependencies. Open any `.html` file directly in a browser or deploy as a static site.
+
+> Last updated: June 2026
