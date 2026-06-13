@@ -90,14 +90,29 @@ function initMobileSidebar() {
   const overlay = document.querySelector('.sidebar-overlay');
   if (!toggle || !sidebar) return;
 
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay && overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay && overlay.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
   toggle.addEventListener('click', () => {
-    sidebar.classList.toggle('open');
-    overlay && overlay.classList.toggle('show');
+    sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
   });
 
-  overlay && overlay.addEventListener('click', () => {
-    sidebar.classList.remove('open');
-    overlay.classList.remove('show');
+  overlay && overlay.addEventListener('click', closeSidebar);
+
+  // Close on nav link tap so body scroll is restored
+  sidebar.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      if (window.innerWidth <= 900) closeSidebar();
+    });
   });
 }
 
