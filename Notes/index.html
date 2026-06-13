@@ -46,6 +46,10 @@
       <span class="nav-section-label">Assessment</span>
       <a href="past-papers.html"><span class="nav-chapter">PP</span> Past Papers</a>
       <a href="mcq.html"><span class="nav-chapter">MC</span> MCQ Bank</a>
+
+      <span class="nav-section-label">Quick Reference</span>
+      <a href="index.html#scope"><span class="nav-chapter">SC</span> Exam Scope</a>
+      <a href="index.html#prediction"><span class="nav-chapter">EP</span> Exam Prediction</a>
     </nav>
 
     <div class="sidebar-footer">
@@ -257,6 +261,411 @@
           <li><strong>Ch 15</strong>: Write Scheme list processing functions in DrRacket.</li>
           <li><strong>Ch 16</strong>: Write Prolog list processing predicates in SWI-Prolog.</li>
         </ul>
+      </div>
+
+
+      <!-- ══════════════════════════════════════════════════════
+           EXAM SCOPE
+      ══════════════════════════════════════════════════════ -->
+      <h2 id="scope">Examination Scope</h2>
+      <p>The official scope as communicated in lectures. Expand each chapter to see exactly what is and is not examinable.</p>
+
+      <div class="callout note" style="margin-bottom: var(--sp-5);">
+        <div class="callout-label">Key Reminder</div>
+        <p>There will be <strong>one Scheme implementation question</strong> and <strong>one Prolog implementation question</strong>, both involving list processing. Study from <strong>both</strong> the textbook and the slides — each covers material the other does not. Use correct terminology: marks are lost for imprecise naming of PL features.</p>
+      </div>
+
+      <!-- Chapter accordions -->
+      <div style="display:flex; flex-direction:column; gap: var(--sp-3); margin: var(--sp-5) 0;">
+
+        <!-- Ch1 -->
+        <details style="border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--bg-hover);">
+          <summary style="padding:var(--sp-4) var(--sp-5); cursor:pointer; font-family:var(--font-display); font-weight:700; font-size:var(--fs-lg); list-style:none; display:flex; justify-content:space-between; align-items:center;">
+            <span><span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.12em; margin-right:var(--sp-3);">Chapter 1</span> Preliminaries</span>
+            <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">▶</span>
+          </summary>
+          <div style="padding: 0 var(--sp-5) var(--sp-5);">
+            <p>The <strong>whole chapter</strong> is important, with three exceptions:</p>
+            <ul>
+              <li>Leave out the discussion related to <strong>Figure 1.2</strong>.</li>
+              <li>Leave out <strong>Section 1.7.4</strong> and <strong>Section 1.8</strong>.</li>
+              <li>In Section 1.7 you do <strong>not</strong> need to know the detailed steps of the compilation and hybrid implementation processes.</li>
+            </ul>
+            <p><strong>Scenario questions:</strong> For reasons-for-studying-PLs questions, a scenario is given (e.g. junior programmer, manager, lecturer). Your answer <em>must relate to that specific scenario</em> — you cannot simply list any reason.</p>
+            <p><strong>Evaluation criteria:</strong> Be able to apply readability, writability, reliability, and cost to features in both real-world and <em>hypothetical</em> programming languages.</p>
+            <p><strong>Orthogonality</strong> will <em>definitely</em> be tested.</p>
+          </div>
+        </details>
+
+        <!-- Ch2 -->
+        <details style="border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--bg-hover);">
+          <summary style="padding:var(--sp-4) var(--sp-5); cursor:pointer; font-family:var(--font-display); font-weight:700; font-size:var(--fs-lg); list-style:none; display:flex; justify-content:space-between; align-items:center;">
+            <span><span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.12em; margin-right:var(--sp-3);">Chapter 2</span> Evolution of PLs</span>
+            <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">▶</span>
+          </summary>
+          <div style="padding: 0 var(--sp-5) var(--sp-5);">
+            <p><strong>Leave out:</strong> Sections 2.1, 2.2, 2.6.2, and 2.9.2. For Section 2.20 only focus on what is in the slides. Don't focus on finer details for the remaining sections.</p>
+            <p>For each language you need to know exactly <strong>three things</strong>:</p>
+            <ol>
+              <li>The <strong>environment</strong> for its development (intended users, intended application area, SE approaches popular at the time, general hardware characteristics).</li>
+              <li>How that environment <strong>affected</strong> the language design.</li>
+              <li>The <strong>main contribution(s)</strong> of the language.</li>
+            </ol>
+            <p><strong>Do not need to know:</strong> specific features introduced in certain versions, dates, specific model names/numbers of computers, names of developers, or details about design committees.</p>
+          </div>
+        </details>
+
+        <!-- Ch5 -->
+        <details style="border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--bg-hover);">
+          <summary style="padding:var(--sp-4) var(--sp-5); cursor:pointer; font-family:var(--font-display); font-weight:700; font-size:var(--fs-lg); list-style:none; display:flex; justify-content:space-between; align-items:center;">
+            <span><span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.12em; margin-right:var(--sp-3);">Chapter 5</span> Names, Bindings &amp; Scopes</span>
+            <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">▶</span>
+          </summary>
+          <div style="padding: 0 var(--sp-5) var(--sp-5);">
+            <p>The <strong>whole chapter</strong> is examinable. No sections are excluded.</p>
+          </div>
+        </details>
+
+        <!-- Ch6 -->
+        <details style="border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--bg-hover);">
+          <summary style="padding:var(--sp-4) var(--sp-5); cursor:pointer; font-family:var(--font-display); font-weight:700; font-size:var(--fs-lg); list-style:none; display:flex; justify-content:space-between; align-items:center;">
+            <span><span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.12em; margin-right:var(--sp-3);">Chapter 6</span> Data Types</span>
+            <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">▶</span>
+          </summary>
+          <div style="padding: 0 var(--sp-5) var(--sp-5);">
+            <p><strong>Leave out</strong> (all deal with compiler construction implementation): 6.3.5, 6.5.9, 6.6.2, 6.7.4, 6.10.5, 6.11.7. Also leave out Sections 6.4, 6.5.4, 6.12, and 6.16.</p>
+            <p>For <strong>Section 6.15</strong> (type equivalence): only the details in the slides are examinable, though reading it gives more insight into name vs structure type equivalence.</p>
+            <p>Pay attention to <strong>discriminated unions</strong> — a graphical example is in the slides; the textbook discusses them using F#.</p>
+          </div>
+        </details>
+
+        <!-- Ch7 -->
+        <details style="border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--bg-hover);">
+          <summary style="padding:var(--sp-4) var(--sp-5); cursor:pointer; font-family:var(--font-display); font-weight:700; font-size:var(--fs-lg); list-style:none; display:flex; justify-content:space-between; align-items:center;">
+            <span><span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.12em; margin-right:var(--sp-3);">Chapter 7</span> Expressions &amp; Assignments</span>
+            <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">▶</span>
+          </summary>
+          <div style="padding: 0 var(--sp-5) var(--sp-5);">
+            <p>The <strong>whole chapter</strong> is examinable.</p>
+            <p>Pay special attention to <strong>side effects</strong> and <strong>referential transparency</strong> — these are discussed in the slides of Chapter 15 and will be tested here too.</p>
+          </div>
+        </details>
+
+        <!-- Ch8 -->
+        <details style="border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--bg-hover);">
+          <summary style="padding:var(--sp-4) var(--sp-5); cursor:pointer; font-family:var(--font-display); font-weight:700; font-size:var(--fs-lg); list-style:none; display:flex; justify-content:space-between; align-items:center;">
+            <span><span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.12em; margin-right:var(--sp-3);">Chapter 8</span> Control Structures</span>
+            <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">▶</span>
+          </summary>
+          <div style="padding: 0 var(--sp-5) var(--sp-5);">
+            <p><strong>Leave out:</strong> Section 8.2.2.3, 8.3.1.4, the last paragraph and example of 8.3.2.2 (pretest logical loops in functional PLs).</p>
+            <p>Make sure you understand <strong>Ruby blocks</strong> (Section 8.3.4).</p>
+            <p>Pay special attention to <strong>guarded commands</strong> (Section 8.5).</p>
+          </div>
+        </details>
+
+        <!-- Ch9 -->
+        <details style="border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--bg-hover);">
+          <summary style="padding:var(--sp-4) var(--sp-5); cursor:pointer; font-family:var(--font-display); font-weight:700; font-size:var(--fs-lg); list-style:none; display:flex; justify-content:space-between; align-items:center;">
+            <span><span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.12em; margin-right:var(--sp-3);">Chapter 9</span> Subprograms</span>
+            <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">▶</span>
+          </summary>
+          <div style="padding: 0 var(--sp-5) var(--sp-5);">
+            <p><strong>Terminology is critical</strong> — use exact terms. Referencing environments are important.</p>
+            <ul>
+              <li><strong>Section 9.5.3</strong>: not examinable.</li>
+              <li><strong>Sections 9.6 and 9.7</strong>: very important.</li>
+              <li><strong>Parameter passing methods</strong>: very important.</li>
+              <li><strong>Generics</strong> (9.10.1 C++, 9.10.2 Java, 9.10.3 C#): understand the differences. For C# also refer to the slides which go into more detail. Section 9.10.4 is <em>not</em> examinable.</li>
+              <li><strong>Closures</strong> (9.12): very important. You must be able to understand JS closure code and provide output for implementations similar to the MakeAdder example.</li>
+              <li><strong>Coroutines</strong> (9.13): you must be able to provide the output of pseudocode programs involving coroutines.</li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- Ch11 -->
+        <details style="border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--bg-hover);">
+          <summary style="padding:var(--sp-4) var(--sp-5); cursor:pointer; font-family:var(--font-display); font-weight:700; font-size:var(--fs-lg); list-style:none; display:flex; justify-content:space-between; align-items:center;">
+            <span><span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.12em; margin-right:var(--sp-3);">Chapter 11</span> ADTs <em>(reference only)</em></span>
+            <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">▶</span>
+          </summary>
+          <div style="padding: 0 var(--sp-5) var(--sp-5);">
+            <p>Not directly examinable. Reading it may help you understand Chapter 12 better. Refer to it if you don't understand terms used in Chapter 12. The most important terms are on slide 4 of Chapter 12 Part 1.</p>
+          </div>
+        </details>
+
+        <!-- Ch12 -->
+        <details style="border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--bg-hover);">
+          <summary style="padding:var(--sp-4) var(--sp-5); cursor:pointer; font-family:var(--font-display); font-weight:700; font-size:var(--fs-lg); list-style:none; display:flex; justify-content:space-between; align-items:center;">
+            <span><span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.12em; margin-right:var(--sp-3);">Chapter 12</span> OOP Support</span>
+            <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">▶</span>
+          </summary>
+          <div style="padding: 0 var(--sp-5) var(--sp-5);">
+            <p>This chapter is <strong>very important</strong>.</p>
+            <p><strong>Leave out:</strong> Sections 12.5 and 12.6.</p>
+            <p>Everything else is examinable.</p>
+          </div>
+        </details>
+
+        <!-- Ch15 -->
+        <details style="border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--bg-hover);">
+          <summary style="padding:var(--sp-4) var(--sp-5); cursor:pointer; font-family:var(--font-display); font-weight:700; font-size:var(--fs-lg); list-style:none; display:flex; justify-content:space-between; align-items:center;">
+            <span><span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.12em; margin-right:var(--sp-3);">Chapter 15</span> Functional Programming &amp; Scheme</span>
+            <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">▶</span>
+          </summary>
+          <div style="padding: 0 var(--sp-5) var(--sp-5);">
+            <p>This chapter is <strong>very important</strong>. Study all material up to and including <strong>Section 15.5.11</strong> (Scheme examples of list processing functions).</p>
+            <p><strong>Leave out:</strong> Common Lisp, ML, Haskell, F#, and support for functional programming in imperative languages. Also leave out Sections 15.2 and 15.4 (not directly examinable). Lambda expressions in Section 15.5.4 are also not examinable.</p>
+            <p>The slides contain material from Sections 7.2.2, 8.2.2.4, 6.9, and 5.5.2, which <em>is</em> examinable.</p>
+            <p>You must be able to <strong>analyse and write simple Scheme programs</strong> no more complex than the class examples (member, equalsimp, equal, append) and the practical. You will use the <strong>DrRacket interpreter</strong> under Windows — if you used a different interpreter, familiarise yourself with DrRacket before the exam.</p>
+            <p>There will be <strong>exactly one</strong> Scheme implementation question involving list processing.</p>
+          </div>
+        </details>
+
+        <!-- Ch16 -->
+        <details style="border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--bg-hover);">
+          <summary style="padding:var(--sp-4) var(--sp-5); cursor:pointer; font-family:var(--font-display); font-weight:700; font-size:var(--fs-lg); list-style:none; display:flex; justify-content:space-between; align-items:center;">
+            <span><span style="font-family:var(--font-mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.12em; margin-right:var(--sp-3);">Chapter 16</span> Logic Programming &amp; Prolog</span>
+            <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">▶</span>
+          </summary>
+          <div style="padding: 0 var(--sp-5) var(--sp-5);">
+            <p>This chapter is <strong>very important</strong>. <strong>All material</strong> in the chapter is examinable.</p>
+            <p>You must be able to analyse and write simple Prolog programs no more complex than the class examples (member, append, reverse) and the practicals.</p>
+            <p>You will use the <strong>SWI-Prolog interpreter</strong> under Windows. During the exam you will have access to the SWI-Prolog documentation and Practical 3 &amp; 4 specifications for <em>quick reference only</em> — you should not need to rely on them heavily.</p>
+            <p><strong>Language restrictions:</strong> Only use constants, variables, list manipulation, arithmetic, relational expressions, <code>is</code>, cuts, and the built-in <code>not</code> proposition. Do <strong>not</strong> use if-then, if-then-else, the semicolon/pipe (<code>;</code>/<code>|</code>) outside of lists, or complex system predicates (including built-in <code>member</code>, <code>append</code>, <code>reverse</code>).</p>
+            <p>There will be <strong>exactly one</strong> Prolog implementation question involving list processing.</p>
+          </div>
+        </details>
+
+      </div><!-- end scope accordions -->
+
+      <!-- ══════════════════════════════════════════════════════
+           PAST-PAPER PREDICTION
+      ══════════════════════════════════════════════════════ -->
+      <h2 id="prediction">What to Expect — Past Paper Analysis</h2>
+      <p>
+        Based on four years of exam papers (2022–2025), the following patterns emerge. This is the most likely shape of the 2026 exam.
+      </p>
+
+      <div class="callout note">
+        <div class="callout-label">Exam Format (consistent every year)</div>
+        <ul>
+          <li><strong>40 marks total, 3 hours.</strong></li>
+          <li>1 Scheme implementation question — always <strong>5 marks</strong>.</li>
+          <li>1 Prolog implementation question — always <strong>5 marks</strong>.</li>
+          <li>~28–31 MCQ questions for the remaining 30 marks (mix of 1-mark single-select and 2–3-mark multi-select with <em>penalty for wrong selections</em>).</li>
+          <li>Questions follow chapter order: Ch1/Ch2 early, then Ch5–Ch9, then Ch12, with implementations (Ch15/Ch16) at questions 4–7.</li>
+        </ul>
+      </div>
+
+      <!-- Implementation predictions -->
+      <h3>Implementation Questions (10 marks total)</h3>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-5); margin: var(--sp-5) 0;">
+        <div style="border:2px solid var(--accent); border-radius:var(--radius-lg); padding:var(--sp-5); background:var(--bg-content);">
+          <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:var(--sp-2);">Scheme — 5 marks</div>
+          <p style="font-weight:600; margin-bottom:var(--sp-3);">The Pattern</p>
+          <p style="font-size:var(--fs-sm);">Every year: a simple numeric list processed with recursion using <code>car</code>, <code>cdr</code>, <code>cons</code>, and <code>null?</code>. The function gets progressively more nuanced each year — adding a third condition each time:</p>
+          <ul style="font-size:var(--fs-sm);">
+            <li>2022: filter — keep positive odd values</li>
+            <li>2023: map — double positive values</li>
+            <li>2024: filter — remove positive odd values</li>
+            <li>2025: filter+map — double positives, keep zeros, omit negatives</li>
+          </ul>
+          <p style="font-size:var(--fs-sm); margin-top:var(--sp-3);"><strong>2026 prediction:</strong> Expect 2–3 conditions on a numeric list combining both filtering (omit/keep) and transformation (double, negate, halve). Practice writing <code>cond</code>-based recursive functions cold. Start with <code>#lang racket</code>. The base case is always the empty list returning <code>'()</code>.</p>
+        </div>
+
+        <div style="border:2px solid var(--accent); border-radius:var(--radius-lg); padding:var(--sp-5); background:var(--bg-content);">
+          <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:var(--sp-2);">Prolog — 5 marks</div>
+          <p style="font-weight:600; margin-bottom:var(--sp-3);">The Pattern</p>
+          <p style="font-size:var(--fs-sm);">Every year: a list proposition with arithmetic conditions. Uses multiple clauses with head unification or comparison operators + <code>is</code>:</p>
+          <ul style="font-size:var(--fs-sm);">
+            <li>2022: remove all occurrences of X from list</li>
+            <li>2023: double all elements that don't match X</li>
+            <li>2024: double positive values, keep non-positives</li>
+            <li>2025: keep negatives, negate positives, omit zeros — <code>cut</code> and <code>not</code> allowed</li>
+          </ul>
+          <p style="font-size:var(--fs-sm); margin-top:var(--sp-3);"><strong>2026 prediction:</strong> Numeric list with 2–3 cases differentiated by sign or value. Use the multi-clause pattern (base case = empty list; recursive cases for each condition). Remember: Prolog arithmetic must use <code>is</code>; use <code>X &gt; 0</code> etc. as goals. No <code>if-then-else</code>, no built-in <code>member/append</code>.</p>
+        </div>
+      </div>
+
+      <!-- MCQ predictions by chapter -->
+      <h3>MCQ Predictions by Chapter</h3>
+
+      <!-- Ch1 -->
+      <div style="border:1px solid var(--border); border-radius:var(--radius-lg); margin-bottom:var(--sp-4); overflow:hidden;">
+        <div style="background:var(--bg-table-head); color:var(--text-sidebar); padding:var(--sp-3) var(--sp-5); display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-family:var(--font-display); font-weight:700;">Chapter 1 — Preliminaries</span>
+          <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--accent-light);">~3–4 marks · HIGH CERTAINTY</span>
+        </div>
+        <div style="padding:var(--sp-4) var(--sp-5);">
+          <p style="font-size:var(--fs-sm);"><strong>Guaranteed topics (appear every year):</strong></p>
+          <ul style="font-size:var(--fs-sm);">
+            <li><strong>Evaluation criteria trade-offs</strong> — e.g. "when readability improves, what suffers?" — every year without exception.</li>
+            <li><strong>Orthogonality</strong> — explicitly stated "will definitely be tested". APL's operator precedence/associativity being orthogonal has appeared twice (2022, 2025).</li>
+            <li>Applying a criterion (readability, writability, reliability, cost) to a specific language feature or design decision in a real or hypothetical language.</li>
+          </ul>
+          <p style="font-size:var(--fs-sm);"><strong>2026 focus:</strong> Know the precise definitions of each evaluation criterion and be ready to explain a trade-off. Practice orthogonality with APL (single-rule precedence = orthogonal). Be able to apply criteria to a feature you've never seen before. Scenarios about portability and generality have appeared twice each.</p>
+        </div>
+      </div>
+
+      <!-- Ch2 -->
+      <div style="border:1px solid var(--border); border-radius:var(--radius-lg); margin-bottom:var(--sp-4); overflow:hidden;">
+        <div style="background:var(--bg-table-head); color:var(--text-sidebar); padding:var(--sp-3) var(--sp-5); display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-family:var(--font-display); font-weight:700;">Chapter 2 — Evolution of PLs</span>
+          <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--accent-light);">~1–2 marks · MEDIUM CERTAINTY</span>
+        </div>
+        <div style="padding:var(--sp-4) var(--sp-5);">
+          <ul style="font-size:var(--fs-sm);">
+            <li>Comparing two languages on one evaluation criterion (e.g. "Pascal vs C — which is more readable?"). Every year has at least one.</li>
+            <li>Identifying a language's environment or main contribution from a description.</li>
+            <li>Questions about portability of specific languages: JavaScript scores high (2024), Java scores high (2025). Know <em>why</em> (e.g. JVM bytecode for Java, runs in any browser for JavaScript).</li>
+          </ul>
+          <p style="font-size:var(--fs-sm);"><strong>2026 focus:</strong> Drill the environment→effect→contribution triad for FORTRAN, ALGOL, COBOL, PL/I, SIMULA 67, Pascal, C, C++, Java. Know which languages were historically notable for portability, readability, or well-definedness.</p>
+        </div>
+      </div>
+
+      <!-- Ch5 -->
+      <div style="border:1px solid var(--border); border-radius:var(--radius-lg); margin-bottom:var(--sp-4); overflow:hidden;">
+        <div style="background:var(--bg-table-head); color:var(--text-sidebar); padding:var(--sp-3) var(--sp-5); display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-family:var(--font-display); font-weight:700;">Chapter 5 — Names, Bindings &amp; Scopes</span>
+          <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--accent-light);">~2–3 marks · HIGH CERTAINTY</span>
+        </div>
+        <div style="padding:var(--sp-4) var(--sp-5);">
+          <ul style="font-size:var(--fs-sm);">
+            <li><strong>Lifetime categories</strong> (static, stack-dynamic, explicit heap-dynamic, implicit heap-dynamic) — asked in 2023. Know each definition precisely.</li>
+            <li><strong>Binding times</strong> — asked in 2024. Know language design time, implementation time, compile time, load time, runtime.</li>
+            <li><strong>Named constants</strong> (manifest vs static — 2023). Know what happens when a named constant is bound to a value at compile time vs runtime.</li>
+            <li><strong>Special words</strong> — keywords vs reserved words (2025). Know the distinction: a keyword's meaning depends on context; a reserved word always means the same thing.</li>
+            <li>Static vs dynamic scoping — this feeds into the Ch9 binding trace questions below.</li>
+          </ul>
+          <p style="font-size:var(--fs-sm);"><strong>2026 focus:</strong> Scope and lifetime distinctions are reliably tested. Be ready for a code snippet asking you to classify a variable's lifetime, or to determine a variable's scope and lifetime separately (2022 Q6).</p>
+        </div>
+      </div>
+
+      <!-- Ch6 -->
+      <div style="border:1px solid var(--border); border-radius:var(--radius-lg); margin-bottom:var(--sp-4); overflow:hidden;">
+        <div style="background:var(--bg-table-head); color:var(--text-sidebar); padding:var(--sp-3) var(--sp-5); display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-family:var(--font-display); font-weight:700;">Chapter 6 — Data Types</span>
+          <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--accent-light);">~2–3 marks · MEDIUM CERTAINTY</span>
+        </div>
+        <div style="padding:var(--sp-4) var(--sp-5);">
+          <ul style="font-size:var(--fs-sm);">
+            <li><strong>Strong/weak typing</strong> — C++ is weakly typed due to unions and the way pointers work (2023). Know which features weaken a language's type system.</li>
+            <li><strong>Unions and discriminated unions</strong> — appeared in 2024. Know: free unions = weak typing; discriminated unions add a tag field making them safer.</li>
+            <li><strong>String types</strong> — static, limited dynamic, dynamic length strings and their trade-offs (2024).</li>
+            <li><strong>List comprehensions in Python</strong> — asked in 2023 and 2025. Answer: they improve <em>writability</em> (concise syntax to build lists).</li>
+            <li><strong>Pointers and reference types</strong> — implicit dereferencing, void pointers, dangling pointers.</li>
+          </ul>
+          <p style="font-size:var(--fs-sm);"><strong>2026 focus:</strong> Discriminated unions (tag field, reliability benefit), type equivalence (name vs structural), and the trade-offs of different string representations are reliable targets.</p>
+        </div>
+      </div>
+
+      <!-- Ch7 -->
+      <div style="border:1px solid var(--border); border-radius:var(--radius-lg); margin-bottom:var(--sp-4); overflow:hidden;">
+        <div style="background:var(--bg-table-head); color:var(--text-sidebar); padding:var(--sp-3) var(--sp-5); display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-family:var(--font-display); font-weight:700;">Chapter 7 — Expressions &amp; Assignments</span>
+          <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--accent-light);">~4–5 marks · VERY HIGH CERTAINTY</span>
+        </div>
+        <div style="padding:var(--sp-4) var(--sp-5);">
+          <p style="font-size:var(--fs-sm);"><strong>The single most reliably tested topic in the whole exam:</strong></p>
+          <ul style="font-size:var(--fs-sm);">
+            <li><strong>Short-circuit evaluation + side effects</strong> — appeared in <em>every single year</em> (2022 Q12, 2023 not present, 2024 Q13, 2025 Q14). Always: given code with a logical <code>and</code>/<code>or</code> and a side effect (e.g. <code>++index</code>, assignment in condition), which form causes a problem? <em>The side effect not occurring when short-circuit skips the operand is the issue when the program relies on that side effect.</em></li>
+            <li><strong>APL operator precedence = orthogonality</strong> — 2022 Q8 and 2025 Q11. In APL there is one rule: right-to-left with no precedence levels. This is more orthogonal but less aligned with mathematical conventions.</li>
+            <li><strong>Conditional targets</strong> — appeared 3 years in a row (2023, 2024, 2025). They improve <em>writability</em>.</li>
+            <li><strong>Coercions in Ada</strong> — Ada has no coercions, which improves <em>reliability</em> (2022 Q10, 2024 Q12).</li>
+            <li><strong>Mixed-mode arithmetic comparisons</strong> (F# vs C++, Ada vs C) — appeared 2023, 2024, 2025. F# has no coercions → more reliable but less writable than C++.</li>
+            <li><strong>Multiple-assignment targets in Ruby</strong> — improves <em>writability</em> (2025 Q16).</li>
+          </ul>
+          <p style="font-size:var(--fs-sm);"><strong>2026 focus:</strong> Know the short-circuit side-effect scenario cold — you will see it. Know whether each assignment/expression feature improves readability, writability, reliability, or cost, and be able to argue why.</p>
+        </div>
+      </div>
+
+      <!-- Ch8 -->
+      <div style="border:1px solid var(--border); border-radius:var(--radius-lg); margin-bottom:var(--sp-4); overflow:hidden;">
+        <div style="background:var(--bg-table-head); color:var(--text-sidebar); padding:var(--sp-3) var(--sp-5); display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-family:var(--font-display); font-weight:700;">Chapter 8 — Control Structures</span>
+          <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--accent-light);">~4–5 marks · HIGH CERTAINTY</span>
+        </div>
+        <div style="padding:var(--sp-4) var(--sp-5);">
+          <ul style="font-size:var(--fs-sm);">
+            <li><strong>Ruby blocks / yield trace</strong> — 2023 Q19 and 2025 Q21. A method uses <code>yield</code> in a loop; you trace what gets printed. Pattern: follow the loop iteration, each <code>yield</code> passes the current value to the block which prints it. Practice these traces.</li>
+            <li><strong>Guarded commands trace</strong> — 2022 Q16 (<code>if...fi</code>) and 2024 Q17 (<code>do...od</code>). 2023 and 2025 had no guarded command trace. The alternation suggests 2026 is due for one — likely the iterative <code>do...od</code> form. Key rule: if <em>no</em> guard is true in a <code>do</code>, the loop terminates; if <em>no</em> guard is true in an <code>if</code>, it is a runtime error.</li>
+            <li><strong>Nested selector disambiguation</strong> — appeared in 2023, 2024, 2025. Every year compares Python, Ruby, and/or Perl. Python uses indentation (reliable, readable, but opinionated); Perl uses <code>if</code> without special delimiters; Ruby uses <code>end</code> keyword. Know which is more writable, readable, reliable.</li>
+            <li><strong>Counter-controlled loops</strong> — compared across languages every year. C is flexible but less reliable; Ada is more restricted and more reliable; Python's for-each is more reliable than C's for-loop.</li>
+            <li><strong>User-located loop control</strong> — Java has <em>labelled</em> break (can exit named outer loop); C++ does not → Java is more writable here (2025 Q20).</li>
+          </ul>
+          <p style="font-size:var(--fs-sm);"><strong>2026 focus:</strong> Practise Ruby block traces (follow the <code>yield</code> values through the block). Expect a guarded-commands trace. Know the nested-selector comparison table (Python/Ruby/Perl/Java).</p>
+        </div>
+      </div>
+
+      <!-- Ch9 -->
+      <div style="border:1px solid var(--border); border-radius:var(--radius-lg); margin-bottom:var(--sp-4); overflow:hidden;">
+        <div style="background:var(--bg-table-head); color:var(--text-sidebar); padding:var(--sp-3) var(--sp-5); display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-family:var(--font-display); font-weight:700;">Chapter 9 — Subprograms</span>
+          <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--accent-light);">~5–6 marks · VERY HIGH CERTAINTY</span>
+        </div>
+        <div style="padding:var(--sp-4) var(--sp-5);">
+          <ul style="font-size:var(--fs-sm);">
+            <li><strong>Coroutine output trace</strong> — appeared in 2022 Q21, 2023 Q24, 2024 Q23. Absent in 2025. This strongly suggests 2026 will have one. Pattern: <code>resume</code> suspends the calling routine and transfers to the target. Trace which print runs before each <code>resume</code> and where control returns after the resumed routine hits its next <code>resume</code>. Each coroutine resumes from where it left off.</li>
+            <li><strong>Ad-hoc / shallow / deep binding traces</strong> — appeared every year. A subprogram passed as a parameter: which environment is used when it's called?
+              <ul>
+                <li><em>Deep binding</em>: referencing environment at the point the parameter was <em>passed</em>.</li>
+                <li><em>Shallow binding</em>: referencing environment at the point the parameter is <em>called</em>.</li>
+                <li><em>Ad-hoc binding</em>: with static scoping — uses the environment of the subprogram's <em>definition</em> site.</li>
+              </ul>
+            </li>
+            <li><strong>Parameter passing modes</strong> — every year. Know: pass-by-value (copy in), pass-by-result (copy out), pass-by-value-result (copy in+out), pass-by-reference (access path), pass-by-name (textual substitution). 2024 Q20 traced pass-by-name — the actual parameter expression is re-evaluated each access.</li>
+            <li><strong>Closures in JavaScript</strong> — appeared in 2025 Q25. A function returning an inner function that captures outer variables. Know: <code>thing = doSomething(10, 20)</code> creates a closure that captures <code>a=10, b=20</code>; calling <code>thing(5)</code> gives <code>25</code>.</li>
+            <li><strong>Generics comparison C++/Java/C#</strong> — appeared every year:
+              <ul>
+                <li>C++: template instantiation — one version per unique type argument, resolved at <em>compile time</em>.</li>
+                <li>Java: type erasure — one version at compile time using <code>Object</code>; the compiler inserts casts.</li>
+                <li>C#: reification — one version per value type at <em>runtime</em>; one shared version for all reference types.</li>
+              </ul>
+            </li>
+            <li><strong>Default parameters / keyword parameters</strong> — 2022 Q18, 2023 Q20, 2025 Q22. Keyword parameters allow any parameter to be omitted regardless of position; positional parameters do not.</li>
+          </ul>
+          <p style="font-size:var(--fs-sm);"><strong>2026 focus:</strong> Coroutine trace is overdue (missed 2025). Practise binding traces with static and dynamic scoping together. Know parameter passing modes well enough to trace code. Generics C++ vs Java vs C# is a perennial question.</p>
+        </div>
+      </div>
+
+      <!-- Ch12 -->
+      <div style="border:1px solid var(--border); border-radius:var(--radius-lg); margin-bottom:var(--sp-4); overflow:hidden;">
+        <div style="background:var(--bg-table-head); color:var(--text-sidebar); padding:var(--sp-3) var(--sp-5); display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-family:var(--font-display); font-weight:700;">Chapter 12 — OOP Support</span>
+          <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--accent-light);">~4–5 marks · VERY HIGH CERTAINTY</span>
+        </div>
+        <div style="padding:var(--sp-4) var(--sp-5);">
+          <ul style="font-size:var(--fs-sm);">
+            <li><strong>Multiple inheritance diamond problem (implicit name collision)</strong> — appeared in 2022 Q26, 2023 Q28, and 2025 Q28 — practically guaranteed. The exact same question structure: A→B, A→C, D inherits B and C. An <em>implicit</em> collision happens when a method is defined only in A (inherited into both B and C, so D gets two copies). An <em>explicit</em> collision requires the same name in both B and C.</li>
+            <li><strong>Java generics — version count</strong> — 2022 Q24 (written, 3 marks), 2023 Q27 (1 mark). Java type erasure means <strong>one version</strong> exists at compile time regardless of how many type arguments are used.</li>
+            <li><strong>Subclasses vs subtypes</strong> — 2024 Q26, 2025 Q31. In Java a subclass is always a subtype (Liskov substitution holds). In C++ a subclass need not be a subtype (private derivation). Smalltalk: subclasses are always subtypes. Know the principle.</li>
+            <li><strong>Dynamic vs static message binding</strong> — C++ lets you choose (virtual vs non-virtual methods); Java and Smalltalk use dynamic binding exclusively → C++ is more efficient but less orthogonal / reliable.</li>
+            <li><strong>Ruby OOP</strong> — dynamic classes (can add methods at runtime), everything is an object, single inheritance only, modules for mixins. Dynamic classes reduce reliability (2022 Q23).</li>
+            <li><strong>Smalltalk</strong> — pure OOP, everything is an object (even integers), highly orthogonal but very inefficient (all binding is dynamic, even primitives are objects). Appeared 2022, 2024, 2025.</li>
+            <li><strong>C++ ADT representation hiding</strong> — friend functions and the requirement for class data members to appear in header files both <em>detract</em> from hiding (2024 Q24).</li>
+            <li><strong>Java hiding representation</strong> — compiles to bytecode (.class file); only the class file is distributed. Javadoc is the public documentation, not the header (no header files). 2022 Q22, 2023 Q26.</li>
+          </ul>
+          <p style="font-size:var(--fs-sm);"><strong>2026 focus:</strong> Multiple inheritance diamond problem is near-certain. Know the differences between Smalltalk, C++, Java, C#, and Ruby on: exclusivity of objects, dynamic vs static binding, subclasses/subtypes, and how each hides ADT representations. Expect 1–2 multi-select questions worth 2 marks each with a penalty.</p>
+        </div>
+      </div>
+
+      <!-- Overall summary -->
+      <div class="callout warning">
+        <div class="callout-label">Top 10 Highest-Probability Questions for 2026</div>
+        <ol style="font-size:var(--fs-sm);">
+          <li><strong>Scheme list function</strong> — numeric list, 2–3 conditions, filter+map combination. 5 marks.</li>
+          <li><strong>Prolog list proposition</strong> — numeric list, 2–3 cases, arithmetic with <code>is</code>, multiple clauses. 5 marks.</li>
+          <li><strong>Short-circuit evaluation + side effect</strong> — code with assignment in a logical condition, what goes wrong? (Ch7 — every year)</li>
+          <li><strong>Multiple inheritance diamond problem</strong> — which single definition creates an implicit name collision? (Ch12 — 3 of 4 years)</li>
+          <li><strong>Coroutine output trace</strong> — pseudocode with <code>resume</code>; trace the print output. (Ch9 — skipped 2025, overdue)</li>
+          <li><strong>Ad-hoc / shallow / deep binding trace</strong> — subprogram passed as parameter, what does it print with each binding type? (Ch9 — every year)</li>
+          <li><strong>Ruby blocks / yield trace</strong> — trace which values are printed when a method with <code>yield</code> is called with a block. (Ch8 — 2023, 2025)</li>
+          <li><strong>Guarded commands trace</strong> — <code>if...fi</code> or <code>do...od</code> — what is the output? (Ch8 — 2022, 2024)</li>
+          <li><strong>Orthogonality question</strong> — likely involving APL operator precedence or a feature explicitly stated to be orthogonal/not. (Ch1 — every year)</li>
+          <li><strong>Generics C++ vs Java vs C#</strong> — how many versions are created, when, and how? (Ch9/Ch12 — every year)</li>
+        </ol>
       </div>
 
     </article>
