@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Knowledge Graph — Programming Language Concepts</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    /* ── Graph page layout overrides ─────────────────── */
+    #graph-main {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .graph-header {
+      flex-shrink: 0;
+      padding: var(--sp-5) var(--sp-8) var(--sp-3);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-content);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-6);
+      flex-wrap: wrap;
+    }
+    .graph-header-text { flex: 1; min-width: 200px; }
+    .graph-header-text .chapter-tag {
+      font-family: var(--font-mono);
+      font-size: var(--fs-xs);
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      display: block;
+      margin-bottom: var(--sp-1);
+    }
+    .graph-header-text h1 {
+      font-family: var(--font-display);
+      font-size: var(--fs-2xl);
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+      margin: 0;
+    }
+    .graph-header-text p {
+      font-size: var(--fs-sm);
+      color: var(--text-muted);
+      margin: var(--sp-1) 0 0;
+    }
+
+    /* ── Mode switcher ───────────────────────────────── */
+    .mode-bar {
+      display: flex;
+      gap: var(--sp-2);
+      flex-shrink: 0;
+    }
+    .mode-btn {
+      font-family: var(--font-mono);
+      font-size: var(--fs-xs);
+      letter-spacing: 0.06em;
+      padding: var(--sp-2) var(--sp-4);
+      border-radius: var(--radius);
+      border: 1.5px solid var(--border);
+      background: var(--bg-hover);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .mode-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .mode-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+
+    /* ── Graph container ─────────────────────────────── */
+    #graph-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+      background: var(--bg-page);
+      transition: background 0.5s ease;
+    }
+    #graph-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+    #graph-svg:active { cursor: grabbing; }
+
+    /* ── SVG link / node styles ──────────────────────── */
+    .link {
+      stroke: var(--border-strong);
+      stroke-opacity: 0.45;
+      stroke-width: 1.5;
+      fill: none;
+      transition: stroke-opacity 0.2s, stroke-width 0.2s;
+    }
+    .link.highlighted { stroke-opacity: 0.9; stroke-width: 2.5; }
+    .link.dimmed { stroke-opacity: 0.06; }
+
+    .node { cursor: pointer; }
+    .node circle {
+      stroke-width: 2;
+      transition: r 0.2s ease, stroke-width 0.2s;
+    }
+    .node.highlighted circle { stroke-width: 3.5; }
+    .node.dimmed { opacity: 0.15; }
+    .node-label {
+      font-family: var(--font-body);
+      pointer-events: none;
+      user-select: none;
+      fill: var(--text-primary);
+    }
+    .node-label.chapter-label {
+      font-family: var(--font-display);
+      font-weight: 700;
+    }
+
+    /* ── Info panel ──────────────────────────────────── */
+    #info-panel {
+      position: absolute;
+      bottom: var(--sp-5);
+      right: var(--sp-5);
+      width: 280px;
+      background: var(--bg-content);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-4) var(--sp-5);
+      box-shadow: var(--shadow-md);
+      font-size: var(--fs-sm);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      pointer-events: none;
+      z-index: 20;
+    }
+    #info-panel.visible { opacity: 1; transform: translateY(0); pointer-events: all; }
+    #info-panel .ip-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: var(--sp-2);
+    }
+    #info-panel h3 {
+      font-family: var(--font-display);
+      font-size: var(--fs-base);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 var(--sp-2);
+    }
+    #info-panel p { color: var(--text-secondary); margin: 0 0 var(--sp-3); line-height: 1.55; }
+    #info-panel .ip-connections { font-size: var(--fs-xs); color: var(--text-muted); }
+    #info-panel .ip-connections span {
+      display: inline-block;
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 1px 8px;
+      margin: 2px 2px 0 0;
+    }
+    #info-panel-close {
+      position: absolute;
+      top: var(--sp-3);
+      right: var(--sp-3);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: var(--fs-base);
+      line-height: 1;
+      padding: 2px 4px;
+    }
+    #info-panel-close:hover { color: var(--accent); }
+
+    /* ── Graph controls ──────────────────────────────── */
+    #graph-controls {
+      position: absolute;
+      bottom: var(--sp-5);
+      left: var(--sp-5);
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-2);
+      z-index: 20;
+    }
+    .graph-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--bg-content);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: var(--fs-base);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .graph-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Legend ──────────────────────────────────────── */
+    #legend {
+      position: absolute;
+      top: var(--sp-4);
+      right: var(--sp-4);
+      background: var(--bg-content);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-3) var(--sp-4);
+      font-size: var(--fs-xs);
+      z-index: 20;
+      max-width: 160px;
+    }
+    #legend .leg-title {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: var(--sp-2);
+    }
+    .leg-item {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      margin-bottom: 4px;
+      color: var(--text-secondary);
+      line-height: 1.3;
+    }
+    .leg-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── Hint bar ────────────────────────────────────── */
+    #hint-bar {
+      position: absolute;
+      top: var(--sp-4);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-content);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: var(--sp-1) var(--sp-4);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      z-index: 20;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* ── GALAXY MODE ─────────────────────────────────── */
+    #graph-container.galaxy {
+      background: radial-gradient(ellipse at 40% 50%, #120820 0%, #08050f 50%, #030108 100%);
+    }
+    .galaxy #hint-bar,
+    .galaxy #legend {
+      background: rgba(20,12,35,0.85);
+      border-color: rgba(255,255,255,0.1);
+      color: rgba(200,190,220,0.7);
+    }
+    .galaxy #info-panel {
+      background: rgba(18,10,30,0.95);
+      border-color: rgba(255,255,255,0.12);
+    }
+    .galaxy #info-panel h3,
+    .galaxy #info-panel p { color: #e0d8f0; }
+    .galaxy #info-panel .ip-connections span {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.1);
+      color: #a098c0;
+    }
+    .galaxy .node-label { fill: rgba(230,220,255,0.85); }
+    .galaxy .graph-btn {
+      background: rgba(20,12,35,0.9);
+      border-color: rgba(255,255,255,0.12);
+      color: rgba(200,190,220,0.8);
+    }
+    .galaxy .link {
+      stroke-opacity: 0.25;
+    }
+    .galaxy .link.highlighted { stroke-opacity: 0.9; }
+
+    /* Galaxy animated links */
+    .galaxy .link-animated {
+      stroke-dasharray: 6 10;
+      animation: galaxy-flow 3s linear infinite;
+    }
+    @keyframes galaxy-flow {
+      to { stroke-dashoffset: -48; }
+    }
+
+    /* Galaxy node pulse */
+    .galaxy .node circle {
+      animation: node-pulse 4s ease-in-out infinite;
+    }
+    @keyframes node-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.75; }
+    }
+
+    /* Stars */
+    .star { fill: #fff; opacity: 0; animation: twinkle 3s ease-in-out infinite; }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* ── Overview mode label styling ─────────────────── */
+    .overview-badge {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      fill: var(--text-muted);
+    }
+
+    /* ── Mobile ──────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .graph-header { padding: 52px var(--sp-4) var(--sp-3); }
+      #info-panel { width: calc(100vw - var(--sp-8)); right: var(--sp-4); bottom: var(--sp-4); }
+      #legend { display: none; }
+    }
+    @media (max-width: 600px) {
+      .graph-header { flex-direction: column; align-items: flex-start; gap: var(--sp-3); }
+      .graph-header-text h1 { font-size: var(--fs-xl); }
+      .mode-btn { padding: var(--sp-2) var(--sp-3); }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <button class="menu-toggle" aria-label="Open menu">☰</button>
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="course-label">COS 333 · Concepts of PL</span>
+      <h1>Programming Language Concepts</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Overview</span>
+      <a href="index.html"><span class="nav-chapter">00</span> Home &amp; Topics</a>
+      <a href="mindmap.html" class="active"><span class="nav-chapter">MG</span> Knowledge Graph</a>
+
+      <span class="nav-section-label">Chapters</span>
+      <a href="chapter1.html"><span class="nav-chapter">01</span> Preliminaries</a>
+      <a href="chapter2.html"><span class="nav-chapter">02</span> Evolution of PLs</a>
+      <a href="chapter5.html"><span class="nav-chapter">05</span> Names, Bindings &amp; Scopes</a>
+      <a href="chapter6.html"><span class="nav-chapter">06</span> Data Types</a>
+      <a href="chapter7.html"><span class="nav-chapter">07</span> Expressions &amp; Assignments</a>
+      <a href="chapter8.html"><span class="nav-chapter">08</span> Control Structures</a>
+      <a href="chapter9.html"><span class="nav-chapter">09</span> Subprograms</a>
+      <a href="chapter12.html"><span class="nav-chapter">12</span> OOP Support</a>
+      <a href="chapter15.html"><span class="nav-chapter">15</span> Functional Programming</a>
+      <a href="chapter16.html"><span class="nav-chapter">16</span> Logic Programming</a>
+
+      <span class="nav-section-label">Practical</span>
+      <a href="prolog-practical.html"><span class="nav-chapter">P3</span> Prolog in Practice</a>
+      <a href="prolog-list-patterns.html"><span class="nav-chapter">P4</span> List Patterns</a>
+      <a href="scheme-practical.html"><span class="nav-chapter">P5</span> Scheme in Practice</a>
+
+      <span class="nav-section-label">Assessment</span>
+      <a href="past-papers.html"><span class="nav-chapter">PP</span> Past Papers</a>
+      <a href="mcq.html"><span class="nav-chapter">MC</span> MCQ Bank</a>
+
+      <span class="nav-section-label">Quick Reference</span>
+      <a href="index.html#scope"><span class="nav-chapter">SC</span> Exam Scope</a>
+      <a href="index.html#prediction"><span class="nav-chapter">EP</span> Exam Prediction</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle">
+        <span class="toggle-icon">☾</span>
+        <span class="toggle-label">Dark mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <main class="main" id="graph-main">
+
+    <div class="graph-header">
+      <div class="graph-header-text">
+        <span class="chapter-tag">Overview · Knowledge Graph</span>
+        <h1>Concept Map</h1>
+        <p>Drag nodes · Scroll to zoom · Click for details</p>
+      </div>
+      <div class="mode-bar">
+        <button class="mode-btn active" data-mode="overview" title="Chapter-level view — broad topic interactions">Overview</button>
+        <button class="mode-btn" data-mode="deepdive" title="All key concepts and their connections">Deep Dive</button>
+        <button class="mode-btn galaxy-mode-btn" data-mode="galaxy" title="All concepts — maximum connections">✦ Galaxy</button>
+      </div>
+    </div>
+
+    <div id="graph-container">
+      <svg id="graph-svg">
+        <defs>
+          <filter id="glow-filter" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="glow-strong" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <marker id="arrowhead" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto">
+            <polygon points="0 0, 6 2, 0 4" fill="#aaa" opacity="0.5"/>
+          </marker>
+        </defs>
+        <g id="stars-layer"></g>
+        <g id="graph-g"></g>
+      </svg>
+
+      <div id="hint-bar">Click a node to explore · Drag to rearrange · Scroll to zoom</div>
+
+      <div id="legend">
+        <div class="leg-title">Chapters</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#e07840"></div>Ch 1 Preliminaries</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#5888d8"></div>Ch 2 PL Evolution</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#3aaa5a"></div>Ch 5 Bindings</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#9a50d8"></div>Ch 6 Data Types</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#d84040"></div>Ch 7 Expressions</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#2898d8"></div>Ch 8 Control Flow</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#c8a820"></div>Ch 9 Subprograms</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#e05888"></div>Ch 12 OOP</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#58c858"></div>Ch 15 Functional</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#20b8c8"></div>Ch 16 Logic</div>
+      </div>
+
+      <div id="info-panel">
+        <button id="info-panel-close" title="Close">✕</button>
+        <div class="ip-tag" id="ip-tag">Chapter</div>
+        <h3 id="ip-title">Node Title</h3>
+        <p id="ip-desc">Description goes here.</p>
+        <div class="ip-connections" id="ip-connections"></div>
+      </div>
+
+      <div id="graph-controls">
+        <button class="graph-btn" id="zoom-in" title="Zoom in">+</button>
+        <button class="graph-btn" id="zoom-out" title="Zoom out">−</button>
+        <button class="graph-btn" id="zoom-reset" title="Reset view">⊙</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="study-notes.js"></script>
+<script>
+/* ============================================================
+   KNOWLEDGE GRAPH — COS 333
+   ============================================================ */
+
+// ── Colour palette ─────────────────────────────────────────
+const CH_COLOR = {
+  ch1:  "#e07840",
+  ch2:  "#5888d8",
+  ch5:  "#3aaa5a",
+  ch6:  "#9a50d8",
+  ch7:  "#d84040",
+  ch8:  "#2898d8",
+  ch9:  "#c8a820",
+  ch12: "#e05888",
+  ch15: "#58c858",
+  ch16: "#20b8c8",
+  meta: "#7a7060",
+};
+
+// ── Node data ──────────────────────────────────────────────
+const RAW_NODES = [
+  // ── CHAPTER nodes ──────────────────────────────────────
+  { id:"ch1",  type:"chapter", chapter:"ch1",  label:"Ch 1 · Preliminaries",      desc:"Why study PLs, evaluation criteria (readability, writability, reliability, cost), orthogonality, language categories, implementation methods." },
+  { id:"ch2",  type:"chapter", chapter:"ch2",  label:"Ch 2 · PL Evolution",       desc:"History of PLs: environment, effect on design, and main contribution of each language from Fortran to modern scripting languages." },
+  { id:"ch5",  type:"chapter", chapter:"ch5",  label:"Ch 5 · Bindings & Scope",   desc:"Names, variables, binding times, type binding, storage lifetimes, static vs dynamic scoping, referencing environments, named constants." },
+  { id:"ch6",  type:"chapter", chapter:"ch6",  label:"Ch 6 · Data Types",         desc:"Primitive types, strings, arrays, records, unions, pointers, type checking, strong typing, coercion, type equivalence." },
+  { id:"ch7",  type:"chapter", chapter:"ch7",  label:"Ch 7 · Expressions",        desc:"Operator precedence/associativity, overloading, type conversions, short-circuit evaluation, side effects, referential transparency, assignment." },
+  { id:"ch8",  type:"chapter", chapter:"ch8",  label:"Ch 8 · Control Flow",       desc:"Selection statements, iteration, counter and logical loops, guarded commands, Ruby blocks, user-located loop control." },
+  { id:"ch9",  type:"chapter", chapter:"ch9",  label:"Ch 9 · Subprograms",        desc:"Parameter passing, closures, coroutines, generics (C++/Java/C#), overloading, referencing environments of passed subprograms." },
+  { id:"ch12", type:"chapter", chapter:"ch12", label:"Ch 12 · OOP",               desc:"ADTs, classes, inheritance, polymorphism, dynamic binding, Smalltalk, C++, Java, C#, Ruby OOP design issues." },
+  { id:"ch15", type:"chapter", chapter:"ch15", label:"Ch 15 · Functional",        desc:"Functional programming, Scheme, recursion, tail recursion, car/cdr/cons, higher-order functions, list processing functions." },
+  { id:"ch16", type:"chapter", chapter:"ch16", label:"Ch 16 · Logic",             desc:"Predicate calculus, Horn clauses, Prolog, unification, backtracking, forward/backward chaining, resolution." },
+
+  // ── TOPIC nodes — Ch 1 ─────────────────────────────────
+  { id:"readability",      type:"topic", chapter:"ch1",  label:"Readability",           desc:"Ease with which programs can be read and understood. Affected by: simplicity, orthogonality, control statement form, syntax design." },
+  { id:"writability",      type:"topic", chapter:"ch1",  label:"Writability",            desc:"Ease with which a language can be used to create programs for a given domain. Affected by: simplicity, expressivity, support for abstraction." },
+  { id:"reliability",      type:"topic", chapter:"ch1",  label:"Reliability",            desc:"A program performs to its spec under all conditions. Affected by: type checking, exception handling, aliasing, readability." },
+  { id:"cost",             type:"topic", chapter:"ch1",  label:"Cost",                   desc:"Training, writing, compilation, execution, maintenance, and implementation system. Most important today: programmer time (maintenance)." },
+  { id:"orthogonality",    type:"topic", chapter:"ch1",  label:"Orthogonality",          desc:"A small set of primitive constructs can be combined in a relatively small number of ways, and every combination is legal." },
+  { id:"von_neumann",      type:"topic", chapter:"ch1",  label:"Von Neumann Model",      desc:"Memory separate from CPU; instructions and data stored together. Basis for imperative language design: variables = memory, loops = iteration." },
+  { id:"impl_methods",     type:"topic", chapter:"ch1",  label:"Implementation Methods", desc:"Compilation (fast execution), pure interpretation (slow, portable), hybrid/JIT (compromise). Affects portability and cost." },
+
+  // ── TOPIC nodes — Ch 2 ─────────────────────────────────
+  { id:"lang_fortran",     type:"topic", chapter:"ch2",  label:"Fortran",                desc:"1957. Scientific computing on IBM 704. First compiled language: DO loops, formatted I/O, user-defined subprograms." },
+  { id:"lang_algol",       type:"topic", chapter:"ch2",  label:"ALGOL 60",               desc:"Machine-independent, block structure, local scope, recursive subprograms, BNF syntax. Father of all imperative PLs." },
+  { id:"lang_cobol",       type:"topic", chapter:"ch2",  label:"COBOL",                  desc:"Business data processing: hierarchical data structures (records), very long names, self-documenting code goal." },
+  { id:"lang_lisp",        type:"topic", chapter:"ch2",  label:"LISP / Scheme",          desc:"AI research: functional, list-based, no variables/assignment, recursion only, dynamic typing. Scheme added static scope." },
+  { id:"lang_simula",      type:"topic", chapter:"ch2",  label:"SIMULA 67",              desc:"Simulation: introduced coroutines and the class concept. Direct precursor to all OOP languages." },
+  { id:"lang_smalltalk",   type:"topic", chapter:"ch2",  label:"Smalltalk",              desc:"Pure OOP: everything is an object, all computation by message passing, only dynamic binding. GUI pioneer." },
+  { id:"lang_cpp",         type:"topic", chapter:"ch2",  label:"C++",                    desc:"Systems + OOP: C superset, multiple inheritance, templates, virtual methods, operator overloading." },
+  { id:"lang_java",        type:"topic", chapter:"ch2",  label:"Java",                   desc:"JVM bytecode for portability, single inheritance + interfaces, garbage collection, all objects heap-dynamic." },
+  { id:"lang_prolog_hist", type:"topic", chapter:"ch2",  label:"Prolog",                 desc:"AI/theorem proving: non-procedural, fact and rule database with inferencing. Introduced logic programming." },
+
+  // ── TOPIC nodes — Ch 5 ─────────────────────────────────
+  { id:"binding_times",    type:"topic", chapter:"ch5",  label:"Binding Times",          desc:"Language design time, implementation time, compile time, load time, runtime. Earlier = more efficient; later = more flexible." },
+  { id:"type_binding",     type:"topic", chapter:"ch5",  label:"Type Binding",           desc:"Static: variable bound to type at compile time (Java, C++). Dynamic: type can change at runtime (Python, Ruby, JavaScript)." },
+  { id:"static_scope",     type:"topic", chapter:"ch5",  label:"Static Scope",           desc:"Scope determined by program text. Search local → enclosing subprograms. Predictable, supports closures, used by Scheme." },
+  { id:"dynamic_scope",    type:"topic", chapter:"ch5",  label:"Dynamic Scope",          desc:"Scope determined by call chain at runtime. Search local → calling subprogram. Unpredictable, makes type checking hard." },
+  { id:"lifetime",         type:"topic", chapter:"ch5",  label:"Storage Lifetime",       desc:"Static: entire program. Stack-dynamic: subprogram invocation. Explicit heap: new/delete. Implicit heap: assignment." },
+  { id:"aliases",          type:"topic", chapter:"ch5",  label:"Aliases",                desc:"Two or more names for the same memory location. Created by pointers, reference parameters, unions. Reduces readability." },
+  { id:"named_constants",  type:"topic", chapter:"ch5",  label:"Named Constants",        desc:"Manifest constants: bound at compile time (reliable). Dynamic named constants: bound at elaboration time." },
+
+  // ── TOPIC nodes — Ch 6 ─────────────────────────────────
+  { id:"primitive_types",  type:"topic", chapter:"ch6",  label:"Primitive Types",        desc:"Integer (various sizes), float (IEEE 754), complex, decimal (COBOL), boolean, character (ASCII/Unicode)." },
+  { id:"string_types",     type:"topic", chapter:"ch6",  label:"String Types",           desc:"Static length (compile-time). Limited dynamic length (fixed max). Dynamic length (heap, flexible but costly)." },
+  { id:"array_types",      type:"topic", chapter:"ch6",  label:"Array Types",            desc:"Subscript binding (static to heap-dynamic). Range checking: reliability vs cost. Rectangular vs ragged." },
+  { id:"union_types",      type:"topic", chapter:"ch6",  label:"Union Types",            desc:"Free unions (C/C++): no type checking, unsafe. Discriminated unions (Ada, F#): tag field ensures safety." },
+  { id:"pointer_types",    type:"topic", chapter:"ch6",  label:"Pointers & References",  desc:"Pointers: powerful but dangerous (dangling pointer, memory leak). References: implicit deref, safer but restrictive." },
+  { id:"type_checking",    type:"topic", chapter:"ch6",  label:"Type Checking",          desc:"Ensures operands are of compatible types. Static: compile-time. Dynamic: runtime. Earlier checking = cheaper to fix." },
+  { id:"strong_typing",    type:"topic", chapter:"ch6",  label:"Strong Typing",          desc:"All type errors always detected. Ada, Java nearly strongly typed. C/C++ not (unions, casts). Reliability vs flexibility." },
+  { id:"coercion",         type:"topic", chapter:"ch6",  label:"Coercion",               desc:"Implicit type conversion in mixed-mode expression. Convenient but weakens type checking by hiding errors." },
+  { id:"type_equiv",       type:"topic", chapter:"ch6",  label:"Type Equivalence",       desc:"Name equivalence: same type declaration. Structural equivalence: same structure. Affects parameter matching." },
+
+  // ── TOPIC nodes — Ch 7 ─────────────────────────────────
+  { id:"precedence",       type:"topic", chapter:"ch7",  label:"Precedence & Assoc.",    desc:"Precedence: which operator binds tighter. Associativity: left (most) or right (**). APL: single level = orthogonal." },
+  { id:"op_overloading",   type:"topic", chapter:"ch7",  label:"Operator Overloading",   desc:"Same symbol, different semantics by type. Ruby: operators are methods = highly orthogonal. Can harm readability." },
+  { id:"short_circuit",    type:"topic", chapter:"ch7",  label:"Short-Circuit Eval",     desc:"Stop evaluating AND/OR when result is known. Can prevent errors (index bounds) but skip expected side effects." },
+  { id:"side_effects",     type:"topic", chapter:"ch7",  label:"Side Effects",           desc:"Function modifies non-local state. Breaks referential transparency. Functions vs procedures distinction." },
+  { id:"ref_transparency", type:"topic", chapter:"ch7",  label:"Referential Transparency", desc:"Equivalent expressions can substitute each other without changing the program. Requires no side effects." },
+  { id:"mixed_mode",       type:"topic", chapter:"ch7",  label:"Mixed-Mode Expressions", desc:"Operations on different types. F# requires explicit conversion (reliable). C++ coerces freely (convenient, unsafe)." },
+  { id:"assignment_expr",  type:"topic", chapter:"ch7",  label:"Assignment",             desc:"Statement (Ada, Pascal) vs expression (C-based). Compound operators (+=). Conditional targets (Perl). Multiple targets (Ruby)." },
+
+  // ── TOPIC nodes — Ch 8 ─────────────────────────────────
+  { id:"selection_stmts",  type:"topic", chapter:"ch8",  label:"Selection Statements",   desc:"Two-way (if-else) and multiple-way (switch/case/when). Dangling else problem: Python/Ruby use explicit end." },
+  { id:"iteration_stmts",  type:"topic", chapter:"ch8",  label:"Iteration Statements",   desc:"Counter-controlled (for) and logically-controlled (while/do-while). Pretest vs posttest affects min execution count." },
+  { id:"guarded_commands", type:"topic", chapter:"ch8",  label:"Guarded Commands",       desc:"if...fi: non-deterministic selection; runtime error if no guard true. do...od: iterates while any guard is true." },
+  { id:"ruby_blocks",      type:"topic", chapter:"ch8",  label:"Ruby Blocks / yield",    desc:"An anonymous code block passed to a method. yield transfers control; block executes and returns. Closures." },
+  { id:"loop_control",     type:"topic", chapter:"ch8",  label:"Loop Control",           desc:"break (exit), continue (next iteration). Java: labelled break exits named outer loop. More writable than C++." },
+  { id:"data_struct_iter", type:"topic", chapter:"ch8",  label:"Data Structure Iteration", desc:"for-each loops (Java, Python, Ruby) iterate over collections. More reliable than index-based loops." },
+
+  // ── TOPIC nodes — Ch 9 ─────────────────────────────────
+  { id:"param_passing",    type:"topic", chapter:"ch9",  label:"Parameter Passing",      desc:"Pass-by-value (copy in), pass-by-result (copy out), pass-by-value-result, pass-by-reference (access path), pass-by-name." },
+  { id:"closures",         type:"topic", chapter:"ch9",  label:"Closures",               desc:"A subprogram plus its referencing environment. Captured variables outlive the creator. Requires static scoping." },
+  { id:"coroutines",       type:"topic", chapter:"ch9",  label:"Coroutines",             desc:"Multiple entry points. resume continues from where the coroutine last suspended. Quasi-concurrent execution." },
+  { id:"generics",         type:"topic", chapter:"ch9",  label:"Generics",               desc:"C++: template instantiation at compile time. Java: type erasure → one version. C#: reification at runtime per value type." },
+  { id:"sub_overloading",  type:"topic", chapter:"ch9",  label:"Subprogram Overloading", desc:"Same name, different parameter profile. Resolved by parameter types. Return type alone insufficient (C++)." },
+  { id:"referencing_env",  type:"topic", chapter:"ch9",  label:"Referencing Environments", desc:"When subprogram passed as parameter: deep binding (definition site), shallow binding (call site), ad-hoc (pass site)." },
+  { id:"pass_by_name",     type:"topic", chapter:"ch9",  label:"Pass-by-Name",           desc:"Formal replaced textually by actual. Re-evaluated each access. Late binding. Jensen's Device. Rare but important." },
+
+  // ── TOPIC nodes — Ch 12 ────────────────────────────────
+  { id:"adts",             type:"topic", chapter:"ch12", label:"Abstract Data Types",    desc:"User-defined type with hidden representation. Java: .class file hides impl. C++: header file exposes it (friend functions)." },
+  { id:"classes_obj",      type:"topic", chapter:"ch12", label:"Classes & Objects",      desc:"Class = type + methods. Object = instance. Encapsulation bundles data and operations, hides representation." },
+  { id:"inheritance",      type:"topic", chapter:"ch12", label:"Inheritance",            desc:"Derived class inherits parent. Single (Java) vs multiple (C++). Diamond problem: implicit name collision from common ancestor." },
+  { id:"dynamic_binding",  type:"topic", chapter:"ch12", label:"Dynamic Binding",        desc:"Method resolved at runtime based on object type. Enables polymorphism. C++ requires virtual; Java/Smalltalk always dynamic." },
+  { id:"multiple_inherit", type:"topic", chapter:"ch12", label:"Multiple Inheritance",   desc:"Diamond problem: A→B, A→C, D inherits B&C. Method defined only in A causes implicit collision in D." },
+  { id:"subtype",          type:"topic", chapter:"ch12", label:"Subtypes",               desc:"'is-a' relationship. Java: subclass always subtype. C++: private derivation breaks subtype. Ruby: dynamic class changes can break it." },
+  { id:"oop_langs",        type:"topic", chapter:"ch12", label:"Smalltalk / Java / C++", desc:"Smalltalk: pure OOP, inefficient, highly orthogonal. Java: pragmatic, single inheritance + interfaces. C++: hybrid, efficient, complex." },
+
+  // ── TOPIC nodes — Ch 15 ────────────────────────────────
+  { id:"fp_fundamentals",  type:"topic", chapter:"ch15", label:"FP Fundamentals",        desc:"No variables, no assignment, no side effects, referentially transparent. Programs are function applications." },
+  { id:"scheme_syntax",    type:"topic", chapter:"ch15", label:"Scheme Syntax",          desc:"S-expressions: (function arg1 arg2). Prefix notation. DEFINE, IF, COND, LET. Quote prevents evaluation." },
+  { id:"list_processing",  type:"topic", chapter:"ch15", label:"List Processing",        desc:"car (head), cdr (tail), cons (prepend), null? (empty list check). Recursive base case: (null? lst) → '()." },
+  { id:"tail_recursion",   type:"topic", chapter:"ch15", label:"Tail Recursion",         desc:"Recursive call is the last operation. Can be compiled to iteration (no stack growth). Scheme requires optimization." },
+  { id:"higher_order_fns", type:"topic", chapter:"ch15", label:"Higher-Order Functions", desc:"Functions that take functions as arguments or return functions. MAP applies function to every list element." },
+  { id:"lambda_calc",      type:"topic", chapter:"ch15", label:"Lambda Calculus",        desc:"Formal mathematical foundation for FP. λ-abstraction defines functions; β-reduction applies them." },
+
+  // ── TOPIC nodes — Ch 16 ────────────────────────────────
+  { id:"predicate_calc",   type:"topic", chapter:"ch16", label:"Predicate Calculus",     desc:"First-order logic: constants, variables, atomic propositions (functor(params)), logical connectives (∧, ∨, →, ~)." },
+  { id:"horn_clauses",     type:"topic", chapter:"ch16", label:"Horn Clauses",           desc:"Restricted predicate calculus: headed clause (rule: head :- body) or headless clause (fact or query)." },
+  { id:"unification",      type:"topic", chapter:"ch16", label:"Unification",            desc:"Finding variable instantiations that make two terms identical. Core mechanism: enables pattern matching in rules." },
+  { id:"backtracking",     type:"topic", chapter:"ch16", label:"Backtracking",           desc:"When a goal fails, undo last variable binding and try next alternative. Depth-first search in Prolog." },
+  { id:"prolog_syntax",    type:"topic", chapter:"ch16", label:"Prolog Facts & Rules",   desc:"Facts: atom(args). Rules: head :- antecedents. Goals: queries to prove. Conjunction (,) = logical AND." },
+  { id:"resolution",       type:"topic", chapter:"ch16", label:"Resolution",             desc:"Inference rule: combine two clauses to deduce a new one. Backward chaining from goal toward facts (Prolog default)." },
+];
+
+// ── Link data ──────────────────────────────────────────────
+// type: "hierarchy" (chapter→topic) | "chapter" (ch↔ch) | "cross" (topic↔topic)
+
+const RAW_LINKS = [
+  // Chapter ↔ Chapter links (used in overview + deepdive + galaxy)
+  { source:"ch1",  target:"ch2",  type:"chapter", label:"Criteria applied to PL history" },
+  { source:"ch1",  target:"ch5",  type:"chapter", label:"Criteria drive binding/naming design" },
+  { source:"ch1",  target:"ch6",  type:"chapter", label:"Criteria drive type system design" },
+  { source:"ch1",  target:"ch7",  type:"chapter", label:"Criteria drive expression design" },
+  { source:"ch1",  target:"ch8",  type:"chapter", label:"Criteria drive control structure design" },
+  { source:"ch1",  target:"ch9",  type:"chapter", label:"Criteria drive subprogram design" },
+  { source:"ch1",  target:"ch12", type:"chapter", label:"Criteria drive OOP design" },
+  { source:"ch2",  target:"ch12", type:"chapter", label:"OOP evolution: SIMULA → Smalltalk → C++ → Java" },
+  { source:"ch2",  target:"ch15", type:"chapter", label:"LISP history → Scheme functional PL" },
+  { source:"ch2",  target:"ch16", type:"chapter", label:"Prolog language history" },
+  { source:"ch5",  target:"ch9",  type:"chapter", label:"Static scope enables closures" },
+  { source:"ch5",  target:"ch15", type:"chapter", label:"Static scope → Scheme design" },
+  { source:"ch6",  target:"ch9",  type:"chapter", label:"Type checking → parameter semantics" },
+  { source:"ch6",  target:"ch12", type:"chapter", label:"Type equivalence → OOP compatibility" },
+  { source:"ch7",  target:"ch15", type:"chapter", label:"Side effects & referential transparency" },
+  { source:"ch8",  target:"ch15", type:"chapter", label:"Iteration → recursion in FP" },
+  { source:"ch8",  target:"ch16", type:"chapter", label:"Non-determinism → backtracking" },
+  { source:"ch9",  target:"ch12", type:"chapter", label:"Generics vs polymorphism" },
+  { source:"ch9",  target:"ch15", type:"chapter", label:"Closures in functional programming" },
+  { source:"ch15", target:"ch16", type:"chapter", label:"Declarative paradigms" },
+
+  // Chapter → Topic hierarchy
+  ...RAW_NODES.filter(n => n.type === "topic").map(n => ({
+    source: n.chapter, target: n.id, type: "hierarchy", label: ""
+  })),
+
+  // Cross-chapter topic ↔ topic links
+  { source:"orthogonality",    target:"precedence",        type:"cross", label:"APL single precedence rule = orthogonal" },
+  { source:"readability",      target:"type_binding",      type:"cross", label:"Static typing improves readability" },
+  { source:"reliability",      target:"type_checking",     type:"cross", label:"Type checking catches errors → reliability" },
+  { source:"reliability",      target:"strong_typing",     type:"cross", label:"Strong typing ensures all type errors detected" },
+  { source:"von_neumann",      target:"assignment_expr",   type:"cross", label:"Variables & assignment from Von Neumann model" },
+  { source:"von_neumann",      target:"iteration_stmts",   type:"cross", label:"Von Neumann model favours iteration over recursion" },
+  { source:"writability",      target:"op_overloading",    type:"cross", label:"Overloading improves writability" },
+  { source:"cost",             target:"impl_methods",      type:"cross", label:"Implementation method affects execution cost" },
+  { source:"lang_algol",       target:"static_scope",      type:"cross", label:"ALGOL 60 introduced lexical (static) scope" },
+  { source:"lang_algol",       target:"binding_times",     type:"cross", label:"Block structure → explicit binding times" },
+  { source:"lang_lisp",        target:"fp_fundamentals",   type:"cross", label:"LISP is the original functional language" },
+  { source:"lang_lisp",        target:"list_processing",   type:"cross", label:"LISP → Scheme list processing (car/cdr/cons)" },
+  { source:"lang_simula",      target:"classes_obj",       type:"cross", label:"SIMULA 67 introduced the class concept" },
+  { source:"lang_simula",      target:"coroutines",        type:"cross", label:"SIMULA 67 introduced coroutines" },
+  { source:"lang_smalltalk",   target:"dynamic_binding",   type:"cross", label:"Smalltalk: always dynamic binding" },
+  { source:"lang_cpp",         target:"multiple_inherit",  type:"cross", label:"C++ introduced multiple inheritance" },
+  { source:"lang_cpp",         target:"generics",          type:"cross", label:"C++ templates = compile-time generics" },
+  { source:"lang_java",        target:"adts",              type:"cross", label:"Java .class file hides ADT representation" },
+  { source:"lang_java",        target:"subtype",           type:"cross", label:"Java: every subclass is always a subtype" },
+  { source:"lang_prolog_hist", target:"prolog_syntax",     type:"cross", label:"Prolog history → logic programming syntax" },
+  { source:"binding_times",    target:"generics",          type:"cross", label:"C++ generics bound at compile time" },
+  { source:"type_binding",     target:"type_checking",     type:"cross", label:"Static type binding enables compile-time checking" },
+  { source:"static_scope",     target:"closures",          type:"cross", label:"Closures require static (lexical) scoping" },
+  { source:"static_scope",     target:"scheme_syntax",     type:"cross", label:"Scheme uses static scoping exclusively" },
+  { source:"dynamic_scope",    target:"referencing_env",   type:"cross", label:"Dynamic scope relates to shallow binding" },
+  { source:"lifetime",         target:"closures",          type:"cross", label:"Closures extend variable lifetime beyond scope" },
+  { source:"lifetime",         target:"param_passing",     type:"cross", label:"Lifetime affects pass-by-value-result semantics" },
+  { source:"aliases",          target:"param_passing",     type:"cross", label:"Pass-by-reference creates aliases" },
+  { source:"type_checking",    target:"param_passing",     type:"cross", label:"Parameters must be type-checked at call site" },
+  { source:"coercion",         target:"mixed_mode",        type:"cross", label:"Coercion enables mixed-mode expressions" },
+  { source:"strong_typing",    target:"sub_overloading",   type:"cross", label:"Overloading resolution requires type checking" },
+  { source:"union_types",      target:"strong_typing",     type:"cross", label:"Free unions undermine strong typing (C++)" },
+  { source:"type_equiv",       target:"subtype",           type:"cross", label:"Type equivalence rules → OOP type compatibility" },
+  { source:"side_effects",     target:"fp_fundamentals",   type:"cross", label:"Functional programming eliminates side effects" },
+  { source:"ref_transparency", target:"fp_fundamentals",   type:"cross", label:"FP requires referential transparency" },
+  { source:"short_circuit",    target:"side_effects",      type:"cross", label:"Short-circuit eval can skip expected side effects" },
+  { source:"iteration_stmts",  target:"tail_recursion",    type:"cross", label:"Tail recursion replaces iteration in FP" },
+  { source:"guarded_commands", target:"backtracking",      type:"cross", label:"Non-deterministic selection mirrors backtracking" },
+  { source:"data_struct_iter", target:"list_processing",   type:"cross", label:"List iteration: for-each in OOP, car/cdr in FP" },
+  { source:"ruby_blocks",      target:"closures",          type:"cross", label:"Ruby blocks are closures (anonymous functions)" },
+  { source:"generics",         target:"dynamic_binding",   type:"cross", label:"Parametric vs subtype polymorphism" },
+  { source:"closures",         target:"higher_order_fns",  type:"cross", label:"Closures enable higher-order functions" },
+  { source:"pass_by_name",     target:"lambda_calc",       type:"cross", label:"Pass-by-name is β-reduction in lambda calculus" },
+  { source:"coroutines",       target:"backtracking",      type:"cross", label:"Both support non-sequential execution flow" },
+  { source:"referencing_env",  target:"static_scope",      type:"cross", label:"Deep binding uses definition-site static scope" },
+  { source:"inheritance",      target:"subtype",           type:"cross", label:"Inheritance creates subtype relationships" },
+  { source:"dynamic_binding",  target:"higher_order_fns",  type:"cross", label:"Both dispatch calls at runtime" },
+  { source:"fp_fundamentals",  target:"resolution",        type:"cross", label:"Both FP and LP: describe what, not how" },
+  { source:"list_processing",  target:"prolog_syntax",     type:"cross", label:"Prolog list [H|T] mirrors Scheme (car/cdr)" },
+  { source:"lambda_calc",      target:"predicate_calc",    type:"cross", label:"Formal foundations: λ-calculus (FP) vs predicate calculus (LP)" },
+  { source:"unification",      target:"param_passing",     type:"cross", label:"Unification is Prolog's parameter-binding mechanism" },
+  { source:"higher_order_fns", target:"horn_clauses",      type:"cross", label:"Both encode patterns/relationships abstractly" },
+  { source:"tail_recursion",   target:"iteration_stmts",   type:"cross", label:"Tail recursion compiles to iteration (same cost)" },
+];
+
+// ─────────────────────────────────────────────────────────────
+//  GRAPH ENGINE
+// ─────────────────────────────────────────────────────────────
+(function () {
+  const container = document.getElementById("graph-container");
+  const svg = d3.select("#graph-svg");
+  const g = d3.select("#graph-g");
+  const starsLayer = d3.select("#stars-layer");
+
+  let width, height, simulation, currentMode = "overview";
+  let zoomBehavior;
+  let selectedNode = null;
+
+  // Build lookup maps
+  const nodeMap = {};
+  RAW_NODES.forEach(n => { nodeMap[n.id] = n; });
+
+  // ── Stars (galaxy mode) ────────────────────────────────
+  function buildStars() {
+    starsLayer.selectAll(".star").remove();
+    const w = container.clientWidth || 1200;
+    const h = container.clientHeight || 700;
+    const stars = d3.range(200).map(() => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: Math.random() * 1.2 + 0.3,
+      delay: Math.random() * 3,
+    }));
+    starsLayer.selectAll(".star")
+      .data(stars).join("circle")
+      .attr("class", "star")
+      .attr("cx", d => d.x).attr("cy", d => d.y).attr("r", d => d.r)
+      .style("animation-delay", d => d.delay + "s");
+  }
+
+  // ── Node radius ────────────────────────────────────────
+  function nodeRadius(d, mode) {
+    if (d.type === "chapter") return mode === "overview" ? 42 : 28;
+    return 10;
+  }
+
+  // ── Filter data by mode ────────────────────────────────
+  function getVisibleData(mode) {
+    let nodes, links;
+    if (mode === "overview") {
+      nodes = RAW_NODES.filter(n => n.type === "chapter");
+      links = RAW_LINKS.filter(l => l.type === "chapter");
+    } else {
+      // deepdive + galaxy: chapters + topics, no hierarchy links shown (implicit by layout)
+      nodes = RAW_NODES.slice(); // all
+      if (mode === "deepdive") {
+        links = RAW_LINKS.filter(l => l.type === "hierarchy" || l.type === "cross");
+      } else {
+        // galaxy: everything
+        links = RAW_LINKS.slice();
+      }
+    }
+    // Deep-copy for d3 mutation
+    const nodesCopy = nodes.map(n => ({ ...n }));
+    const nodeIds = new Set(nodesCopy.map(n => n.id));
+    const linksCopy = links
+      .filter(l => nodeIds.has(l.source) && nodeIds.has(l.target))
+      .map(l => ({ ...l }));
+    return { nodes: nodesCopy, links: linksCopy };
+  }
+
+  // ── Force parameters ───────────────────────────────────
+  function forceParams(mode) {
+    if (mode === "overview") return { charge: -600, linkDist: d => 160, collide: 55, alpha: 0.6 };
+    if (mode === "deepdive") return {
+      charge: d => d.type === "chapter" ? -500 : -120,
+      linkDist: d => d.type === "hierarchy" ? 80 : (d.type === "chapter" ? 180 : 140),
+      collide: d => d.type === "chapter" ? 38 : 16,
+      alpha: 0.7,
+    };
+    // galaxy
+    return {
+      charge: d => d.type === "chapter" ? -350 : -80,
+      linkDist: d => d.type === "hierarchy" ? 70 : (d.type === "chapter" ? 160 : 120),
+      collide: d => d.type === "chapter" ? 32 : 13,
+      alpha: 0.8,
+    };
+  }
+
+  // ── Render ─────────────────────────────────────────────
+  function render(mode, animate) {
+    resize();
+    const { nodes, links } = getVisibleData(mode);
+    const fp = forceParams(mode);
+    const isGalaxy = mode === "galaxy";
+
+    // Galaxy background
+    container.classList.toggle("galaxy", isGalaxy);
+    if (isGalaxy) buildStars();
+    else starsLayer.selectAll(".star").remove();
+
+    // Stop old simulation
+    if (simulation) simulation.stop();
+
+    // ── Links ──────────────────────────────────────────
+    const linkSel = g.selectAll(".link")
+      .data(links, d => d.source + "__" + d.target)
+      .join(
+        enter => enter.append("line")
+          .attr("class", d => "link" + (isGalaxy && d.type !== "hierarchy" ? " link-animated" : ""))
+          .attr("stroke", d => {
+            const s = typeof d.source === "object" ? d.source.id : d.source;
+            const n = nodeMap[s];
+            return n ? CH_COLOR[n.chapter || n.id] || CH_COLOR.meta : "#aaa";
+          })
+          .attr("opacity", 0)
+          .call(e => e.transition().duration(400).attr("opacity", 1)),
+        update => update
+          .attr("class", d => "link" + (isGalaxy && d.type !== "hierarchy" ? " link-animated" : "")),
+        exit => exit.transition().duration(300).attr("opacity", 0).remove()
+      );
+
+    // ── Nodes ──────────────────────────────────────────
+    const nodeSel = g.selectAll(".node")
+      .data(nodes, d => d.id)
+      .join(
+        enter => {
+          const grp = enter.append("g").attr("class", "node").call(drag());
+
+          grp.append("circle")
+            .attr("r", 0)
+            .attr("fill", d => {
+              const c = CH_COLOR[d.chapter || d.id] || CH_COLOR.meta;
+              return d.type === "chapter" ? c : c + "cc";
+            })
+            .attr("stroke", d => CH_COLOR[d.chapter || d.id] || CH_COLOR.meta)
+            .attr("stroke-width", d => d.type === "chapter" ? 2.5 : 1.5)
+            .style("filter", isGalaxy ? (d => d.type === "chapter" ? "url(#glow-strong)" : "url(#glow-filter)") : null)
+            .transition().duration(400)
+            .attr("r", d => nodeRadius(d, mode));
+
+          grp.append("text")
+            .attr("class", d => "node-label" + (d.type === "chapter" ? " chapter-label" : ""))
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "central")
+            .attr("font-size", d => d.type === "chapter" ? (mode === "overview" ? "10.5px" : "9px") : "8px")
+            .attr("fill-opacity", 0)
+            .text(d => d.type === "chapter" ? d.label.replace(" · ", "\n") : d.label)
+            .transition().duration(500).attr("fill-opacity", 1);
+
+          grp.on("click", onNodeClick).on("mouseover", onNodeHover).on("mouseout", onNodeOut);
+          return grp;
+        },
+        update => {
+          update.select("circle")
+            .transition().duration(400)
+            .attr("r", d => nodeRadius(d, mode))
+            .style("filter", isGalaxy ? (d => d.type === "chapter" ? "url(#glow-strong)" : "url(#glow-filter)") : null);
+          update.select("text")
+            .attr("font-size", d => d.type === "chapter" ? (mode === "overview" ? "10.5px" : "9px") : "8px");
+          return update;
+        },
+        exit => exit.transition().duration(300).attr("opacity", 0).remove()
+      );
+
+    // For chapter nodes: split label onto two lines
+    g.selectAll(".node text").each(function (d) {
+      if (d.type !== "chapter") return;
+      const parts = d.label.split(" · ");
+      if (parts.length < 2) return;
+      const el = d3.select(this);
+      el.text(null);
+      el.append("tspan").attr("x", 0).attr("dy", "-0.6em").attr("font-size", "0.65em")
+        .attr("fill-opacity", 0.75).attr("font-family", "var(--font-mono)").text(parts[0]);
+      el.append("tspan").attr("x", 0).attr("dy", "1.25em").text(parts[1]);
+    });
+
+    // ── Simulation ────────────────────────────────────
+    simulation = d3.forceSimulation(nodes)
+      .force("link", d3.forceLink(links).id(d => d.id)
+        .distance(typeof fp.linkDist === "function" ? fp.linkDist : () => fp.linkDist)
+        .strength(d => d.type === "hierarchy" ? 0.7 : 0.3))
+      .force("charge", d3.forceManyBody()
+        .strength(typeof fp.charge === "function" ? fp.charge : () => fp.charge))
+      .force("center", d3.forceCenter(width / 2, height / 2).strength(0.05))
+      .force("collide", d3.forceCollide()
+        .radius(typeof fp.collide === "function" ? d => fp.collide(d) + 5 : fp.collide + 5))
+      .alpha(fp.alpha)
+      .alphaDecay(0.025)
+      .on("tick", () => {
+        linkSel
+          .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+          .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+        g.selectAll(".node")
+          .attr("transform", d => `translate(${d.x},${d.y})`);
+      });
+  }
+
+  // ── Drag ──────────────────────────────────────────────
+  function drag() {
+    return d3.drag()
+      .on("start", (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+      .on("drag",  (e, d) => { d.fx = e.x; d.fy = e.y; })
+      .on("end",   (e, d) => { if (!e.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; });
+  }
+
+  // ── Hover ─────────────────────────────────────────────
+  function getNeighbors(d) {
+    const links = g.selectAll(".link").data();
+    const ids = new Set([d.id]);
+    links.forEach(l => {
+      const s = typeof l.source === "object" ? l.source.id : l.source;
+      const t = typeof l.target === "object" ? l.target.id : l.target;
+      if (s === d.id) ids.add(t);
+      if (t === d.id) ids.add(s);
+    });
+    return ids;
+  }
+
+  function onNodeHover(e, d) {
+    if (selectedNode) return;
+    const neighbors = getNeighbors(d);
+    g.selectAll(".node").classed("dimmed", n => !neighbors.has(n.id));
+    g.selectAll(".link").classed("dimmed", l => {
+      const s = typeof l.source === "object" ? l.source.id : l.source;
+      const t = typeof l.target === "object" ? l.target.id : l.target;
+      return !neighbors.has(s) || !neighbors.has(t);
+    }).classed("highlighted", l => {
+      const s = typeof l.source === "object" ? l.source.id : l.source;
+      const t = typeof l.target === "object" ? l.target.id : l.target;
+      return s === d.id || t === d.id;
+    });
+  }
+
+  function onNodeOut() {
+    if (selectedNode) return;
+    g.selectAll(".node").classed("dimmed", false).classed("highlighted", false);
+    g.selectAll(".link").classed("dimmed", false).classed("highlighted", false);
+  }
+
+  // ── Click / Info Panel ────────────────────────────────
+  function onNodeClick(e, d) {
+    e.stopPropagation();
+    selectedNode = d;
+    const neighbors = getNeighbors(d);
+
+    g.selectAll(".node")
+      .classed("dimmed", n => !neighbors.has(n.id))
+      .classed("highlighted", n => n.id === d.id);
+    g.selectAll(".link")
+      .classed("highlighted", l => {
+        const s = typeof l.source === "object" ? l.source.id : l.source;
+        const t = typeof l.target === "object" ? l.target.id : l.target;
+        return s === d.id || t === d.id;
+      })
+      .classed("dimmed", l => {
+        const s = typeof l.source === "object" ? l.source.id : l.source;
+        const t = typeof l.target === "object" ? l.target.id : l.target;
+        return !neighbors.has(s) || !neighbors.has(t);
+      });
+
+    // Populate info panel
+    const chapterInfo = d.type === "chapter" ? d : (nodeMap[d.chapter] || {});
+    const color = CH_COLOR[d.chapter || d.id] || CH_COLOR.meta;
+
+    document.getElementById("ip-tag").textContent = d.type === "chapter" ? "Chapter" : chapterInfo.label || "";
+    document.getElementById("ip-tag").style.color = color;
+    document.getElementById("ip-title").textContent = d.type === "chapter" ? d.label.replace(" · ", " — ") : d.label;
+    document.getElementById("ip-desc").textContent = d.desc || "";
+
+    // Connected nodes
+    const connEl = document.getElementById("ip-connections");
+    const connNodes = [...neighbors].filter(id => id !== d.id).slice(0, 8);
+    if (connNodes.length) {
+      connEl.innerHTML = '<div style="margin-bottom:4px;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);">Connected to</div>' +
+        connNodes.map(id => {
+          const n = nodeMap[id]; if (!n) return "";
+          return `<span>${n.label}</span>`;
+        }).join("");
+    } else connEl.innerHTML = "";
+
+    document.getElementById("info-panel").classList.add("visible");
+  }
+
+  svg.on("click", () => {
+    selectedNode = null;
+    g.selectAll(".node").classed("dimmed", false).classed("highlighted", false);
+    g.selectAll(".link").classed("dimmed", false).classed("highlighted", false);
+    document.getElementById("info-panel").classList.remove("visible");
+  });
+
+  document.getElementById("info-panel-close").addEventListener("click", e => {
+    e.stopPropagation();
+    selectedNode = null;
+    g.selectAll(".node").classed("dimmed", false).classed("highlighted", false);
+    g.selectAll(".link").classed("dimmed", false).classed("highlighted", false);
+    document.getElementById("info-panel").classList.remove("visible");
+  });
+
+  // ── Zoom ──────────────────────────────────────────────
+  zoomBehavior = d3.zoom()
+    .scaleExtent([0.15, 4])
+    .on("zoom", e => g.attr("transform", e.transform));
+  svg.call(zoomBehavior);
+
+  document.getElementById("zoom-in").addEventListener("click", () =>
+    svg.transition().duration(300).call(zoomBehavior.scaleBy, 1.4));
+  document.getElementById("zoom-out").addEventListener("click", () =>
+    svg.transition().duration(300).call(zoomBehavior.scaleBy, 0.7));
+  document.getElementById("zoom-reset").addEventListener("click", () =>
+    svg.transition().duration(400).call(zoomBehavior.transform, d3.zoomIdentity.translate(width/2, height/2).scale(1).translate(-width/2, -height/2)));
+
+  // ── Mode buttons ──────────────────────────────────────
+  document.querySelectorAll(".mode-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentMode = btn.dataset.mode;
+      selectedNode = null;
+      document.getElementById("info-panel").classList.remove("visible");
+      g.selectAll("*").remove();
+      svg.call(zoomBehavior.transform, d3.zoomIdentity);
+      render(currentMode, true);
+    });
+  });
+
+  // ── Resize ────────────────────────────────────────────
+  function resize() {
+    width = container.clientWidth;
+    height = container.clientHeight;
+    svg.attr("viewBox", `0 0 ${width} ${height}`);
+  }
+
+  window.addEventListener("resize", () => {
+    resize();
+    if (simulation) {
+      simulation.force("center", d3.forceCenter(width / 2, height / 2).strength(0.05));
+      simulation.alpha(0.3).restart();
+    }
+  });
+
+  // ── Hint bar text per mode ─────────────────────────────
+  const HINTS = {
+    overview: "10 chapter nodes · Click to explore · Hover to see connections",
+    deepdive: "Chapters + all key topics · Click a node for details · Scroll to zoom",
+    galaxy:   "All concepts connected · Drag to explore · Click to focus ✦",
+  };
+
+  document.querySelectorAll(".mode-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.getElementById("hint-bar").textContent = HINTS[btn.dataset.mode] || "";
+    });
+  });
+
+  // ── Init ──────────────────────────────────────────────
+  resize();
+  render("overview", false);
+
+})();
+</script>
+</body>
+</html>
