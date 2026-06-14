@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flashcards — COS 333</title>
+  <style>
+    /* ── Variables ──────────────────────────────────────────── */
+    :root {
+      --bg:         #f7f4ee;
+      --surface:    #faf8f4;
+      --surface2:   #f0ece0;
+      --text:       #1a1714;
+      --text-muted: #7a7268;
+      --accent:     #b85c2a;
+      --accent-bg:  rgba(184,92,42,0.10);
+      --border:     #ddd8cc;
+      --border2:    #c4bfb4;
+      --green:      #198754;
+      --green-bg:   #eaf7ef;
+      --red:        #c73333;
+      --red-bg:     #fdecec;
+      --font:       'Segoe UI', Arial, sans-serif;
+      --mono:       'Consolas', 'Courier New', monospace;
+      --r:          8px;
+      --rl:         12px;
+      --sh:         0 2px 8px rgba(0,0,0,.08);
+      --shl:        0 4px 20px rgba(0,0,0,.12);
+    }
+    [data-theme="dark"] {
+      --bg:         #1a1714;
+      --surface:    #242018;
+      --surface2:   #2e2820;
+      --text:       #f0ece0;
+      --text-muted: #9a9088;
+      --accent:     #e8a07a;
+      --accent-bg:  rgba(232,160,122,.15);
+      --border:     #3a3530;
+      --border2:    #4a4540;
+      --green:      #3da870;
+      --green-bg:   rgba(61,168,112,.15);
+      --red:        #e05555;
+      --red-bg:     rgba(224,85,85,.15);
+    }
+
+    /* ── Reset ──────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.5; font-size: 15px; }
+    button { font: inherit; cursor: pointer; border: none; background: none; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    pre, code { font-family: var(--mono); font-size: 13px; }
+    pre {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 10px 14px;
+      overflow-x: auto; white-space: pre-wrap; margin: 6px 0; line-height: 1.6;
+    }
+    ol, ul { padding-left: 20px; }
+    li { margin-bottom: 3px; }
+
+    /* ── 3-column layout ────────────────────────────────────── */
+    #app {
+      display: grid;
+      grid-template-columns: 240px 1fr 220px;
+      min-height: 100vh;
+    }
+
+    /* ── Filter panel ───────────────────────────────────────── */
+    #fc-filters {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 16px 14px;
+      overflow-y: auto;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+    .filter-brand { font-size: 17px; font-weight: 700; color: var(--accent); margin-bottom: 2px; }
+    .filter-back  { font-size: 12px; color: var(--text-muted); }
+    .fsep { height: 1px; background: var(--border); margin: 10px 0; }
+    .flabel {
+      font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--text-muted); margin-bottom: 5px;
+    }
+    .fgroup { margin-bottom: 12px; }
+
+    #fc-search {
+      width: 100%; padding: 7px 10px;
+      border: 1px solid var(--border); border-radius: var(--r);
+      background: var(--bg); color: var(--text); font: inherit; font-size: 13px;
+    }
+    #fc-search:focus { outline: none; border-color: var(--accent); }
+
+    .crow {
+      display: flex; align-items: center; gap: 6px;
+      padding: 2px 0; font-size: 13px; cursor: pointer; color: var(--text);
+    }
+    .crow input[type="checkbox"] { accent-color: var(--accent); flex-shrink: 0; }
+
+    .ch-grid { display: flex; flex-wrap: wrap; gap: 4px; }
+    .ch-btn {
+      padding: 3px 7px; border: 1px solid var(--border); border-radius: 4px;
+      background: var(--bg); color: var(--text-muted);
+      font-size: 11px; font-weight: 700; transition: all .15s;
+    }
+    .ch-btn.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .fbtn {
+      display: block; width: 100%; padding: 7px 10px; text-align: left;
+      border: 1px solid var(--border); border-radius: var(--r);
+      background: var(--bg); color: var(--text); font-size: 13px;
+      margin-bottom: 5px; transition: all .15s;
+    }
+    .fbtn:hover  { border-color: var(--accent); background: var(--accent-bg); }
+    .fbtn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .count-row {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .active-count { font-weight: 700; color: var(--accent); font-size: 13px; }
+
+    /* ── Card area ──────────────────────────────────────────── */
+    #fc-main {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 24px 28px 40px; overflow-y: auto;
+    }
+    .fc-top {
+      width: 100%; max-width: 580px;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
+    }
+    .fc-title { font-size: 19px; font-weight: 700; }
+    .help-btn {
+      padding: 4px 10px; border: 1px solid var(--border); border-radius: var(--r);
+      background: var(--surface); color: var(--text-muted); font-size: 12px;
+    }
+    .help-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Progress */
+    #prog-wrap { width: 100%; max-width: 580px; margin-bottom: 14px; }
+    #prog-labels {
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: var(--text-muted); margin-bottom: 5px;
+    }
+    #prog-bg { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    #prog-bar { height: 100%; background: var(--accent); border-radius: 3px; transition: width .35s ease; width: 0; }
+
+    /* Card scene */
+    #card-scene {
+      perspective: 1200px;
+      width: 100%; max-width: 580px;
+      margin-bottom: 14px;
+      cursor: pointer;
+    }
+    #card-inner {
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform .55s cubic-bezier(.4,0,.2,1);
+      height: 420px;
+    }
+    #card-inner.flipped { transform: rotateY(180deg); }
+
+    .card-face {
+      position: absolute; inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--rl);
+      padding: 20px 22px;
+      box-shadow: var(--shl);
+      display: flex; flex-direction: column; gap: 10px;
+      overflow-y: auto;
+    }
+    .card-back-face {
+      transform: rotateY(180deg);
+      background: var(--surface2);
+    }
+
+    .card-meta { display: flex; gap: 5px; flex-wrap: wrap; }
+    .badge {
+      font-size: 10px; font-weight: 700; padding: 2px 7px;
+      border-radius: 20px; text-transform: uppercase; letter-spacing: .05em;
+    }
+    .b-mcq     { background: #dbeafe; color: #1e40af; }
+    .b-concept { background: #f3e8ff; color: #6b21a8; }
+    .b-code    { background: #d1fae5; color: #065f46; }
+    .b-trace   { background: #fef3c7; color: #92400e; }
+    .b-ch      { background: var(--accent-bg); color: var(--accent); }
+    .b-easy    { background: #d1fae5; color: #065f46; }
+    .b-ok      { background: #dbeafe; color: #1e40af; }
+    .b-hard    { background: #fee2e2; color: #991b1b; }
+
+    #card-q { font-size: 15.5px; line-height: 1.65; }
+
+    #card-opts { display: grid; gap: 6px; }
+    .opt {
+      text-align: left; padding: 9px 12px;
+      border: 1px solid var(--border); border-radius: var(--r);
+      background: var(--bg); color: var(--text);
+      font-size: 14px; line-height: 1.4; transition: all .15s;
+    }
+    .opt:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-bg); }
+    .opt.correct { border-color: var(--green) !important; background: var(--green-bg) !important; color: var(--green) !important; font-weight: 600; }
+    .opt.wrong   { border-color: var(--red)   !important; background: var(--red-bg)   !important; color: var(--red)   !important; }
+    .opt:disabled { cursor: default; }
+
+    #see-exp-wrap { display: none; }
+    #btn-see-exp {
+      padding: 7px 13px; border: 1px solid var(--accent); border-radius: var(--r);
+      background: var(--accent-bg); color: var(--accent); font-size: 13px; font-weight: 600;
+      transition: all .15s;
+    }
+    #btn-see-exp:hover { background: var(--accent); color: #fff; }
+
+    #card-hint { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: auto; }
+
+    .back-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); }
+    #card-ans { font-size: 14.5px; line-height: 1.65; }
+
+    /* Controls */
+    #fc-controls {
+      display: flex; gap: 8px;
+      width: 100%; max-width: 580px;
+      justify-content: center; margin-bottom: 10px;
+    }
+    .ctrl {
+      padding: 9px 20px; border: 1px solid var(--border); border-radius: var(--r);
+      background: var(--surface); color: var(--text); font-size: 14px; font-weight: 600;
+      transition: all .15s;
+    }
+    .ctrl:hover { border-color: var(--accent); background: var(--accent-bg); }
+    #btn-flip { background: var(--accent); color: #fff; border-color: var(--accent); }
+    #btn-flip:hover { opacity: .85; }
+
+    /* Ratings */
+    #fc-rating {
+      display: flex; gap: 7px;
+      width: 100%; max-width: 580px; justify-content: center;
+      visibility: visible;
+    }
+    #fc-rating.hidden { visibility: hidden; pointer-events: none; }
+    .rate {
+      flex: 1; padding: 8px 6px; border-radius: var(--r);
+      font-size: 13px; font-weight: 700; transition: all .15s;
+      border: 2px solid transparent;
+    }
+    .r-easy { background: var(--green-bg); color: var(--green); border-color: var(--green); }
+    .r-easy:hover { background: var(--green); color: #fff; }
+    .r-ok   { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+    .r-ok:hover   { background: #1e40af; color: #fff; }
+    .r-hard { background: var(--red-bg); color: var(--red); border-color: var(--red); }
+    .r-hard:hover { background: var(--red); color: #fff; }
+    .r-skip { background: var(--surface2); color: var(--text-muted); border-color: var(--border); }
+    .r-skip:hover { background: var(--surface); color: var(--text); }
+
+    /* Deck complete */
+    #deck-done { display: none; text-align: center; padding: 48px 20px; }
+    #deck-done.show { display: block; }
+    #deck-done h2 { font-size: 22px; margin-bottom: 8px; }
+    #deck-done p  { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
+
+    /* Empty state */
+    #empty-state { display: none; text-align: center; padding: 60px 20px; color: var(--text-muted); }
+    #empty-state.show { display: block; }
+
+    /* ── Stats panel ────────────────────────────────────────── */
+    #fc-stats {
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      padding: 16px 14px;
+      overflow-y: auto;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+    .stitle {
+      font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--text-muted); margin-bottom: 8px;
+    }
+    .ssec { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .srow { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; font-size: 13px; }
+    .sval { font-weight: 700; color: var(--accent); }
+    .sbtn {
+      display: block; width: 100%; padding: 8px 10px; text-align: left;
+      border: 1px solid var(--border); border-radius: var(--r);
+      background: var(--surface2); color: var(--text);
+      font-size: 13px; margin-bottom: 7px; transition: all .15s;
+    }
+    .sbtn:hover { border-color: var(--accent); background: var(--accent-bg); }
+
+    /* ── Mobile filter overlay ──────────────────────────────── */
+    #fc-ftoggle {
+      display: none; position: fixed; bottom: 20px; left: 16px; z-index: 200;
+      padding: 10px 16px; border-radius: 20px;
+      background: var(--accent); color: #fff; font-size: 14px; font-weight: 600;
+      box-shadow: var(--shl);
+    }
+    #fc-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.4); z-index: 99;
+    }
+    #fc-overlay.show { display: block; }
+
+    /* ── Shortcut modal ─────────────────────────────────────── */
+    .modal {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,.5);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal.hidden { display: none; }
+    .modal-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--rl); padding: 24px 28px;
+      max-width: 400px; width: 90%; box-shadow: var(--shl);
+    }
+    .modal-box h3 { margin-bottom: 14px; font-size: 16px; }
+    .modal-box table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .modal-box td { padding: 5px 8px; border-bottom: 1px solid var(--border); }
+    .modal-box td:first-child { font-family: var(--mono); font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .modal-close {
+      margin-top: 14px; padding: 8px 20px;
+      background: var(--accent); color: #fff; border-radius: var(--r); font-size: 14px;
+    }
+
+    /* ── Animations ─────────────────────────────────────────── */
+    @keyframes bounceIn { 0%{transform:scale(1)} 40%{transform:scale(1.04)} 70%{transform:scale(.97)} 100%{transform:scale(1)} }
+    @keyframes shakeX   { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-8px)} 40%,80%{transform:translateX(8px)} }
+    @keyframes fadeSlideR { from{opacity:0;transform:translateX(24px)} to{opacity:1;transform:none} }
+    @keyframes fadeSlideL { from{opacity:0;transform:translateX(-24px)} to{opacity:1;transform:none} }
+    .anim-bounce #card-inner { animation: bounceIn .4s ease; }
+    .anim-shake  #card-inner { animation: shakeX  .4s ease; }
+    #card-scene.anim-next { animation: fadeSlideR .28s ease; }
+    #card-scene.anim-prev { animation: fadeSlideL .28s ease; }
+
+    /* ── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      #app { grid-template-columns: 1fr; }
+      #fc-filters {
+        position: fixed; left: -260px; top: 0; bottom: 0; width: 260px;
+        z-index: 100; transition: left .3s ease;
+      }
+      #fc-filters.open { left: 0; }
+      #fc-stats { position: static; height: auto; border-left: none; border-top: 1px solid var(--border); }
+      #fc-ftoggle { display: block; }
+      #fc-main { padding: 14px 14px 60px; }
+    }
+    @media (max-width: 500px) {
+      .ctrl { padding: 8px 12px; font-size: 13px; }
+      .rate { font-size: 12px; padding: 8px 4px; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ═══════════ FILTER PANEL ═══════════ -->
+  <aside id="fc-filters">
+    <div class="filter-brand">Flashcards</div>
+    <a class="filter-back" href="index.html">← Back to Notes</a>
+
+    <div class="fsep"></div>
+
+    <div class="fgroup">
+      <input type="search" id="fc-search" placeholder="Search cards…" autocomplete="off" />
+    </div>
+
+    <div class="fgroup">
+      <div class="flabel">Sources</div>
+      <label class="crow"><input type="checkbox" data-src="2022-exam"  checked> 2022 Exam</label>
+      <label class="crow"><input type="checkbox" data-src="2023-exam"  checked> 2023 Exam</label>
+      <label class="crow"><input type="checkbox" data-src="2024-exam"  checked> 2024 Exam</label>
+      <label class="crow"><input type="checkbox" data-src="2025-exam"  checked> 2025 Exam</label>
+      <label class="crow"><input type="checkbox" data-src="2024-st2"   checked> 2024 ST2</label>
+      <label class="crow"><input type="checkbox" data-src="2025-st2"   checked> 2025 ST2</label>
+      <label class="crow"><input type="checkbox" data-src="study"      checked> Study Cards</label>
+    </div>
+
+    <div class="fgroup">
+      <div class="flabel">Chapters</div>
+      <div class="ch-grid" id="ch-grid"></div>
+    </div>
+
+    <div class="fgroup">
+      <div class="flabel">Types</div>
+      <label class="crow"><input type="checkbox" data-type="mcq"     checked> MCQ</label>
+      <label class="crow"><input type="checkbox" data-type="concept" checked> Concept</label>
+      <label class="crow"><input type="checkbox" data-type="code"    checked> Coding</label>
+      <label class="crow"><input type="checkbox" data-type="trace"   checked> Trace</label>
+    </div>
+
+    <div class="fgroup">
+      <label class="crow"><input type="checkbox" id="f-hard">   Hard cards only</label>
+      <label class="crow"><input type="checkbox" id="f-unseen"> Unseen only</label>
+      <label class="crow"><input type="checkbox" id="f-exam">   Exam questions only</label>
+    </div>
+
+    <div class="fsep"></div>
+
+    <button class="fbtn" id="btn-shuffle">⇄ Shuffle: ON</button>
+    <button class="fbtn" id="btn-all">Select all</button>
+    <button class="fbtn" id="btn-none">Clear all</button>
+
+    <div class="fsep"></div>
+
+    <div class="fgroup">
+      <div class="flabel">Quick Presets</div>
+      <button class="fbtn" data-preset="exam-prep">2026 Exam prep</button>
+      <button class="fbtn" data-preset="hard-review">Hard cards review</button>
+      <button class="fbtn" data-preset="coding">Coding practice</button>
+    </div>
+
+    <div class="fsep"></div>
+    <div class="count-row">
+      <span class="flabel" style="margin:0">Active</span>
+      <span class="active-count" id="active-count">0 cards</span>
+    </div>
+  </aside>
+
+  <!-- ═══════════ CARD AREA ═══════════ -->
+  <main id="fc-main">
+
+    <div class="fc-top">
+      <span class="fc-title">COS 333 Flashcards</span>
+      <button class="help-btn" id="btn-help">? Shortcuts</button>
+    </div>
+
+    <div id="prog-wrap">
+      <div id="prog-labels">
+        <span id="prog-pos">Card 1 of 0</span>
+        <span id="prog-pct">0% seen</span>
+      </div>
+      <div id="prog-bg"><div id="prog-bar"></div></div>
+    </div>
+
+    <div id="card-scene" role="button" tabindex="0" aria-label="Flashcard — click to flip">
+      <div id="card-inner">
+
+        <div id="card-front" class="card-face">
+          <div class="card-meta" id="front-meta"></div>
+          <div id="card-q"></div>
+          <div id="card-opts"></div>
+          <div id="see-exp-wrap"><button id="btn-see-exp">See explanation &rarr;</button></div>
+          <div id="card-hint">Click card or press Space to flip</div>
+        </div>
+
+        <div id="card-back" class="card-face card-back-face">
+          <div class="card-meta"><span class="back-label">Answer / Explanation</span></div>
+          <div id="card-ans"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="empty-state">No cards match the current filters.</div>
+
+    <div id="deck-done">
+      <h2>Deck complete!</h2>
+      <p id="done-summary"></p>
+      <button class="ctrl" id="btn-restart"
+        style="background:var(--accent);color:#fff;border-color:var(--accent)">Restart deck</button>
+    </div>
+
+    <div id="fc-controls">
+      <button class="ctrl" id="btn-prev">&#9664; Prev</button>
+      <button class="ctrl" id="btn-flip">Flip</button>
+      <button class="ctrl" id="btn-next">Next &#9654;</button>
+    </div>
+
+    <div id="fc-rating" class="hidden">
+      <button class="rate r-easy" data-r="easy">Easy (1)</button>
+      <button class="rate r-ok"   data-r="ok">OK (2)</button>
+      <button class="rate r-hard" data-r="hard">Hard (3)</button>
+      <button class="rate r-skip" id="btn-skip">Skip</button>
+    </div>
+
+  </main>
+
+  <!-- ═══════════ STATS PANEL ═══════════ -->
+  <aside id="fc-stats">
+    <div class="ssec">
+      <div class="stitle">Session</div>
+      <div class="srow"><span>Cards seen</span>   <span class="sval" id="s-seen">0</span></div>
+      <div class="srow"><span>Correct (MCQ)</span><span class="sval" id="s-cor">0</span></div>
+      <div class="srow"><span>Wrong (MCQ)</span>  <span class="sval" id="s-wrong">0</span></div>
+      <div class="srow"><span>Streak</span>       <span class="sval" id="s-streak">0</span></div>
+    </div>
+    <div class="ssec">
+      <div class="stitle">Rated this session</div>
+      <div class="srow"><span>Easy</span><span class="sval" id="s-easy">0</span></div>
+      <div class="srow"><span>OK</span>  <span class="sval" id="s-ok">0</span></div>
+      <div class="srow"><span>Hard</span><span class="sval" id="s-hard">0</span></div>
+    </div>
+    <div class="ssec">
+      <div class="stitle">All-time</div>
+      <div class="srow"><span>Hard-rated</span><span class="sval" id="s-at-hard">0</span></div>
+      <div class="srow"><span>Easy-rated</span><span class="sval" id="s-at-easy">0</span></div>
+    </div>
+    <button class="sbtn" id="btn-reset">Reset session</button>
+    <button class="sbtn" id="btn-theme">&#9790; Toggle dark mode</button>
+  </aside>
+
+</div>
+
+<!-- Mobile filter toggle -->
+<button id="fc-ftoggle">&#9881; Filters</button>
+<div id="fc-overlay"></div>
+
+<!-- Shortcut modal -->
+<div id="shortcut-modal" class="modal hidden">
+  <div class="modal-box">
+    <h3>Keyboard Shortcuts</h3>
+    <table>
+      <tr><td>Space</td>  <td>Flip card / submit MCQ</td></tr>
+      <tr><td>&rarr; / L</td><td>Next card</td></tr>
+      <tr><td>&larr; / H</td><td>Previous card</td></tr>
+      <tr><td>1</td>      <td>Rate Easy</td></tr>
+      <tr><td>2</td>      <td>Rate OK</td></tr>
+      <tr><td>3</td>      <td>Rate Hard</td></tr>
+      <tr><td>S</td>      <td>Toggle shuffle</td></tr>
+      <tr><td>F</td>      <td>Focus search</td></tr>
+      <tr><td>?</td>      <td>Show this help</td></tr>
+    </table>
+    <button class="modal-close" id="close-modal">Close</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ══════════════════════════════════════════════════════════════════════════
+//  CARDS
+//  To add more cards: append objects to this array.
+//  Schema: { id, front, back, opts, ans, multi, type, chapter, topic, source, year, pts }
+//    type:    'mcq' | 'concept' | 'code' | 'trace'
+//    chapter: 1,2,5,6,7,8,9,12,15,16  (0 = general)
+//    source:  '2022-exam'|'2023-exam'|'2024-exam'|'2025-exam'|'2024-st2'|'2025-st2'|'study'
+//    opts:    string[] for MCQ, null otherwise
+//    ans:     1-based correct indices for MCQ, null otherwise
+// ══════════════════════════════════════════════════════════════════════════
+const CARDS = [
+
+  // ── 2024 Exam ────────────────────────────────────────────────────────
+  {
+    id:'ex2024-q2', type:'mcq', chapter:1, topic:'evaluation-criteria',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'An additional criterion is <strong>generality</strong>. Select the programming language that has the <strong>best generality</strong>.',
+    back:'<strong>PL/I</strong> was explicitly designed to combine the best features of FORTRAN (scientific), COBOL (business) and ALGOL 60 (structured) — making it the most general-purpose of these four options.',
+    opts:['Fortran I','ALGOL 60','SIMULA 67','PL/I'], ans:[4],
+  },
+  {
+    id:'ex2024-q3', type:'mcq', chapter:1, topic:'evaluation-criteria',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'Consider <strong>Pascal and C</strong>, and select the most correct statement.',
+    back:'<strong>Pascal is more readable than C.</strong> Pascal was designed for teaching and clarity — strict typing, structured blocks and clean syntax make it more readable than C\'s terse style.',
+    opts:['Pascal is more readable than C.','Pascal is more writable than C.','Pascal is less reliable than C.','Pascal has a higher cost of maintenance than C.'], ans:[1],
+  },
+  {
+    id:'ex2024-q4', type:'mcq', chapter:1, topic:'portability',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'An additional criterion is <strong>portability</strong>. Select the programming language that is the <strong>most portable</strong>.',
+    back:'<strong>JavaScript</strong> runs in every browser and via Node.js on every OS — its universal web presence makes it the most portable of these options.',
+    opts:['Fortran 90','C++','PL/I','JavaScript'], ans:[4],
+  },
+
+  // ── Concept cards ────────────────────────────────────────────────────
+  {
+    id:'study-ch1-orthogonality', type:'concept', chapter:1, topic:'orthogonality',
+    source:'study', year:null, pts:0, multi:false, opts:null, ans:null,
+    front:'What is <strong>orthogonality</strong> in programming language design?',
+    back:'Orthogonality means a small set of primitive constructs can be combined in a small number of ways, and <strong>every combination is legal and meaningful</strong> — no special cases or exceptions.<br><br>High orthogonality makes a language easier to learn because you don\'t need to memorise many exceptions.<br><br><em>Counter-example: in C, a struct can be returned from a function but an array cannot — a non-orthogonal rule.</em>',
+  },
+  {
+    id:'study-ch5-scope', type:'concept', chapter:5, topic:'scope',
+    source:'study', year:null, pts:0, multi:false, opts:null, ans:null,
+    front:'What is the difference between <strong>static (lexical)</strong> and <strong>dynamic scoping</strong>?',
+    back:'<strong>Static scoping</strong> — a name is resolved by searching the <em>textually enclosing</em> scopes at the <em>definition site</em>. Determined at compile time. Used by C, Java, Python, Scheme.<br><br><strong>Dynamic scoping</strong> — a name is resolved by searching the <em>call stack</em> at <em>runtime</em>; the most recently activated subprogram that declared the name wins.<br><br>Static is predictable; dynamic makes closures impossible and is rarely used today (legacy Lisp, some shells).',
+  },
+  {
+    id:'study-ch5-binding-times', type:'concept', chapter:5, topic:'binding-times',
+    source:'study', year:null, pts:0, multi:false, opts:null, ans:null,
+    front:'List the <strong>five binding times</strong> for a variable attribute, from earliest to latest.',
+    back:'<ol><li><strong>Language design time</strong> — e.g. <code>*</code> means multiplication</li><li><strong>Language implementation time</strong> — e.g. size of an <code>int</code></li><li><strong>Compile time</strong> — e.g. type of a variable in a statically-typed language</li><li><strong>Load time</strong> — e.g. address of a static/global variable</li><li><strong>Runtime</strong> — e.g. value of a variable; address of a stack-allocated variable</li></ol>Earlier binding → more efficiency. Later binding → more flexibility.',
+  },
+  {
+    id:'study-ch9-closures', type:'concept', chapter:9, topic:'closures',
+    source:'study', year:null, pts:0, multi:false, opts:null, ans:null,
+    front:'What is a <strong>closure</strong>?',
+    back:'A closure is a subprogram together with the <strong>referencing environment in which it was defined</strong>.<br><br>When called later — even after the defining scope has exited — the closure still has access to variables from that environment.<br><br>Closures require <em>deep binding</em> (bind at definition time) and are natural in languages with static scoping and first-class functions (Scheme, Python, JavaScript).',
+  },
+  {
+    id:'study-ch9-param-modes', type:'concept', chapter:9, topic:'parameter-passing',
+    source:'study', year:null, pts:0, multi:false, opts:null, ans:null,
+    front:'Name and briefly describe the <strong>5 parameter passing modes</strong>.',
+    back:'<ol><li><strong>Pass-by-value</strong> — copy of the actual is passed; callee changes do not affect caller</li><li><strong>Pass-by-result</strong> — no initial value transferred; callee writes result back to caller at return (physical copy)</li><li><strong>Pass-by-value-result</strong> — value copied in at call, result copied back at return (in-out)</li><li><strong>Pass-by-reference</strong> — callee receives address of actual; all changes are immediate and visible to caller</li><li><strong>Pass-by-name</strong> — textual substitution; actual re-evaluated on every use (Jensen\'s Device)</li></ol>',
+  },
+  {
+    id:'study-ch16-unification', type:'concept', chapter:16, topic:'unification',
+    source:'study', year:null, pts:0, multi:false, opts:null, ans:null,
+    front:'What is <strong>unification</strong> in Prolog?',
+    back:'Unification is the process of finding a <strong>substitution</strong> that makes two terms identical.<br><br>Rules:<ul><li>A variable unifies with any term (and becomes bound)</li><li>Two atoms/numbers unify only if they are identical</li><li>Two compound terms unify if their functor+arity match, and each argument pair unifies recursively</li></ul><em>Example: <code>foo(X, 3)</code> unifies with <code>foo(2, Y)</code> via {X=2, Y=3}</em>',
+  },
+
+  // ── Code cards ───────────────────────────────────────────────────────
+  {
+    id:'study-ch15-factorial', type:'code', chapter:15, topic:'scheme-recursion',
+    source:'study', year:null, pts:0, multi:false, opts:null, ans:null,
+    front:'Write a <strong>Scheme function</strong> <code>factorial</code> that computes n! recursively.',
+    back:'<pre>(define (factorial n)\n  (if (= n 0)\n      1\n      (* n (factorial (- n 1)))))</pre>Base case: <code>(= n 0)</code> returns 1.<br>Recursive: multiply n by (n-1)!<br><br>Tail-recursive version (more efficient):<pre>(define (factorial n acc)\n  (if (= n 0)\n      acc\n      (factorial (- n 1) (* n acc))))\n\n; call as: (factorial 5 1)</pre>',
+  },
+  {
+    id:'study-ch16-member', type:'code', chapter:16, topic:'prolog-lists',
+    source:'study', year:null, pts:0, multi:false, opts:null, ans:null,
+    front:'Write a <strong>Prolog predicate</strong> <code>member(X, List)</code> that succeeds if X is an element of List.',
+    back:'<pre>member(X, [X|_]).\nmember(X, [_|T]) :- member(X, T).</pre>Clause 1: X is the <strong>head</strong> of the list — succeed.<br>Clause 2: X is in the <strong>tail</strong> — recurse.<br><br>Usage:<pre>?- member(2, [1,2,3]).   % true\n?- member(X, [a,b,c]).   % X=a ; X=b ; X=c</pre>',
+  },
+
+  // ── Trace cards ──────────────────────────────────────────────────────
+  {
+    id:'study-ch15-trace1', type:'trace', chapter:15, topic:'scheme-lists',
+    source:'study', year:null, pts:0, multi:false, opts:null, ans:null,
+    front:'What is the value of this Scheme expression?<pre>(car (cdr (list 1 2 3 4)))</pre>',
+    back:'<strong>Answer: 2</strong><br><br>Step by step:<ol><li><code>(list 1 2 3 4)</code> &rarr; <code>(1 2 3 4)</code></li><li><code>(cdr (1 2 3 4))</code> &rarr; <code>(2 3 4)</code> &nbsp;(everything after the first)</li><li><code>(car (2 3 4))</code> &rarr; <code>2</code> &nbsp;(the first element)</li></ol>',
+  },
+  {
+    id:'study-ch9-closure-trace', type:'trace', chapter:9, topic:'closures',
+    source:'study', year:null, pts:0, multi:false, opts:null, ans:null,
+    front:'What does this Python code print?<pre>def f(x):\n    def g(): return x\n    return g\n\na = f(10)\nx = 99\nprint(a())</pre>',
+    back:'<strong>Output: 10</strong><br><br><code>g</code> is a closure that captured <code>x</code> from the environment where it was <strong>defined</strong> — inside <code>f</code> where <code>x = 10</code>.<br><br>The later assignment <code>x = 99</code> in the outer (global) scope creates a <em>different</em> binding for <code>x</code>. It does not affect the closure\'s captured <code>x</code>.<br><br>This demonstrates <strong>deep binding</strong> (static scoping + closure).',
+  },
+
+
+  // ── 2024 EXAM ────────────────────────────────────────────────────────────
+  {
+    id:'ex2024-q1', type:'mcq', chapter:1, topic:'evaluation-criteria',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'There are often trade-offs between the evaluation criteria. Select the statement that most correctly describes a likely <strong>trade-off when readability improves</strong>.',
+    back:'Correct: <strong>The cost of implementation becomes worse.</strong><br><br>More readable languages require richer, more expressive grammar and higher-level constructs, which increases the complexity of implementing the language — compilers and runtimes become harder to build.',
+    opts:['The cost of execution becomes worse.','The cost of maintenance becomes worse.','The cost of implementation becomes worse.','Reliability becomes worse.'], ans:[3],
+  },
+  {
+    id:'ex2024-q5', type:'code', chapter:15, topic:'scheme-filtering',
+    source:'2024-exam', year:2024, pts:5, multi:false, opts:null, ans:null,
+    front:'Write a Scheme function <code>removePositiveOddValues</code> that receives a simple list of numeric atoms and returns the list with all <strong>positive odd values removed</strong>.<pre>(removePositiveOddValues \'(3 9))        ; =&gt; ()\n(removePositiveOddValues \'(-5 3 0 5 9)) ; =&gt; (-5 0)</pre>',
+    back:'<pre>(define (removePositiveOddValues lst)\n  (cond\n    ((null? lst) \'())\n    ((and (&gt; (car lst) 0) (odd? (car lst)))\n     (removePositiveOddValues (cdr lst)))\n    (else\n     (cons (car lst) (removePositiveOddValues (cdr lst))))))</pre><strong>Logic:</strong><ul><li>Base: empty list → return <code>\'()</code></li><li>Skip: head is positive AND odd → recurse on tail (discard head)</li><li>Keep: all other values → cons head onto recursive result</li></ul>',
+  },
+  {
+    id:'ex2024-q6', type:'code', chapter:16, topic:'prolog-lists',
+    source:'2024-exam', year:2024, pts:5, multi:false, opts:null, ans:null,
+    front:'Write a Prolog proposition <code>doublePositives(L1, L2)</code> that succeeds if L2 is L1 with every <strong>positive value doubled</strong> and every <strong>non-positive value unchanged</strong>.<pre>?- doublePositives([-4,-9], X).           % X = [-4,-9]\n?- doublePositives([-3,6,7,-1,-5], X).    % X = [-3,12,14,-1,-5]</pre>',
+    back:'<pre>doublePositives([], []).\ndoublePositives([H|T], [D|R]) :-\n    H &gt; 0, D is H * 2, doublePositives(T, R).\ndoublePositives([H|T], [H|R]) :-\n    H =&lt; 0, doublePositives(T, R).</pre><strong>Clauses:</strong><ol><li>Base: empty in, empty out.</li><li>Head positive: double it (<code>D is H*2</code>), recurse.</li><li>Head non-positive: keep it unchanged, recurse.</li></ol>',
+  },
+  {
+    id:'ex2024-q7', type:'mcq', chapter:5, topic:'binding-times',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'Select the option that most correctly describes the <strong>binding time</strong> of a standard 32-bit signed integer type in a statically typed language to either sign-and-magnitude or two\'s complement representation.',
+    back:'Correct: <strong>Language implementation time.</strong><br><br>The decision to use two\'s complement (vs sign-and-magnitude) is made by whoever implements the language on a particular platform — it is not fixed by the language standard, not by the compiler, and not at runtime.',
+    opts:['Language design time','Language implementation time','Compile time','Load time','Runtime'], ans:[2],
+  },
+  {
+    id:'ex2024-q8', type:'mcq', chapter:5, topic:'variable-hiding',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'Consider this C# code:<pre>1. {\n2.    int y;\n3.    {\n4.       int x = 5;\n5.    }\n6.    int x = 2;\n7. }</pre>Select the most correct statement.',
+    back:'Correct: <strong>Does not compile because x on line 4 hides x on line 6.</strong><br><br>C# treats the outer block and all its nested blocks as a single local variable space. You cannot declare a local variable in a nested block with the same name as any variable in the enclosing block — even if the inner block closes before the outer declaration. The compiler rejects this.',
+    opts:['Does not compile because y is not initialised.','Does not compile because x on line 4 hides x on line 6.','Does not compile because x on line 6 hides x on line 4.','Compiles and runs successfully.'], ans:[2],
+  },
+  {
+    id:'ex2024-q9', type:'mcq', chapter:6, topic:'string-types',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'Consider <strong>character string types</strong> in programming languages, and select the most correct statement.',
+    back:'Correct: <strong>Limited dynamic length strings have a higher overall hardware cost than static length strings, and a lower cost than dynamic length strings.</strong><br><br>Static strings: no overhead. Limited dynamic: a fixed upper-bound buffer + a length field (modest overhead). Fully dynamic: heap allocation and potential resizing (highest overhead).',
+    opts:['In languages that represent character strings using only classes, strings are always mutable.','In languages that represent character strings using only classes, strings are always immutable.','Limited dynamic length strings have a higher overall hardware cost than static length strings, and a lower cost than dynamic length strings.','C supports character strings as a primitive type.'], ans:[3],
+  },
+  {
+    id:'ex2024-q10', type:'mcq', chapter:6, topic:'unions',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'Consider <strong>unions</strong>, and select the most correct statement.',
+    back:'Correct: <strong>Unions can be used as a mechanism for returning multiple values from a subprogram.</strong><br><br>A union can hold one of several differently-typed fields at a time; a subprogram can write to one field and the caller can read it — effectively passing back a result of varying type. Unions are also used for memory efficiency (overlaying types in the same space).',
+    opts:['Unions are closely related to classes in OOP, but are more limited in functionality.','Discriminated unions are more memory efficient than free unions.','Unions can be used as a mechanism for returning multiple values from a subprogram.','Unions are used when memory cost is of great concern.'], ans:[3],
+  },
+  {
+    id:'ex2024-q11', type:'mcq', chapter:7, topic:'scheme-expressions',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'Consider <strong>arithmetic operations in Scheme</strong>, and select the most correct statement.',
+    back:'Correct: <strong>Order is unambiguously determined based on function and parameter evaluation.</strong><br><br>Scheme uses prefix notation — arithmetic is expressed as nested function calls. The nesting of applications unambiguously determines evaluation order with no separate precedence rules needed.',
+    opts:['Order is unambiguously determined based on clear precedence levels and associativity rules.','Order is unambiguously determined based on function and parameter evaluation.','Order is unambiguously determined because all operators have the same precedence and associate left-to-right.','Order is ambiguous because function parameters are evaluated in no particular order.'], ans:[2],
+  },
+  {
+    id:'ex2024-q12', type:'mcq', chapter:7, topic:'coercions',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'Consider <strong>expressions in Ada</strong>, and select the most correct statement.',
+    back:'Correct: <strong>The lack of coercions in Ada makes the language more readable.</strong><br><br>With no implicit coercions, every type conversion is explicit and visible in the source code. The programmer can always see exactly what types are being used, making the program\'s behaviour clearer and more readable.',
+    opts:['The lack of coercions in Ada makes the language more readable.','The lack of coercions in Ada makes the language less reliable.','The common use of coercions in Ada makes the language more writable.','The common use of coercions in Ada makes the language less reliable.'], ans:[1],
+  },
+  {
+    id:'ex2024-q13', type:'mcq', chapter:7, topic:'short-circuit',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'Consider:<pre>while ((count &gt; 0) and (result = (10.0 / count))) { print result; count = count - 1; }</pre>Assume C-like syntax, assignment as expression, integers as Booleans. Select the most correct statement.',
+    back:'Correct: <strong>Produces an error if <code>and</code> is NOT short-circuit evaluated.</strong><br><br>When <code>count</code> reaches 0, <code>count &gt; 0</code> is false. Without short-circuit, the right side <code>result = (10.0 / 0)</code> is still evaluated → division by zero error. With short-circuit, the right side is skipped and the loop exits safely.',
+    opts:['Produces an error regardless of short-circuit evaluation.','Produces an error if <code>and</code> IS short-circuit evaluated.','Produces an error if <code>and</code> is NOT short-circuit evaluated.','Produces no error regardless of short-circuit evaluation.'], ans:[3],
+  },
+  {
+    id:'ex2024-q14', type:'mcq', chapter:7, topic:'unary-operators',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'Consider <strong>unary assignment operators</strong>, and select the most correct statement.',
+    back:'Correct: <strong>Unary assignment operators reduce readability if overloaded to provide prefix and postfix versions.</strong><br><br>When both <code>++i</code> (prefix, increments then returns) and <code>i++</code> (postfix, returns then increments) exist, a reader must understand both forms and their subtly different side-effect timing — reducing readability.',
+    opts:['Unary assignment operators reduce readability if overloaded to provide prefix and postfix versions.','Unary assignment operators reduce writability if overloaded to provide prefix and postfix versions.','Unary assignment operators reduce the execution cost of a programming language.','Unary assignment operators are essential within a programming language.'], ans:[1],
+  },
+  {
+    id:'ex2024-q15', type:'mcq', chapter:8, topic:'counter-loops',
+    source:'2024-exam', year:2024, pts:2, multi:true,
+    front:'Select <strong>only</strong> the statements that are true about <strong>counter-controlled loops</strong>. <em>(Incorrectly selected options will be penalised.)</em>',
+    back:'Correct: <strong>B &amp; D</strong><br><br><strong>B</strong> — Python\'s <code>range</code>-based for loop prevents index manipulation errors (the counter is implicit), making it more reliable than C\'s general for loop where the programmer controls the counter directly.<br><br><strong>D</strong> — Purely functional languages (Scheme, Haskell) use recursion rather than counter loops; there is no built-in counter-controlled loop construct.',
+    opts:['Counter-controlled loops are required to implement any flowchart-represented algorithm.','Counter-controlled loops in Python are more reliable than in C.','Counter-controlled loops in C are more readable than in Java.','Counter-controlled loops are not directly supported in purely functional programming languages.'], ans:[2,4],
+  },
+  {
+    id:'ex2024-q16', type:'mcq', chapter:8, topic:'nested-selectors',
+    source:'2024-exam', year:2024, pts:2, multi:true,
+    front:'Select <strong>only</strong> the correct statements about <strong>disambiguating nested selection statements</strong>. <em>(Incorrectly selected options will be penalised.)</em>',
+    back:'Correct: <strong>A &amp; B</strong><br><br><strong>A</strong> — Python uses indentation to delimit blocks; a mis-indent silently changes logic without a syntax error, so Python is less readable (the structure isn\'t visually enforced by syntax).<br><br><strong>B</strong> — Python\'s indentation-based nesting is error-prone (a mis-indent silently changes logic) making it less reliable than Java\'s explicit curly-brace delimiters.',
+    opts:['Python\'s approach is less readable than Java\'s approach.','Python\'s approach is less reliable than Java\'s approach.','Ruby and Perl use very similar approaches, but Perl\'s approach is more writable than Ruby\'s.','Python and Ruby use very similar approaches, but Python\'s approach is more writable than Ruby\'s.'], ans:[1,2],
+  },
+  {
+    id:'ex2024-q17', type:'trace', chapter:8, topic:'guarded-commands',
+    source:'2024-exam', year:2024, pts:1, multi:false, opts:null, ans:null,
+    front:'Consider this guarded-commands program:<pre>var myVal = 2\ndo (myVal &lt; 0) -&gt; print("A "); myVal = 1\n[] (myVal &gt; 0) -&gt; print("B "); myVal = myVal - 1\nod</pre>Provide the <strong>output</strong>.',
+    back:'<strong>Output: B B</strong><br><br>Trace:<ol><li>myVal=2: guard (2&lt;0)=false, guard (2&gt;0)=true → print "B ", myVal=1</li><li>myVal=1: guard (1&lt;0)=false, guard (1&gt;0)=true → print "B ", myVal=0</li><li>myVal=0: both guards false → exit <code>do...od</code></li></ol>',
+  },
+  {
+    id:'ex2024-q18', type:'mcq', chapter:9, topic:'subprograms-outside-class',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'Consider <strong>subprograms defined outside a class definition</strong>, and select the most correct statement.',
+    back:'Correct: <strong>Ruby subprograms defined outside a class definition are more orthogonal than C++ subprograms.</strong><br><br>In Ruby, functions defined outside a class automatically become private methods of the <code>Object</code> class — everything is a method, consistent with Ruby\'s pure-OOP model. C++ allows true standalone functions outside the object system, creating a non-orthogonal mix of methods and free functions.',
+    opts:['Ruby subprograms defined outside a class definition are more writable than C++ subprograms defined outside a class definition.','Ruby subprograms defined outside a class definition are less writable than C++ subprograms defined outside a class definition.','Ruby subprograms defined outside a class definition are more orthogonal than C++ subprograms defined outside a class definition.','Ruby subprograms defined outside a class definition behave in exactly the same way as C++ subprograms defined outside a class definition.'], ans:[3],
+  },
+  {
+    id:'ex2024-q19', type:'mcq', chapter:9, topic:'procedures-functions',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'Consider <strong>procedures and functions</strong>, and select the most correct statement.',
+    back:'Correct: <strong>A procedure can more easily produce multiple results than a function can.</strong><br><br>A procedure can modify multiple pass-by-reference parameters simultaneously, effectively returning several results at once. A function formally returns a single value (though that value can be a struct/tuple).',
+    opts:['A procedure can produce a result if all its parameters use pass-by-value semantics.','A procedure is guaranteed to produce no side effect if it produces a result.','A function is guaranteed to produce a side effect if it produces a result.','A procedure can more easily produce multiple results than a function can.'], ans:[4],
+  },
+  {
+    id:'ex2024-q20', type:'trace', chapter:9, topic:'pass-by-name',
+    source:'2024-exam', year:2024, pts:1, multi:false, opts:null, ans:null,
+    front:'Consider this code — the language uses <strong>pass-by-name</strong>:<pre>doSomething(int first, int second) {\n   first = 2\n   print(first)\n   print(" ")\n   print(second)\n}\nvoid main() {\n   int val1 = 5\n   int val2 = val1 + 1\n   doSomething(val1, val2)\n}</pre>Provide the <strong>output</strong>.',
+    back:'<strong>Output: 2 3</strong><br><br>With pass-by-name, actual parameters are substituted textually and re-evaluated on every use:<ol><li><code>first = 2</code> → substitutes <code>val1 = 2</code></li><li><code>print(first)</code> → <code>print(val1)</code> → prints <code>2</code></li><li><code>print(second)</code> → <code>print(val1 + 1)</code> → <code>print(2 + 1)</code> → prints <code>3</code></li></ol>Key: <code>second</code> is the <em>expression</em> <code>val1+1</code>, re-evaluated each time — and val1 is now 2.',
+  },
+  {
+    id:'ex2024-q21', type:'trace', chapter:9, topic:'deep-binding',
+    source:'2024-exam', year:2024, pts:1, multi:false, opts:null, ans:null,
+    front:'Consider this code — the language uses <strong>deep binding</strong> and <strong>dynamic scoping</strong>:<pre>var A = 2\nmain()      { var A = 5; call sub1(sub2) }\nsub1(param) { var A = 3; call param() }\nsub2()      { print(A) }</pre>Provide the <strong>output</strong>.',
+    back:'<strong>Output: 3</strong><br><br>With dynamic scoping, name lookup follows the <em>call chain</em> at runtime. When <code>sub2</code> executes (called via <code>param()</code> inside <code>sub1</code>), the most recently active binding of <code>A</code> on the call chain is <code>sub1</code>\'s <code>A = 3</code>.',
+  },
+  {
+    id:'ex2024-q22', type:'mcq', chapter:9, topic:'generics',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'Consider this C# generic method called with <code>doSomething(5, 2)</code> and <code>doSomething(false, true)</code>. Select the most correct statement about its use.',
+    back:'Correct: <strong>Two versions created at runtime — one for int, one for bool.</strong><br><br>C# uses reified generics. For value types (like <code>int</code> and <code>bool</code>), the JIT generates a separate native code specialisation for each distinct value type at runtime.',
+    opts:['One version created at compile time, used with int and bool parameters.','Two versions created at compile time — one for int, one for bool.','One version created at runtime, used with Object parameters.','Two versions created at runtime — one for int, one for bool.'], ans:[4],
+  },
+  {
+    id:'ex2024-q23', type:'trace', chapter:9, topic:'coroutines',
+    source:'2024-exam', year:2024, pts:1, multi:false, opts:null, ans:null,
+    front:'Consider this coroutine program:<pre>main()            { resume first }\ncoroutine first   { print("X "); resume second; print("Y ") }\ncoroutine second  { print("A "); resume first;  print("B ") }</pre>Provide the <strong>output</strong>.',
+    back:'<strong>Output: X A Y</strong><br><br>Trace:<ol><li>main → resume first</li><li>first: print "X", resume second</li><li>second: print "A", resume first</li><li>first resumes from where it paused: print "Y", first terminates → control returns to main</li><li>Program ends. second never gets to resume → "B" is never printed.</li></ol>',
+  },
+  {
+    id:'ex2024-q24', type:'mcq', chapter:12, topic:'adt-hiding',
+    source:'2024-exam', year:2024, pts:2, multi:true,
+    front:'Select <strong>only</strong> the C++ features that <strong>detract from ADT representation hiding</strong>. <em>(Incorrectly selected options will be penalised.)</em>',
+    back:'Correct: <strong>A</strong> — Friend functions and classes can access private members directly, breaking encapsulation.<br><br>Note: D (data members must appear in header files) also exposes implementation details since headers are visible to clients — the reason text supports this, though the marked answer is A only.',
+    opts:['The existence of friend functions and friend classes.','The fact that C++ supports stand-alone functions not part of a class.','The fact that C++ requires class and member function definitions must appear in the same file.','The fact that all class data members must appear in header files.'], ans:[1],
+  },
+  {
+    id:'ex2024-q25', type:'mcq', chapter:12, topic:'adt-ruby',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'Consider <strong>ADTs in Ruby</strong>, and select the most correct statement.',
+    back:'Correct: <strong>The interface of a Ruby ADT is very unreliable.</strong><br><br>Ruby classes are open — any code can reopen a class at runtime and add, remove, or redefine methods. This means what a class provides can change at any moment, making its interface unpredictable and unreliable.',
+    opts:['Instance and class variable names are more readable in Ruby than in Java.','Ruby supports multiple constructors, each implicitly called with the appropriate parameters.','It is impossible to implement multiple constructor functionality in Ruby.','The interface of a Ruby ADT is very unreliable.'], ans:[4],
+  },
+  {
+    id:'ex2024-q26', type:'mcq', chapter:12, topic:'subclasses-subtypes',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'Imagine a language where a subclass can inherit a public method and <strong>change its access to private or protected</strong>. Select the most correct statement.',
+    back:'Correct: <strong>Subclasses are not subtypes.</strong><br><br>For a subclass to be a subtype (Liskov Substitution Principle), all public methods of the parent must remain accessible in the subclass. Restricting a public method to private breaks that guarantee — the subclass cannot substitute for the parent in all contexts.',
+    opts:['Dynamic binding is less efficient.','Dynamic binding is impossible.','Subclasses are subtypes.','Subclasses are not subtypes.'], ans:[4],
+  },
+  {
+    id:'ex2024-q27', type:'mcq', chapter:12, topic:'smalltalk-orthogonality',
+    source:'2024-exam', year:2024, pts:2, multi:true,
+    front:'Select <strong>only</strong> the approaches that make <strong>Smalltalk more orthogonal than Java</strong>. <em>(Incorrectly selected options will be penalised.)</em>',
+    back:'Correct: <strong>A &amp; B</strong><br><br><strong>A</strong> — Smalltalk treats <em>everything</em> as an object (no primitive types). Java has both primitives and objects — a non-orthogonal mix.<br><br><strong>B</strong> — Smalltalk always uses dynamic binding for all messages. Java uses static binding for non-virtual calls — a non-orthogonal exception.',
+    opts:['The difference in approach to the exclusivity of objects.','The difference in approach to dynamic and static binding.','The difference in approach to subclasses and subtypes.','The difference in approach to object deallocation.'], ans:[1,2],
+  },
+  {
+    id:'ex2024-q28', type:'mcq', chapter:12, topic:'oop-cpp-csharp',
+    source:'2024-exam', year:2024, pts:1, multi:false,
+    front:'Consider <strong>OOP in C++ and C#</strong>, and select the most correct statement.',
+    back:'Correct: <strong>C++ provides worse support for multiple inheritance than C#.</strong><br><br>C++ supports multiple inheritance but with significant complexity — the diamond problem, ambiguous member access, and the need for virtual inheritance. C#\'s interface-based approach achieves similar polymorphism goals without these pitfalls.',
+    opts:['C++ provides worse support for multiple inheritance than C#.','C++ provides less writability in terms of nested classes than C#.','C++ uses a more orthogonal approach to OOP than C#.','C++ provides a more readable approach to dynamic message binding than C#.'], ans:[1],
+  },
+
+  // ── 2025 EXAM ────────────────────────────────────────────────────────────
+  {
+    id:'ex2025-q1', type:'mcq', chapter:1, topic:'cost-types',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider the types of cost that can be associated with a programming language, and select the one that is <strong>most relevant to consider in a modern computing context</strong>.',
+    back:'Correct: <strong>Cost of reliability.</strong><br><br>In modern computing, hardware is cheap and compilation/execution are fast. The dominant cost is now reliability — bugs, outages, and system failures have enormous human and economic consequences.',
+    opts:['Cost of compiling programs','Cost of executing programs','Cost of reliability','Cost of the language implementation system'], ans:[3],
+  },
+  {
+    id:'ex2025-q2', type:'mcq', chapter:1, topic:'portability',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider the following programming languages, and select the one that has the <strong>highest level of portability</strong>.',
+    back:'Correct: <strong>Java.</strong><br><br>Java compiles to platform-independent bytecode that runs on any JVM — explicitly designed around "write once, run anywhere." Swift targets Apple platforms; PL/I and Fortran I are highly platform-specific.',
+    opts:['Fortran I','PL/I','Swift','Java'], ans:[4],
+  },
+  {
+    id:'ex2025-q3', type:'mcq', chapter:1, topic:'readability',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider the following programming languages, and select the one that had the <strong>highest overall readability</strong>.',
+    back:'Correct: <strong>Ada.</strong><br><br>Ada was designed for safety-critical systems where readability and reliability are paramount — strict typing, no implicit coercions, explicit and verbose block structure, and mandatory end-keywords all prioritise clarity.',
+    opts:['C++','BASIC','Ada','C#'], ans:[3],
+  },
+  {
+    id:'ex2025-q4', type:'mcq', chapter:2, topic:'language-history',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider the following programming languages, and select the one that <strong>focused the most on the well-definedness</strong> of the original language design.',
+    back:'Correct: <strong>ALGOL 68.</strong><br><br>ALGOL 68 introduced the Van Wijngaarden grammar (a two-level formal grammar) to give the language a rigorous, fully formal specification — the most formally well-defined language design of this set.',
+    opts:['Fortran I','ALGOL 68','C','C++'], ans:[2],
+  },
+  {
+    id:'ex2025-q5', type:'code', chapter:15, topic:'scheme-filtering',
+    source:'2025-exam', year:2025, pts:5, multi:false, opts:null, ans:null,
+    front:'Write a Scheme function <code>getZerosDoublePositives</code> applied to a numeric list. Yield a list where <strong>zeros remain unchanged</strong>, <strong>positives are doubled</strong>, and <strong>negatives are omitted</strong>.<pre>(getZerosDoublePositives \'(-1 4 0 -3 12)) ; =&gt; (8 0 24)</pre>',
+    back:'<pre>(define (getZerosDoublePositives lst)\n  (cond\n    ((null? lst) \'())\n    ((zero? (car lst))\n     (cons 0 (getZerosDoublePositives (cdr lst))))\n    ((&gt; (car lst) 0)\n     (cons (* 2 (car lst)) (getZerosDoublePositives (cdr lst))))\n    (else\n     (getZerosDoublePositives (cdr lst)))))</pre><strong>Three cases (after base):</strong><ul><li>Zero → cons 0</li><li>Positive → cons (* 2 head)</li><li>Negative → skip (recurse on tail only)</li></ul>',
+  },
+  {
+    id:'ex2025-q6', type:'code', chapter:16, topic:'prolog-lists',
+    source:'2025-exam', year:2025, pts:5, multi:false, opts:null, ans:null,
+    front:'Write a Prolog proposition <code>getNegativesNegatePositives(L1, L2)</code> where L2 contains L1\'s values in order with <strong>negatives unchanged</strong>, <strong>positives negated</strong>, and <strong>zeros omitted</strong>.<pre>?- getNegativesNegatePositives([1,0,-2,0], X). % X = [-1,-2]</pre>',
+    back:'<pre>getNegativesNegatePositives([], []).\ngetNegativesNegatePositives([0|T], R) :-\n    getNegativesNegatePositives(T, R).\ngetNegativesNegatePositives([H|T], [H|R]) :-\n    H &lt; 0, getNegativesNegatePositives(T, R).\ngetNegativesNegatePositives([H|T], [N|R]) :-\n    H &gt; 0, N is -H, getNegativesNegatePositives(T, R).</pre><strong>Four clauses:</strong> base, zero (skip), negative (keep), positive (negate).',
+  },
+  {
+    id:'ex2025-q7', type:'concept', chapter:5, topic:'keywords-reserved',
+    source:'2025-exam', year:2025, pts:1, multi:false, opts:null, ans:null,
+    front:'A program uses <code>switch</code> as both a variable name and a control structure. What <strong>kind of special word</strong> is <code>switch</code> in this language?',
+    back:'<strong>Keyword.</strong><br><br>A <strong>keyword</strong> is special only in certain syntactic contexts — it <em>can</em> be used as a variable name in other contexts.<br><br>A <strong>reserved word</strong> <em>cannot</em> be used as a variable name at all — the identifier is permanently taken.<br><br>Since <code>switch</code> is used as both a variable name and a control structure, it must be a keyword, not a reserved word.',
+  },
+  {
+    id:'ex2025-q8', type:'mcq', chapter:5, topic:'global-variables',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider <strong>accessing and modifying global variables in PHP, Python, and C</strong>, and select the most correct statement.',
+    back:'Correct: <strong>PHP\'s approach is less writable than both Python and C.</strong><br><br>PHP requires an explicit <code>global $var</code> declaration inside every function before a global variable can be used, plus the <code>$</code> prefix on all variables — more verbose than Python\'s <code>global var</code> declaration and far more verbose than C\'s direct global access.',
+    opts:['PHP\'s approach is less writable than both Python and C.','PHP\'s approach is less reliable than both Python and C.','PHP\'s approach is less readable than both Python and C.','PHP\'s approach has a lower cost of execution than both Python and C.'], ans:[1],
+  },
+  {
+    id:'ex2025-q9', type:'mcq', chapter:6, topic:'array-operations',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Fortran supports <strong>elemental array operations</strong> not supported in most other high-level languages. Select the reason that describes a <strong>strong justification</strong> for their inclusion.',
+    back:'Correct: <strong>Elemental array operations make sense in the programming domain for which Fortran was designed.</strong><br><br>Fortran was designed for scientific and numerical computing, where operating on entire arrays (adding matrices, scaling vectors) is ubiquitous. The language features mirror the domain\'s needs.',
+    opts:['Elemental array operations improve the orthogonality of Fortran.','Elemental array operations make sense because their purpose is unambiguous.','Elemental array operations make sense for the implementation method that Fortran uses.','Elemental array operations make sense in the programming domain for which Fortran was designed.'], ans:[4],
+  },
+  {
+    id:'ex2025-q10', type:'mcq', chapter:6, topic:'list-comprehensions',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider <strong>list comprehensions in Python</strong>, and select the most correct statement.',
+    back:'Correct: <strong>List comprehensions improve the writability of list operations in Python.</strong><br><br>They provide a concise, expressive one-liner for building lists from sequences — replacing multi-line loops with a single readable expression, directly improving writability.',
+    opts:['List comprehensions improve the readability of list operations in Python.','List comprehensions improve the writability of list operations in Python.','List comprehensions improve the reliability of list operations in Python.','List comprehensions improve the cost of training programmers in Python.'], ans:[2],
+  },
+  {
+    id:'ex2025-q11', type:'mcq', chapter:7, topic:'apl-precedence',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider <strong>operator precedence and associativity in APL</strong>, and select the most correct statement.',
+    back:'Correct: <strong>Operator precedence and associativity in APL is highly orthogonal.</strong><br><br>APL has a single, uniform rule: all operators have the same precedence and associate right-to-left. One consistent rule with no exceptions — that is high orthogonality.',
+    opts:['Operator precedence and associativity in APL is highly orthogonal.','Operator precedence and associativity in APL is very complex due to the large number of operators.','Operator precedence and associativity in APL introduces a high cost of execution.','Operator precedence and associativity in APL is unreliable.'], ans:[1],
+  },
+  {
+    id:'ex2025-q12', type:'mcq', chapter:7, topic:'ruby-operators',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider <strong>operators in Ruby</strong>, and select the most correct statement.',
+    back:'Correct: <strong>Operators in Ruby are very reliable.</strong><br><br>Ruby implements all operators as methods on objects, following a consistent OOP model. This uniform mechanism makes operator behaviour predictable and well-defined, and operators can be overloaded in a controlled way — contributing to reliability.',
+    opts:['Operators in Ruby are implemented in a way that is not very orthogonal.','Operators in Ruby are not very writable.','Operators in Ruby have a high cost of execution.','Operators in Ruby are very reliable.'], ans:[4],
+  },
+  {
+    id:'ex2025-q13', type:'mcq', chapter:7, topic:'mixed-mode',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider <strong>mixed mode arithmetic expressions in F# and C++</strong>, and select the most correct statement.',
+    back:'Correct: <strong>Mixed mode arithmetic expressions in F# are more reliable than in C++.</strong><br><br>F# requires explicit type conversions — no implicit coercions. Every type operation is visible and intentional, and type errors are caught at compile time. C++\'s implicit coercions can silently convert values in unexpected ways, introducing subtle bugs.',
+    opts:['Mixed mode arithmetic expressions in F# are less readable than in C++.','Mixed mode arithmetic expressions in F# are more writable than in C++.','Mixed mode arithmetic expressions in F# have a higher execution cost than in C++.','Mixed mode arithmetic expressions in F# are more reliable than in C++.'], ans:[4],
+  },
+  {
+    id:'ex2025-q14', type:'mcq', chapter:7, topic:'short-circuit',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider this loop:<pre>while ((total &lt;= 100) or ((input = read()) != EOF)) {\n   total = total + input\n}</pre>Select the statement that most correctly describes a <strong>problem</strong>.',
+    back:'Correct: <strong>If <code>or</code> is short-circuit evaluated, a side effect will not occur, which causes a problem.</strong><br><br>When <code>total &lt;= 100</code> is true, short-circuit skips <code>read()</code> — the side effect of reading new input does NOT happen. The variable <code>input</code> holds a stale value, so <code>total + input</code> uses the wrong data.',
+    opts:['If <code>or</code> is short-circuit evaluated a side effect will occur, which causes a problem.','If <code>or</code> is short-circuit evaluated a side effect will <strong>not</strong> occur, which causes a problem.','If <code>or</code> is <strong>not</strong> short-circuit evaluated a side effect will occur, which causes a problem.','If <code>or</code> is <strong>not</strong> short-circuit evaluated a side effect will not occur, which causes a problem.'], ans:[2],
+  },
+  {
+    id:'ex2025-q15', type:'mcq', chapter:7, topic:'conditional-targets',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider <strong>conditional targets</strong>, and select the most correct statement.',
+    back:'Correct: <strong>Conditional targets reduce the reliability of assignments.</strong><br><br>A conditional target (e.g. Perl\'s <code>(cond ? a : b) = val</code>) makes it ambiguous which variable is actually being assigned to at a glance. The assignment target is determined at runtime, making the code harder to reason about and less reliable.',
+    opts:['Conditional targets reduce the writability of assignments.','Conditional targets increase the readability of assignments.','Conditional targets increase the cost of execution of assignments.','Conditional targets reduce the reliability of assignments.'], ans:[4],
+  },
+  {
+    id:'ex2025-q16', type:'mcq', chapter:7, topic:'multiple-assignment',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider <strong>multiple-target multiple-source assignments in Ruby</strong>, and select the most correct statement.',
+    back:'Correct: <strong>Multiple-target multiple-source assignments make Ruby more writable.</strong><br><br>Ruby allows <code>a, b = b, a</code> for swaps and <code>x, y, z = expr</code> for parallel assignment — significantly more concise than using temporary variables. This directly improves writability.',
+    opts:['Multiple-target multiple-source assignments make Ruby more writable.','Multiple-target multiple-source assignments make Ruby more readable.','Multiple-target multiple-source assignments make Ruby more reliable.','Multiple-target multiple-source assignments decrease the cost of execution of Ruby.'], ans:[1],
+  },
+  {
+    id:'ex2025-q17', type:'mcq', chapter:8, topic:'nested-selectors',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider the method that <strong>Python and Perl</strong> use to <strong>disambiguate nested selectors</strong>, and select the most correct statement.',
+    back:'Correct: <strong>Python\'s approach can be less reliable than Perl\'s approach.</strong><br><br>Python uses indentation to delimit blocks — a mis-indent silently changes the nesting of an <code>if</code> statement without a syntax error. Perl uses explicit curly braces which give a compile error if mismatched, making it more reliable.',
+    opts:['Python\'s approach is less writable than Perl\'s approach.','Python\'s approach is less readable than Perl\'s approach.','Python\'s approach can be less reliable than Perl\'s approach.','Python\'s approach has a higher cost of execution than Perl\'s approach.'], ans:[3],
+  },
+  {
+    id:'ex2025-q18', type:'mcq', chapter:8, topic:'multiple-way-selection',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'You have variables <code>first</code> and <code>second</code>, and wish to assign a value to <code>second</code> depending on <code>first</code> using a <strong>multiple-way selection</strong>. Select the language that allows this in the <strong>most writable</strong> way.',
+    back:'Correct: <strong>Ruby.</strong><br><br>Ruby\'s <code>case/when</code> is an expression that returns a value, can match against any type, ranges, or regex, and can be assigned directly. C++/C#/JS switch statements are limited to specific types and cannot return values as expressions.',
+    opts:['C++','JavaScript','C#','Ruby'], ans:[4],
+  },
+  {
+    id:'ex2025-q19', type:'mcq', chapter:8, topic:'counter-loops',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider <strong>counter-controlled loops in C++</strong>, and select the most correct statement.',
+    back:'Correct: <strong>Counter-controlled loops in C++ are unreliable because it is possible to branch into the loop body.</strong><br><br>C++ allows <code>goto</code> to jump into the middle of a loop, bypassing the initialisation and condition check entirely — an unpredictable and unreliable behaviour.',
+    opts:['Counter-controlled loops in C++ are reliable because the loop body always executes a fixed number of times.','Counter-controlled loops in C++ are reliable because it is possible to include the definition of the loop variable in the first control expression.','Counter-controlled loops in C++ are unreliable because it is possible to branch into the loop body.','Counter-controlled loops in C++ are unreliable because it is not possible to modify how many times the loop body executes once execution has entered the loop.'], ans:[3],
+  },
+  {
+    id:'ex2025-q20', type:'mcq', chapter:8, topic:'labeled-break',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider <strong>user-located loop control mechanisms in Java and C++</strong>, and select the most correct statement.',
+    back:'Correct: <strong>Java has more writable user-located loop control mechanisms than C++ does.</strong><br><br>Java supports <code>break label</code> and <code>continue label</code>, letting the programmer target specific outer loops in nested structures. C++ only has unlabeled <code>break</code>/<code>continue</code> which always target the immediately enclosing loop.',
+    opts:['Java has more writable user-located loop control mechanisms than C++ does.','Java has less writable user-located loop control mechanisms than C++ does.','User-located loop control mechanisms are equally writable in Java and C++.','Java has less reliable user-located loop control mechanisms than C++ does.'], ans:[1],
+  },
+  {
+    id:'ex2025-q21', type:'trace', chapter:8, topic:'ruby-yield',
+    source:'2025-exam', year:2025, pts:1, multi:false, opts:null, ans:null,
+    front:'Consider this Ruby code:<pre>def doSomething()\n  num = 3\n  while num &gt; 0\n    yield num\n    num = num - 1\n  end\nend</pre>Provide the <strong>output</strong> if <code>doSomething</code> is called with a block that has one formal parameter and prints it followed by a single space.',
+    back:'<strong>Output: 3 2 1</strong><br><br>Trace:<ol><li>num=3: yield 3 → block prints "3 ", num=2</li><li>num=2: yield 2 → block prints "2 ", num=1</li><li>num=1: yield 1 → block prints "1 ", num=0</li><li>num=0: while condition false → exit</li></ol>',
+  },
+  {
+    id:'ex2025-q22', type:'mcq', chapter:9, topic:'keyword-parameters',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Some languages allow <strong>default values</strong> to be given to a formal parameter when an actual parameter is left out. Select the option that describes a mechanism that allows <strong>any</strong> actual parameter to be left out regardless of the order formal parameters are listed.',
+    back:'Correct: <strong>By using keyword parameters.</strong><br><br>Keyword parameters let the caller explicitly name which arguments to pass (<code>f(b=2, d=4)</code>), so any parameter with a default can be omitted regardless of its position in the formal parameter list.',
+    opts:['By using positional parameters.','By using keyword parameters.','It is impossible to allow any actual parameter to be left out regardless of order.','Subprograms always allow any actual parameter to be left out.'], ans:[2],
+  },
+  {
+    id:'ex2025-q23', type:'mcq', chapter:9, topic:'variable-params',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider <strong>subprograms in Ruby</strong>, and select the most correct statement.',
+    back:'Correct: <strong>Ruby allows variable parameters of any type because the parameters are stored in an array and are all dynamically typed.</strong><br><br>Ruby is dynamically typed — variables carry no fixed type. A variable-length parameter (<code>*args</code>) collects arguments into a plain array where each element can be of any type.',
+    opts:['Ruby does not allow a subprogram to have a variable number of parameters.','Ruby allows variable parameters but all must have the same type because they are stored in a fixed-type array.','Ruby allows variable parameters of any type because the parameters are stored in an array of objects.','Ruby allows variable parameters of any type because the parameters are stored in an array and are all dynamically typed.'], ans:[4],
+  },
+  {
+    id:'ex2025-q24', type:'mcq', chapter:9, topic:'overloading',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'This C++ code is not legal:<pre>int   doSomething(int val) { return val + 2; }\nfloat doSomething(int val) { return val + 1.0; }</pre>Select the option that most correctly describes the <strong>underlying reason</strong> for this being illegal.',
+    back:'Correct: <strong>C++ performs a large number of coercions.</strong><br><br>Both overloads take exactly the same parameter type (<code>int</code>). The call <code>doSomething(5)</code> is ambiguous — C++ cannot distinguish overloads by return type alone. The root cause is that C++ coercions mean return-type differences are not sufficient for overload resolution.',
+    opts:['C++ does not support overloaded subprograms.','Variables of different types cannot be added.','C++ performs a large number of coercions.','C++ performs no coercions.'], ans:[3],
+  },
+  {
+    id:'ex2025-q25', type:'mcq', chapter:9, topic:'closures',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider this JavaScript code:<pre>function doSomething(a, b) {\n   return function(y) { return (a + b) - y; }\n}\nvar thing = doSomething(10, 20);</pre>Select the option that most correctly describes what <code>thing</code> is.',
+    back:'Correct: <strong>The function <code>function(y) {return (10 + 20) - y;}</code></strong><br><br><code>doSomething</code> returns a closure that has captured <code>a=10</code> and <code>b=20</code> from the enclosing scope. <code>thing</code> is effectively <code>function(y){ return 30 - y; }</code> — a closure with the captured values embedded.',
+    opts:['The function <code>function(y) {return (a + b) - y;}</code>','The function <code>function(y) {return (10 + 20) - y;}</code>','A reference to the <code>doSomething</code> function.','An invalid function, because a value for <code>y</code> cannot be specified.'], ans:[2],
+  },
+  {
+    id:'ex2025-q26', type:'mcq', chapter:9, topic:'parameter-passing',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider <strong>pass-by-result parameters</strong>, and select the most correct statement.',
+    back:'Correct: <strong>Pass-by-result parameters can be passed using only a physical copy because the formal parameter is deallocated once the function terminates.</strong><br><br>The formal parameter lives on the called function\'s stack. When the function returns, that stack frame is deallocated — so an access path back to the formal parameter would reference freed memory. The only option is to physically copy the final value back into the caller\'s variable before the stack unwinds.',
+    opts:['Pass-by-result parameters can be passed using a physical copy or an access path.','Pass-by-result parameters can be passed using only a physical copy because using an access path would create a functional side effect.','Pass-by-result parameters can be passed using only a physical copy because the formal parameter is deallocated once the function terminates.','Pass-by-result parameters can be passed using only an access path because a physical copy would take up additional memory.','Pass-by-result parameters can be passed using only an access path because a physical copy would cause the calling function to work with an out-of-date copy.'], ans:[3],
+  },
+  {
+    id:'ex2025-q27', type:'mcq', chapter:9, topic:'array-parameters',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider <strong>multidimensional arrays as subprogram parameters in C and C#</strong>, and select the most correct statement.',
+    back:'Correct: <strong>The approach in C is less orthogonal than in C#.</strong><br><br>In C you must specify all dimensions except the first (e.g. <code>void f(int a[][5])</code>), embedding a dimension into the parameter type — an inconsistent rule. C# passes multidimensional arrays uniformly without specifying dimensions in the parameter, following one consistent rule.',
+    opts:['The approach in C is more writable than in C#.','The approach in C is more readable than in C#.','The approach in C is more reliable than in C#.','The approach in C is less orthogonal than in C#.'], ans:[4],
+  },
+  {
+    id:'ex2025-q28', type:'mcq', chapter:12, topic:'diamond-problem',
+    source:'2025-exam', year:2025, pts:2, multi:true,
+    front:'Four classes: A (base), B and C inherit from A, D inherits from both B and C. An <strong>implicit name collision</strong> is possible. Select <strong>only</strong> the implementation details that result in an implicit (not explicit) collision. <em>(Incorrectly selected options will be penalised.)</em>',
+    back:'Correct: <strong>A only</strong> — Defining <code>myMethod</code> in class A (and nowhere else). Neither B nor C override it, so D inherits two copies via the two paths (A→B→D and A→C→D) — a collision with no explicit redefinition in B, C, or D. If B or C also define <code>myMethod</code>, the collision becomes explicit.',
+    opts:['Defining a method named <code>myMethod</code> in class A.','Defining a method named <code>myMethod</code> in class B.','Defining a method named <code>myMethod</code> in class C.','Defining a method named <code>myMethod</code> in class D.'], ans:[1],
+  },
+  {
+    id:'ex2025-q29', type:'mcq', chapter:12, topic:'linked-list',
+    source:'2025-exam', year:2025, pts:2, multi:true,
+    front:'You wish to implement a linked list and its nodes. Select <strong>only</strong> the programming language constructs that can be used to implement the <strong>linked list nodes</strong>. <em>(Incorrectly selected options will be penalised.)</em>',
+    back:'Correct: <strong>B &amp; C</strong> — A C++ <code>struct</code> or <code>class</code> can both hold a data field and a pointer to the next node (they are functionally identical in this context).<br><br><strong>Not A</strong> — A C# <code>struct</code> is a value type (stack-allocated); a self-referential pointer to the same struct type is not possible.<br><br><strong>Not D</strong> — A C++ <code>union</code> holds only one member at a time; a node needs <em>both</em> a data field AND a next-pointer simultaneously.',
+    opts:['A <code>struct</code> in C#','A <code>struct</code> in C++','A <code>class</code> in C++','A <code>union</code> in C++'], ans:[2,3],
+  },
+  {
+    id:'ex2025-q30', type:'mcq', chapter:12, topic:'ruby-oop',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider <strong>Ruby</strong>, and select the most correct statement.',
+    back:'Correct: <strong>Ruby classes have very unreliable message interfaces.</strong><br><br>Ruby\'s dynamic classes can be reopened and modified at any time — methods can be added, changed, or removed at runtime by any code anywhere. This makes the class interface unpredictable, i.e. unreliable.',
+    opts:['Ruby has highly efficient primitive types.','Ruby has support for a programmer to explicitly allocate and deallocate heap memory for objects.','Ruby allows the programmer to choose between dynamic and static message binding.','Ruby classes have very unreliable message interfaces.'], ans:[4],
+  },
+  {
+    id:'ex2025-q31', type:'mcq', chapter:12, topic:'java-cpp-oop',
+    source:'2025-exam', year:2025, pts:1, multi:false,
+    front:'Consider <strong>Java and C++</strong>, and select the most correct statement.',
+    back:'Correct: <strong>Java exclusively supports dynamic message binding, while C++ allows the programmer to choose between dynamic and static message binding.</strong><br><br>In Java all method calls are dynamically bound (all methods are virtual by default). In C++, methods are statically bound unless the programmer explicitly declares them <code>virtual</code>.',
+    opts:['Java uses objects less exclusively than C++.','Java supports some of the benefits of multiple inheritance, while preventing name collisions.','Java supports some of the benefits of multiple inheritance, but does not prevent name collisions.','Java exclusively supports dynamic message binding, while C++ allows the programmer to choose between dynamic and static message binding.'], ans:[4],
+  },
+
+]; // ←── End of CARDS. Add more cards above this line.
+
+
+// ══════════════════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════════════════
+const CHAPTERS = [...new Set(CARDS.map(c => c.chapter))].filter(Boolean).sort((a,b)=>a-b);
+
+const st = {
+  deck:     [],   // filtered card objects in current order
+  pos:      0,
+  flipped:  false,
+  answered: false,
+  shuffle:  localStorage.getItem('fc_shuffle') !== 'false',
+  seen:     new Set(),
+  sess:     { correct:0, wrong:0, easy:0, ok:0, hard:0, streak:0 },
+};
+
+// ── LocalStorage helpers ───────────────────────────────────────────────
+const getRating   = id => localStorage.getItem('fc_rating_' + id);
+const saveRating  = (id, r) => localStorage.setItem('fc_rating_' + id, r);
+const saveShuffle = v => localStorage.setItem('fc_shuffle', v);
+
+// ── DOM helpers ─────────────────────────────────────────────────────────
+const $  = id => document.getElementById(id);
+const qs = sel => document.querySelector(sel);
+
+// ══════════════════════════════════════════════════════════════════════════
+//  BUILD CHAPTER BUTTONS
+// ══════════════════════════════════════════════════════════════════════════
+function buildChapterBtns() {
+  const grid = $('ch-grid');
+  CHAPTERS.forEach(ch => {
+    const b = document.createElement('button');
+    b.className = 'ch-btn on';
+    b.dataset.ch = ch;
+    b.textContent = String(ch).padStart(2, '0');
+    b.addEventListener('click', () => { b.classList.toggle('on'); applyFilters(); });
+    grid.appendChild(b);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  FILTER & DECK BUILDING
+// ══════════════════════════════════════════════════════════════════════════
+function getFilterState() {
+  const sources  = [...document.querySelectorAll('[data-src]:checked')].map(el => el.dataset.src);
+  const types    = [...document.querySelectorAll('[data-type]:checked')].map(el => el.dataset.type);
+  const chapters = [...document.querySelectorAll('.ch-btn.on')].map(el => +el.dataset.ch);
+  return {
+    sources, types, chapters,
+    hardOnly:   $('f-hard').checked,
+    unseenOnly: $('f-unseen').checked,
+    examOnly:   $('f-exam').checked,
+    q: $('fc-search').value.trim().toLowerCase(),
+  };
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function applyFilters(keepPos) {
+  const f = getFilterState();
+  let filtered = CARDS.filter(c => {
+    if (!f.sources.includes(c.source))  return false;
+    if (!f.types.includes(c.type))      return false;
+    if (f.chapters.length && !f.chapters.includes(c.chapter)) return false;
+    if (f.hardOnly   && getRating(c.id) !== 'hard')   return false;
+    if (f.unseenOnly && st.seen.has(c.id))             return false;
+    if (f.examOnly   && !c.source.includes('-exam'))   return false;
+    if (f.q) {
+      const txt = (c.front + ' ' + c.back + ' ' + (c.opts||[]).join(' ')).toLowerCase();
+      if (!txt.includes(f.q)) return false;
+    }
+    return true;
+  });
+
+  let order = filtered.slice();
+  if (st.shuffle) shuffle(order);
+  st.deck = order;
+  if (!keepPos) st.pos = 0;
+  st.flipped  = false;
+  st.answered = false;
+
+  $('active-count').textContent = st.deck.length + ' cards';
+  renderCard();
+  renderStats();
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════
+//  RENDER CARD
+// ══════════════════════════════════════════════════════════════════════════
+function renderCard() {
+  const total = st.deck.length;
+
+  // empty / complete states
+  $('empty-state').classList.remove('show');
+  $('deck-done').classList.remove('show');
+  $('card-scene').style.display   = '';
+  $('fc-controls').style.display  = '';
+  $('fc-rating').style.display    = '';
+
+  if (total === 0) {
+    $('card-scene').style.display  = 'none';
+    $('fc-controls').style.display = 'none';
+    $('fc-rating').style.display   = 'none';
+    $('empty-state').classList.add('show');
+    $('prog-pos').textContent = 'No cards';
+    $('prog-pct').textContent = '';
+    $('prog-bar').style.width = '0%';
+    return;
+  }
+
+  if (st.pos >= total) {
+    $('card-scene').style.display  = 'none';
+    $('fc-controls').style.display = 'none';
+    $('fc-rating').style.display   = 'none';
+    $('deck-done').classList.add('show');
+    const s = st.sess;
+    $('done-summary').textContent =
+      `Seen: ${st.seen.size} / ${total} · Easy: ${s.easy} · OK: ${s.ok} · Hard: ${s.hard}`
+      + (s.correct + s.wrong ? ` · MCQ: ${s.correct}/${s.correct+s.wrong} correct` : '');
+    return;
+  }
+
+  const card = st.deck[st.pos];
+
+  // Progress
+  const pct = Math.round((st.pos / total) * 100);
+  const seenPct = Math.round((st.seen.size / total) * 100);
+  $('prog-bar').style.width = pct + '%';
+  $('prog-pos').textContent = `Card ${st.pos + 1} of ${total}`;
+  $('prog-pct').textContent = `${seenPct}% seen`;
+
+  // Mark seen
+  st.seen.add(card.id);
+
+  // Badges
+  const rating = getRating(card.id);
+  const src = card.year ? `${card.year}` : card.source === 'study' ? 'Study' : card.source;
+  $('front-meta').innerHTML =
+    `<span class="badge b-${card.type}">${card.type.toUpperCase()}</span>` +
+    (card.chapter ? `<span class="badge b-ch">Ch ${String(card.chapter).padStart(2,'0')}</span>` : '') +
+    `<span class="badge b-ch" style="background:var(--surface2);color:var(--text-muted)">${src}</span>` +
+    (rating ? `<span class="badge b-${rating}">${rating}</span>` : '');
+
+  // Front question
+  $('card-q').innerHTML = card.front;
+
+  // MCQ options or hint
+  const optsEl = $('card-opts');
+  const hintEl = $('card-hint');
+  optsEl.innerHTML = '';
+
+  if (card.type === 'mcq' && card.opts) {
+    hintEl.style.display = 'none';
+    card.opts.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.innerHTML = `<strong>${String.fromCharCode(65+i)}.</strong> ${opt}`;
+      if (st.answered) {
+        btn.disabled = true;
+        if (card.ans.includes(i+1)) btn.classList.add('correct');
+      }
+      btn.addEventListener('click', () => handleMCQClick(i+1, card));
+      optsEl.appendChild(btn);
+    });
+    $('see-exp-wrap').style.display = st.answered ? 'block' : 'none';
+  } else {
+    hintEl.style.display = 'block';
+    $('see-exp-wrap').style.display = 'none';
+  }
+
+  // Back
+  $('card-ans').innerHTML = card.back;
+
+  // Flip state
+  $('card-inner').classList.toggle('flipped', st.flipped);
+
+  // Rating visibility — show after flip (non-MCQ) or after answering (MCQ)
+  const showRating = st.flipped || (card.type === 'mcq' && st.answered);
+  $('fc-rating').classList.toggle('hidden', !showRating);
+
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  MCQ INTERACTION
+// ══════════════════════════════════════════════════════════════════════════
+function handleMCQClick(idx, card) {
+  if (st.answered) return;
+  st.answered = true;
+
+  const correct = card.ans.includes(idx);
+  if (correct) {
+    st.sess.correct++;
+    st.sess.streak++;
+    anim('bounce');
+  } else {
+    st.sess.wrong++;
+    st.sess.streak = 0;
+    anim('shake');
+  }
+  renderStats();
+
+  // Style all buttons
+  const btns = $('card-opts').querySelectorAll('.opt');
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (card.ans.includes(i+1)) btn.classList.add('correct');
+    else if (i+1 === idx)       btn.classList.add('wrong');
+  });
+
+  $('see-exp-wrap').style.display = 'block';
+  $('fc-rating').classList.remove('hidden');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════════════════════════
+function gotoCard(pos, dir) {
+  if (st.deck.length === 0) return;
+  st.pos      = Math.max(0, Math.min(pos, st.deck.length));
+  st.flipped  = false;
+  st.answered = false;
+
+  if (dir) {
+    const scene = $('card-scene');
+    scene.classList.remove('anim-next', 'anim-prev');
+    void scene.offsetWidth;
+    scene.classList.add(dir === 'next' ? 'anim-next' : 'anim-prev');
+    setTimeout(() => scene.classList.remove('anim-next', 'anim-prev'), 320);
+  }
+  renderCard();
+}
+
+function flipCard() {
+  const card = st.deck[st.pos];
+  if (!card) return;
+  if (card.type === 'mcq' && !st.answered) return; // must answer before flipping MCQ
+  st.flipped = !st.flipped;
+  $('card-inner').classList.toggle('flipped', st.flipped);
+  const showRating = st.flipped || (card.type === 'mcq' && st.answered);
+  $('fc-rating').classList.toggle('hidden', !showRating);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  RATING
+// ══════════════════════════════════════════════════════════════════════════
+function rateCard(r) {
+  const card = st.deck[st.pos];
+  if (!card) return;
+  if (r !== 'skip') {
+    saveRating(card.id, r);
+    st.sess[r]++;
+    anim('bounce');
+  }
+  renderStats();
+  setTimeout(() => gotoCard(st.pos + 1, 'next'), r === 'skip' ? 0 : 300);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  STATS
+// ══════════════════════════════════════════════════════════════════════════
+function renderStats() {
+  const s = st.sess;
+  $('s-seen').textContent   = st.seen.size;
+  $('s-cor').textContent    = s.correct;
+  $('s-wrong').textContent  = s.wrong;
+  $('s-streak').textContent = s.streak;
+  $('s-easy').textContent   = s.easy;
+  $('s-ok').textContent     = s.ok;
+  $('s-hard').textContent   = s.hard;
+
+  const allHard = CARDS.filter(c => getRating(c.id) === 'hard').length;
+  const allEasy = CARDS.filter(c => getRating(c.id) === 'easy').length;
+  $('s-at-hard').textContent = allHard;
+  $('s-at-easy').textContent = allEasy;
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  ANIMATION HELPERS
+// ══════════════════════════════════════════════════════════════════════════
+function anim(cls) {
+  const scene = $('card-scene');
+  scene.classList.remove('anim-bounce', 'anim-shake');
+  void scene.offsetWidth;
+  scene.classList.add('anim-' + cls);
+  setTimeout(() => scene.classList.remove('anim-' + cls), 450);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  EVENTS
+// ══════════════════════════════════════════════════════════════════════════
+function wireEvents() {
+  // Card click = flip
+  $('card-scene').addEventListener('click', e => {
+    if (e.target.closest('.opt') || e.target.closest('#btn-see-exp')) return;
+    flipCard();
+  });
+  $('card-scene').addEventListener('keydown', e => { if (e.key === 'Enter') flipCard(); });
+
+  // See explanation (MCQ)
+  $('btn-see-exp').addEventListener('click', e => { e.stopPropagation(); flipCard(); });
+
+  // Controls
+  $('btn-prev').addEventListener('click', () => gotoCard(st.pos - 1, 'prev'));
+  $('btn-next').addEventListener('click', () => gotoCard(st.pos + 1, 'next'));
+  $('btn-flip').addEventListener('click', flipCard);
+
+  // Rating buttons
+  document.querySelectorAll('.rate').forEach(btn => {
+    btn.addEventListener('click', () => rateCard(btn.dataset.r));
+  });
+  $('btn-skip').addEventListener('click', () => rateCard('skip'));
+
+  // Restart
+  $('btn-restart').addEventListener('click', () => {
+    st.seen = new Set();
+    st.sess = { correct:0, wrong:0, easy:0, ok:0, hard:0, streak:0 };
+    applyFilters();
+  });
+
+  // Reset session
+  $('btn-reset').addEventListener('click', () => {
+    st.seen = new Set();
+    st.sess = { correct:0, wrong:0, easy:0, ok:0, hard:0, streak:0 };
+    applyFilters();
+    renderStats();
+  });
+
+  // Shuffle toggle
+  $('btn-shuffle').addEventListener('click', () => {
+    st.shuffle = !st.shuffle;
+    saveShuffle(st.shuffle);
+    $('btn-shuffle').textContent = `⇄ Shuffle: ${st.shuffle ? 'ON' : 'OFF'}`;
+    $('btn-shuffle').classList.toggle('active', st.shuffle);
+    applyFilters();
+  });
+
+  // Select/clear all chapters + sources
+  $('btn-all').addEventListener('click', () => {
+    document.querySelectorAll('[data-src],[data-type],.ch-btn').forEach(el => {
+      if (el.tagName === 'INPUT') el.checked = true;
+      else el.classList.add('on');
+    });
+    applyFilters();
+  });
+  $('btn-none').addEventListener('click', () => {
+    document.querySelectorAll('[data-src],[data-type],.ch-btn').forEach(el => {
+      if (el.tagName === 'INPUT') el.checked = false;
+      else el.classList.remove('on');
+    });
+    applyFilters();
+  });
+
+  // Filter checkboxes
+  document.querySelectorAll('[data-src],[data-type],#f-hard,#f-unseen,#f-exam')
+    .forEach(el => el.addEventListener('change', () => applyFilters()));
+  $('fc-search').addEventListener('input', () => applyFilters());
+
+  // Quick presets
+  document.querySelectorAll('[data-preset]').forEach(btn => {
+    btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+  });
+
+  // Theme
+  $('btn-theme').addEventListener('click', () => {
+    const el = document.documentElement;
+    const next = el.dataset.theme === 'dark' ? 'light' : 'dark';
+    el.dataset.theme = next;
+    localStorage.setItem('fc_theme', next);
+  });
+
+  // Mobile filter toggle
+  $('fc-ftoggle').addEventListener('click', () => {
+    $('fc-filters').classList.add('open');
+    $('fc-overlay').classList.add('show');
+  });
+  $('fc-overlay').addEventListener('click', () => {
+    $('fc-filters').classList.remove('open');
+    $('fc-overlay').classList.remove('show');
+  });
+
+  // Shortcut modal
+  $('btn-help').addEventListener('click', () => $('shortcut-modal').classList.remove('hidden'));
+  $('close-modal').addEventListener('click', () => $('shortcut-modal').classList.add('hidden'));
+  $('shortcut-modal').addEventListener('click', e => {
+    if (e.target === $('shortcut-modal')) $('shortcut-modal').classList.add('hidden');
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if (document.activeElement === $('fc-search')) return;
+    if ($('shortcut-modal').classList.contains('hidden') === false) {
+      if (e.key === 'Escape') $('shortcut-modal').classList.add('hidden');
+      return;
+    }
+    switch(e.key) {
+      case ' ':        e.preventDefault(); flipCard(); break;
+      case 'ArrowRight': case 'l': case 'L': gotoCard(st.pos+1,'next'); break;
+      case 'ArrowLeft':  case 'h': case 'H': gotoCard(st.pos-1,'prev'); break;
+      case '1': rateCard('easy'); break;
+      case '2': rateCard('ok');   break;
+      case '3': rateCard('hard'); break;
+      case 's': case 'S': $('btn-shuffle').click(); break;
+      case 'f': case 'F': e.preventDefault(); $('fc-search').focus(); break;
+      case '?': $('shortcut-modal').classList.remove('hidden'); break;
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  PRESETS
+// ══════════════════════════════════════════════════════════════════════════
+function applyPreset(preset) {
+  // Reset all first
+  document.querySelectorAll('[data-src]').forEach(el => el.checked = false);
+  document.querySelectorAll('[data-type]').forEach(el => el.checked = true);
+  document.querySelectorAll('.ch-btn').forEach(el => el.classList.add('on'));
+  $('f-hard').checked = $('f-unseen').checked = $('f-exam').checked = false;
+
+  if (preset === 'exam-prep') {
+    ['2022-exam','2023-exam','2024-exam','2025-exam'].forEach(s => {
+      qs(`[data-src="${s}"]`).checked = true;
+    });
+  } else if (preset === 'hard-review') {
+    document.querySelectorAll('[data-src]').forEach(el => el.checked = true);
+    $('f-hard').checked = true;
+  } else if (preset === 'coding') {
+    document.querySelectorAll('[data-src]').forEach(el => el.checked = true);
+    document.querySelectorAll('[data-type]').forEach(el => el.checked = false);
+    qs('[data-type="code"]').checked = true;
+  }
+  applyFilters();
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════════════════
+function init() {
+  // Restore theme
+  const theme = localStorage.getItem('fc_theme');
+  if (theme) document.documentElement.dataset.theme = theme;
+
+  // Restore shuffle state in UI
+  $('btn-shuffle').textContent = `⇄ Shuffle: ${st.shuffle ? 'ON' : 'OFF'}`;
+  if (st.shuffle) $('btn-shuffle').classList.add('active');
+
+  buildChapterBtns();
+  wireEvents();
+  applyFilters();
+}
+
+init();
+</script>
+</body>
+</html>
