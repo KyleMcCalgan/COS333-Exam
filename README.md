@@ -14,6 +14,7 @@ Interactive study notes for the COS 333 exam at the University of Pretoria.
 | **Practical** | Prolog in Practice, List Patterns, Scheme in Practice (exam formula) |
 | **Past Papers** | Interactive quizzes for all 4 exams (2022–2025) and ST2 papers |
 | **MCQ Bank** | 180 multiple-choice questions with filtering, search, and instant feedback |
+| **Flashcards** | 69 spaced-repetition cards (MCQ, concept, code, trace) drawn from 2024 & 2025 exams and study topics — with confidence ratings, filters, keyboard shortcuts, and dark mode |
 
 ## Stack
 
